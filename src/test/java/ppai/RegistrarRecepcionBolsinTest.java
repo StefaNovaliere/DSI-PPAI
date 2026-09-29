@@ -12,6 +12,7 @@ import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
 
+import ppai.boundary.PantallaConsolaRecepcionBolsin;
 import ppai.boundary.PantallaRecepcionBolsin;
 import ppai.control.GestorNotificacionCU29;
 import ppai.control.GestorRecepcionBolsin;
@@ -30,7 +31,7 @@ class RegistrarRecepcionBolsinTest {
 
     private void ejecutarCU(String entradaUsuario) {
         PrintStream out = new PrintStream(salida, true, StandardCharsets.UTF_8);
-        PantallaRecepcionBolsin pantalla = new PantallaRecepcionBolsin(new Scanner(entradaUsuario), out);
+        PantallaRecepcionBolsin pantalla = new PantallaConsolaRecepcionBolsin(new Scanner(entradaUsuario), out);
         GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio,
                 new GestorNotificacionCU29(out));
         pantalla.setGestor(gestor);

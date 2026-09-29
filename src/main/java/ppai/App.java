@@ -1,8 +1,17 @@
 package ppai;
 
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.util.Arrays;
 import java.util.Scanner;
 
-import ppai.boundary.PantallaRecepcionBolsin;
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
+import ppai.boundary.PantallaConsolaRecepcionBolsin;
+import ppai.boundary.PantallaGraficaRecepcionBolsin;
 import ppai.control.GestorNotificacionCU29;
 import ppai.control.GestorRecepcionBolsin;
 import ppai.entidades.Bolsin;
@@ -13,14 +22,51 @@ import ppai.persistencia.Repositorio;
 import ppai.persistencia.RepositorioEnMemoria;
 
 /**
- * Punto de entrada: arma las capas y muestra el menú principal.
+ * Punto de entrada: arma las capas y abre la interfaz gráfica.
+ * Con el argumento {@code --consola} (o sin entorno gráfico) usa la consola.
  */
 public class App {
 
     public static void main(String[] args) {
-        Scanner entrada = new Scanner(System.in);
         Repositorio repositorio = new RepositorioEnMemoria();
-        PantallaRecepcionBolsin pantalla = new PantallaRecepcionBolsin(entrada, System.out);
+        if (Arrays.asList(args).contains("--consola") || GraphicsEnvironment.isHeadless()) {
+            iniciarConsola(repositorio);
+        } else {
+            SwingUtilities.invokeLater(() -> iniciarVentana(repositorio));
+        }
+    }
+
+    /** Arma la ventana principal y la devuelve (también la usa la captura de pantallas). */
+    public static JFrame iniciarVentana(Repositorio repositorio) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            // Si no se puede, queda el look and feel por defecto
+        }
+        PantallaGraficaRecepcionBolsin pantalla = new PantallaGraficaRecepcionBolsin();
+        GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio,
+                new GestorNotificacionCU29(pantalla.getSalidaMensajes()));
+        pantalla.setGestor(gestor);
+
+        VisorHistorialEstados visor = new VisorHistorialEstados(repositorio);
+        JTabbedPane pestanias = new JTabbedPane();
+        pestanias.addTab("Registrar recepción de bolsín", pantalla);
+        pestanias.addTab("Historial de estados (patrón State)", visor);
+        pestanias.addChangeListener(e -> visor.actualizar());
+
+        JFrame ventana = new JFrame("Sistema de Bolsines - Usuario: " + repositorio.getSesionActual().getUsuario());
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventana.setContentPane(pestanias);
+        ventana.setMinimumSize(new Dimension(900, 640));
+        ventana.pack();
+        ventana.setLocationRelativeTo(null);
+        ventana.setVisible(true);
+        return ventana;
+    }
+
+    private static void iniciarConsola(Repositorio repositorio) {
+        Scanner entrada = new Scanner(System.in);
+        PantallaConsolaRecepcionBolsin pantalla = new PantallaConsolaRecepcionBolsin(entrada, System.out);
         GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio,
                 new GestorNotificacionCU29(System.out));
         pantalla.setGestor(gestor);
