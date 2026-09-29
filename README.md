@@ -15,11 +15,12 @@ Rediseño e implementación de la realización del caso de uso de análisis
 
 ## 2. Cómo ejecutarlo
 
-Requisitos: JDK 17 o superior y Maven. Las dependencias (Hibernate, driver de SQLite) las
-descarga Maven.
+Requisito: JDK 17 o superior. **No hace falta instalar Maven**: el proyecto trae el Maven
+Wrapper (`mvnw` / `mvnw.cmd`), que lo descarga solo junto con las dependencias (Hibernate,
+driver de SQLite). En Windows (PowerShell) usar `.\mvnw.cmd` en lugar de `mvn`.
 
 ```bash
-mvn package                                              # compila, corre las pruebas y arma el .jar
+mvn package        # o .\mvnw.cmd package en Windows: compila, corre las pruebas y arma el .jar
 java -jar target/ppai-bolsines-g10-1.0.0.jar             # abre la ventana
 java -jar target/ppai-bolsines-g10-1.0.0.jar --reiniciar-datos   # vuelve la base a los datos de prueba
 java -jar target/ppai-bolsines-g10-1.0.0.jar --consola   # versión por consola
