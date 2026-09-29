@@ -20,4 +20,10 @@ public class ParaRedirigir extends EstadoDocumentacion {
     public void recibir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
         cambiarEstado(documentacion, new RecibidaYAceptada(), fechaHora, responsable);
     }
+
+    /** CU 31 [documentación correcta = False]: ParaRedirigir -> Recibida&amp;Rechazada. */
+    @Override
+    public void rechazar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
+        cambiarEstado(documentacion, new RecibidaYRechazada(), fechaHora, responsable);
+    }
 }

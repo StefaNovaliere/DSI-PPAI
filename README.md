@@ -73,8 +73,8 @@ La ventana tiene tres pestañas:
 | ![](docs/capturas/2_documentacion.png) | ![](docs/capturas/3_confirmacion.png) |
 | **Cambios de estado al registrar la recepción** | **Historial de estados del bolsín 101** |
 | ![](docs/capturas/7_dialogo_cambios.png) | ![](docs/capturas/8_historial_filtrado.png) |
-| **Probar el patrón State** | **Flujo alternativo A2: cancelación** |
-| ![](docs/capturas/9_demo_patron_state.png) | ![](docs/capturas/6_alternativo_cancelacion.png) |
+| **Probar el patrón State (todas las transiciones, incluidas las del CU 31)** | **Flujo alternativo A2: cancelación** |
+| ![](docs/capturas/10_demo_cu31.png) | ![](docs/capturas/6_alternativo_cancelacion.png) |
 
 ## 5. Arquitectura (capas)
 
@@ -124,8 +124,9 @@ El gestor accede a los objetos persistentes sólo a través de la interfaz `Repo
 Participantes (según la plantilla de la cátedra):
 
 - **Contexto: `Documentacion`.** Conoce su `estadoActual` y **delega** cada evento de su
-  máquina de estados (`remitar`, `cancelarRemito`, `agregarAlBolsin`, `enviar`, `recibir`,
-  `registrar`, `darDeBaja`).
+  máquina de estados: `remitar`, `cancelarRemito`, `agregarAlBolsin`, `enviar`, `recibir`
+  (CU 28), `registrarNoRecibida`, `marcarParaRedirigir` y `rechazar` (CU 31), `registrar` y
+  `darDeBaja`.
 - **Estado abstracto: `EstadoDocumentacion`.** Declara un método por evento. Por defecto
   lanza `IllegalStateException` (transición inválida). Además tiene los pasos comunes de
   toda transición: cerrar el `CambioEstadoDocumentacion` actual, crear el nuevo y hacer
@@ -212,7 +213,9 @@ transición y cuál es el estado siguiente.
    en distintos estados. Por ejemplo, `recibir()` sobre la 1001 pasa a Recibida&Aceptada; si
    se aprieta otra vez, `RecibidaYAceptada` lo rechaza. Con "Nueva documentación" se crea
    una en `Registrada` y se puede recorrer toda la máquina de estados: `remitar()` →
-   `agregarAlBolsin()` → `enviar()` → `recibir()`.
+   `agregarAlBolsin()` → `enviar()` → `recibir()`. Con los eventos del CU 31 se llega a
+   `NoRecibida`, `ParaRedirigir`, `Recibida&Rechazada` y `DeBaja`. El botón **"Ver máquina de
+   estados"** muestra el diagrama del análisis para seguir el recorrido.
 4. **Pestaña "Historial de estados"**: muestra los `CambioEstadoDocumentacion` que crearon los
    estados concretos, tal como quedaron en la base.
 
@@ -247,6 +250,10 @@ grupo a partir de las actividades de descubrimiento hechas en el aula.
 - `Bolsin` y `Remito` mantienen la entidad `Estado` con ámbito, tal como en el análisis,
   porque la entrega sólo modela la máquina de estados de Documentación. Si se modelan sus
   máquinas de estados, se les puede aplicar State de la misma forma.
-- Las transiciones del CU 31 (Registrar Revisión de Documentación) no se implementan. La
+- **La máquina de estados de Documentación está completa**, incluidas las transiciones
+  del CU 31. En el diagrama son `recibir()` con distintas guardas; en el diseño cada guarda es
+  un evento propio (`registrarNoRecibida`, `marcarParaRedirigir`, `rechazar`), así ningún estado
+  necesita un `if` para evaluarla. Se pueden probar todas en la pestaña "Probar el patrón
+  State". Lo que no se implementa es la **pantalla y el gestor del CU 31**: en el CU 28, la
   opción "Hay diferencias con lo registrado" informa que corresponde el CU 31.
 - El CU 29 (notificación por correo) se simula mostrando el mail en el área de Mensajes o en la consola.

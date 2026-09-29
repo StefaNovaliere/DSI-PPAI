@@ -64,6 +64,8 @@ public class App {
         ventana.setContentPane(pestanias);
         ventana.setMinimumSize(new Dimension(900, 640));
         ventana.pack();
+        Dimension pantallaCompleta = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        ventana.setSize(Math.min(1100, pantallaCompleta.width), Math.min(800, pantallaCompleta.height - 40));
         ventana.setLocationRelativeTo(null);
         ventana.setVisible(true);
         return ventana;

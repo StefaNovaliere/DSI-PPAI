@@ -131,6 +131,21 @@ public class Documentacion {
         estadoActual.recibir(this, fechaHora, responsable);
     }
 
+    /** CU 31 Registrar Revisión: no llegó o no coincide con lo registrado. */
+    public void registrarNoRecibida(LocalDateTime fechaHora, Empleado responsable) {
+        estadoActual.registrarNoRecibida(this, fechaHora, responsable);
+    }
+
+    /** CU 31 Registrar Revisión: la documentación debe redirigirse. */
+    public void marcarParaRedirigir(LocalDateTime fechaHora, Empleado responsable) {
+        estadoActual.marcarParaRedirigir(this, fechaHora, responsable);
+    }
+
+    /** CU 31 Registrar Revisión: la documentación se rechaza. */
+    public void rechazar(LocalDateTime fechaHora, Empleado responsable) {
+        estadoActual.rechazar(this, fechaHora, responsable);
+    }
+
     /** CU 7 Registrar Documentación (volver a registrar). */
     public void registrar(LocalDateTime fechaHora, Empleado responsable) {
         estadoActual.registrar(this, fechaHora, responsable);

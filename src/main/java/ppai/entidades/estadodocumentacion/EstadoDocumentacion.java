@@ -45,6 +45,21 @@ public abstract class EstadoDocumentacion {
         throw transicionInvalida("recibir");
     }
 
+    /** CU 31: la documentación no llegó o no coincide con lo registrado. */
+    public void registrarNoRecibida(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
+        throw transicionInvalida("registrar como no recibida");
+    }
+
+    /** CU 31: la documentación debe redirigirse a otra CM. */
+    public void marcarParaRedirigir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
+        throw transicionInvalida("marcar para redirigir");
+    }
+
+    /** CU 31: la documentación se recibe pero se rechaza. */
+    public void rechazar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
+        throw transicionInvalida("rechazar");
+    }
+
     public void registrar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
         throw transicionInvalida("registrar");
     }

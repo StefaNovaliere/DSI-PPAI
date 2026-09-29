@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -128,8 +130,11 @@ public class DemostracionPatronState extends JPanel {
             areaLog.setText("");
             refrescarTabla(0);
         });
-        JPanel botones = new JPanel(new GridLayout(1, 2, 6, 0));
+        JButton btnMaquina = new JButton("Ver máquina de estados");
+        btnMaquina.addActionListener(e -> mostrarMaquinaDeEstados());
+        JPanel botones = new JPanel(new GridLayout(1, 3, 6, 0));
         botones.add(btnNueva);
+        botones.add(btnMaquina);
         botones.add(btnReiniciar);
 
         JTable tablaHistorial = new JTable(modeloHistorial);
@@ -156,6 +161,11 @@ public class DemostracionPatronState extends JPanel {
         agregarEvento(botones, "agregarAlBolsin()", "CU 19 Generar Bolsín", Documentacion::agregarAlBolsin);
         agregarEvento(botones, "enviar()", "CU 27 Registrar retiro de bolsines", Documentacion::enviar);
         agregarEvento(botones, "recibir()", "CU 28 Registrar Recepción de Bolsín", Documentacion::recibir);
+        agregarEvento(botones, "registrarNoRecibida()", "CU 31 [todo igual a lo registrado = False]",
+                Documentacion::registrarNoRecibida);
+        agregarEvento(botones, "marcarParaRedirigir()", "CU 31 [CMDestino = CMC]",
+                Documentacion::marcarParaRedirigir);
+        agregarEvento(botones, "rechazar()", "CU 31 [CMDestino no es la correcta / doc. incorrecta]", Documentacion::rechazar);
         agregarEvento(botones, "registrar()", "CU 7 Registrar Documentación", Documentacion::registrar);
         agregarEvento(botones, "darDeBaja()", "CU 9 Eliminar Documentación", Documentacion::darDeBaja);
 
@@ -229,6 +239,20 @@ public class DemostracionPatronState extends JPanel {
             modeloHistorial.addRow(new Object[] {ce.getEstado().getNombre(), ce.getFechaHoraInicio().format(FORMATO),
                 ce.sosActual() ? "ACTUAL" : ce.getFechaHoraFin().format(FORMATO)});
         }
+    }
+
+    /** Muestra la máquina de estados de Documentación modelada en el análisis (Entrega 1). */
+    private void mostrarMaquinaDeEstados() {
+        java.net.URL imagen = getClass().getResource("/imagenes/maquina_estados_documentacion.png");
+        if (imagen == null) {
+            log("No se encontró la imagen de la máquina de estados.");
+            return;
+        }
+        JLabel diagrama = new JLabel(new ImageIcon(imagen));
+        JScrollPane scroll = new JScrollPane(diagrama);
+        scroll.setPreferredSize(new Dimension(1000, 560));
+        JOptionPane.showMessageDialog(this, scroll, "Máquina de estados de la clase Documentación (análisis)",
+                JOptionPane.PLAIN_MESSAGE);
     }
 
     private void log(String mensaje) {

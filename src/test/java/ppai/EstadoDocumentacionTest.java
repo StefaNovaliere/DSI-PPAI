@@ -24,6 +24,7 @@ import ppai.entidades.estadodocumentacion.EnRemito;
 import ppai.entidades.estadodocumentacion.NoRecibida;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
+import ppai.entidades.estadodocumentacion.RecibidaYRechazada;
 import ppai.entidades.estadodocumentacion.Registrada;
 
 /** Pruebas de la máquina de estados de Documentación implementada con State. */
@@ -115,5 +116,52 @@ class EstadoDocumentacionTest {
         documentacion.recibir(T0.plusHours(4), empleado);
         assertThrows(IllegalStateException.class, () -> documentacion.recibir(T0.plusHours(5), empleado));
         assertThrows(IllegalStateException.class, () -> documentacion.darDeBaja(T0.plusHours(5), empleado));
+    }
+
+    private void llevarAEnBolsinEnviado() {
+        documentacion.remitar(T0.plusHours(1), empleado);
+        documentacion.agregarAlBolsin(T0.plusHours(2), empleado);
+        documentacion.enviar(T0.plusHours(3), empleado);
+    }
+
+    @Test
+    void revisionNoRecibidaVuelveARegistrarseOSeDaDeBaja() {
+        llevarAEnBolsinEnviado();
+        documentacion.registrarNoRecibida(T0.plusHours(4), empleado);
+        assertInstanceOf(NoRecibida.class, documentacion.getEstadoActual());
+        documentacion.registrar(T0.plusHours(5), empleado);
+        assertInstanceOf(Registrada.class, documentacion.getEstadoActual());
+    }
+
+    @Test
+    void revisionParaRedirigirLuegoRechazadaYDeBaja() {
+        llevarAEnBolsinEnviado();
+        documentacion.marcarParaRedirigir(T0.plusHours(4), empleado);
+        assertInstanceOf(ParaRedirigir.class, documentacion.getEstadoActual());
+        documentacion.rechazar(T0.plusHours(5), empleado);
+        assertInstanceOf(RecibidaYRechazada.class, documentacion.getEstadoActual());
+        documentacion.darDeBaja(T0.plusHours(6), empleado);
+        assertInstanceOf(DeBaja.class, documentacion.getEstadoActual());
+        assertTrue(documentacion.getEstadoActual().esFinal());
+        assertEquals(7, documentacion.getCambiosEstado().size());
+    }
+
+    @Test
+    void revisionRechazadaDesdeEnBolsinEnviado() {
+        llevarAEnBolsinEnviado();
+        documentacion.rechazar(T0.plusHours(4), empleado);
+        assertInstanceOf(RecibidaYRechazada.class, documentacion.getEstadoActual());
+    }
+
+    @Test
+    void eventosDeRevisionInvalidosSonRechazados() {
+        // Una documentación Registrada no puede revisarse
+        assertThrows(IllegalStateException.class, () -> documentacion.rechazar(T0, empleado));
+        assertThrows(IllegalStateException.class, () -> documentacion.marcarParaRedirigir(T0, empleado));
+        // ParaRedirigir no puede volver a marcarse ni registrarse como no recibida
+        llevarAEnBolsinEnviado();
+        documentacion.marcarParaRedirigir(T0.plusHours(4), empleado);
+        assertThrows(IllegalStateException.class, () -> documentacion.marcarParaRedirigir(T0.plusHours(5), empleado));
+        assertThrows(IllegalStateException.class, () -> documentacion.registrarNoRecibida(T0.plusHours(5), empleado));
     }
 }

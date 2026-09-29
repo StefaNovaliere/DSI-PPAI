@@ -189,6 +189,12 @@ bolsines enviados a CM Córdoba pendientes de recepción: **101** (desde CM Rosa
   eventos. En "Qué pasó" se ve qué objeto estado resolvió cada evento (**OK**) o lo rechazó
   (**RECHAZADO**). Por ejemplo, `recibir()` sobre la 1001 da OK y, si se repite, lo rechaza
   `RecibidaYAceptada`. Esta pestaña trabaja sobre una copia en memoria: no toca la base.
+  - Con **"Ver máquina de estados"** se abre el diagrama del análisis para seguir el recorrido.
+  - Para llegar a los otros estados, usar los eventos del CU 31. Por ejemplo, sobre la 1002:
+    `marcarParaRedirigir()` → `rechazar()` → `darDeBaja()` recorre
+    EnBolsinEnviado → ParaRedirigir → Recibida&Rechazada → DeBaja.
+  - Sobre la 1004: `registrarNoRecibida()` → `registrar()` recorre
+    EnBolsinEnviado → NoRecibida → Registrada.
 
 El detalle del diseño y de dónde interviene el patrón está en el [README](README.md#7-patrón-state).
 
