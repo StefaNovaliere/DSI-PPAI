@@ -231,15 +231,26 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
 
     @Override
     public void mostrarRecepcionRegistrada(int numeroBolsin, List<DatosDocumentacion> documentacion) {
-        // Se actualiza la columna Estado con el nuevo estado de cada documentación
+        // Se actualiza la columna Estado y se informa el cambio de estado de cada documentación
+        StringBuilder resumen = new StringBuilder();
         for (DatosDocumentacion doc : documentacion) {
             for (int fila = 0; fila < modeloDocumentacion.getRowCount(); fila++) {
                 if (modeloDocumentacion.getValueAt(fila, 1).equals(doc.numero())) {
+                    Object estadoAnterior = modeloDocumentacion.getValueAt(fila, 4);
                     modeloDocumentacion.setValueAt(doc.estado(), fila, 4);
+                    resumen.append("Doc ").append(doc.numero()).append(": ")
+                            .append(estadoAnterior).append("  →  ").append(doc.estado()).append("\n");
                 }
             }
         }
-        mostrarMensaje("Recepción del bolsín N° " + numeroBolsin + " registrada correctamente.");
+        mostrarMensaje("Recepción del bolsín N° " + numeroBolsin + " registrada. Cambios de estado:");
+        mostrarMensaje(resumen.toString().stripTrailing());
+        JOptionPane.showMessageDialog(this,
+                "Recepción del bolsín N° " + numeroBolsin + " registrada.\n\n"
+                        + "Cambios de estado de la documentación:\n" + resumen
+                        + "\nCada transición la resolvió el objeto estado de la documentación (patrón State).\n"
+                        + "Ver el detalle en la pestaña \"Historial de estados\".",
+                "Recepción registrada", JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Override

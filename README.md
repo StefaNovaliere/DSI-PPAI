@@ -64,18 +64,25 @@ elige la opción "todo coincide con lo registrado" y confirma. El sistema:
 
 ## 4. Capturas
 
+La ventana tiene tres pestañas:
+
+1. **Registrar recepción de bolsín**: el caso de uso.
+2. **Historial de estados**: los `CambioEstadoDocumentacion` guardados en la base, filtrables por bolsín.
+3. **Probar el patrón State**: herramienta para la defensa. Le aplica cualquier evento a cualquier documentación, sobre una copia en memoria que no toca la base.
+
 | Selección de bolsín y documentación | Confirmación |
 |---|---|
 | ![](docs/capturas/2_documentacion.png) | ![](docs/capturas/3_confirmacion.png) |
-| **Recepción registrada (estados nuevos)** | **Historial de estados (patrón State)** |
-| ![](docs/capturas/4_recepcion_registrada.png) | ![](docs/capturas/5_historial_estados.png) |
-| **Flujo alternativo A2: cancelación** | |
-| ![](docs/capturas/6_alternativo_cancelacion.png) | |
+| **Cambios de estado al registrar la recepción** | **Historial de estados del bolsín 101** |
+| ![](docs/capturas/7_dialogo_cambios.png) | ![](docs/capturas/8_historial_filtrado.png) |
+| **Probar el patrón State** | **Flujo alternativo A2: cancelación** |
+| ![](docs/capturas/9_demo_patron_state.png) | ![](docs/capturas/6_alternativo_cancelacion.png) |
 
 ## 5. Arquitectura (capas)
 
 | Capa | Paquete | Clases |
 |------|---------|--------|
+| Herramientas de la defensa (fuera del CU) | `ppai` | `VisorHistorialEstados`, `DemostracionPatronState` |
 | Interfaz (boundary) | `ppai.boundary` | `PantallaRecepcionBolsin` (interfaz), `PantallaGraficaRecepcionBolsin` (Swing), `PantallaConsolaRecepcionBolsin` |
 | Control | `ppai.control` | `GestorRecepcionBolsin`, `GestorNotificacionCU29` |
 | Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Estado`, `Empleado`, `Sesion`, `ComisionMedica`, `TipoDocumento` |
@@ -192,14 +199,24 @@ GestorRecepcionBolsin.tomarConfirmacion()
 
 ### Cómo mostrar el patrón en la defensa
 
-1. Abrir `Documentacion.recibir()`: sólo delega en `estadoActual.recibir(this, ...)`.
-2. Mostrar `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()`: cada estado resuelve su
-   transición. En la demo, el bolsín 101 tiene documentación en los dos estados y ambas
-   pasan a Recibida&Aceptada.
-3. Pestaña **Historial de estados (patrón State)**: muestra los `CambioEstadoDocumentacion`
-   creados por los estados concretos (la tabla que se guarda en la base).
-4. `EstadoDocumentacionTest`: una transición inválida (por ejemplo, recibir una
-   documentación `Registrada`) se rechaza.
+**¿Dónde interviene State?** No en el historial, que es sólo el resultado. Interviene en la
+lógica: el gestor le dice a cada documentación `recibir()` sin preguntar en qué estado está,
+y la documentación delega en su objeto estado. La clase de ese objeto decide si hay
+transición y cuál es el estado siguiente.
+
+1. **Pestaña "Registrar recepción de bolsín"**, bolsín 101. Trae documentación en dos
+   estados distintos (`EnBolsinEnviado` y `ParaRedirigir`). El mismo `recibir()` lo resuelven
+   dos clases distintas, y el diálogo final muestra cada transición.
+2. **Código:** `Documentacion.recibir()` sólo hace `estadoActual.recibir(this, ...)`.
+   `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()` hacen la transición. `Registrada`
+   no redefine `recibir()`, así que hereda el rechazo de `EstadoDocumentacion`.
+3. **Pestaña "Probar el patrón State"**: elegir una documentación y apretar el mismo botón
+   en distintos estados. Por ejemplo, `recibir()` sobre la 1001 pasa a Recibida&Aceptada; si
+   se aprieta otra vez, `RecibidaYAceptada` lo rechaza. Con "Nueva documentación" se crea
+   una en `Registrada` y se puede recorrer toda la máquina de estados: `remitar()` →
+   `agregarAlBolsin()` → `enviar()` → `recibir()`.
+4. **Pestaña "Historial de estados"**: muestra los `CambioEstadoDocumentacion` que crearon los
+   estados concretos, tal como quedaron en la base.
 
 ## 8. Diseño de la interfaz de usuario
 

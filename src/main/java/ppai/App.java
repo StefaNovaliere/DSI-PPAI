@@ -55,7 +55,8 @@ public class App {
         VisorHistorialEstados visor = new VisorHistorialEstados(repositorio);
         JTabbedPane pestanias = new JTabbedPane();
         pestanias.addTab("Registrar recepción de bolsín", pantalla);
-        pestanias.addTab("Historial de estados (patrón State)", visor);
+        pestanias.addTab("Historial de estados", visor);
+        pestanias.addTab("Probar el patrón State", new DemostracionPatronState());
         pestanias.addChangeListener(e -> visor.actualizar());
 
         JFrame ventana = new JFrame("Sistema de Bolsines - Usuario: " + repositorio.getSesionActual().getUsuario());
