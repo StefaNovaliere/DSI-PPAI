@@ -3,6 +3,7 @@ package ppai;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.JFrame;
@@ -19,17 +20,20 @@ import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.DetalleRemito;
 import ppai.entidades.Remito;
 import ppai.persistencia.Repositorio;
-import ppai.persistencia.RepositorioEnMemoria;
+import ppai.persistencia.RepositorioJPA;
 
 /**
  * Punto de entrada: arma las capas y abre la interfaz gráfica.
- * Con el argumento {@code --consola} (o sin entorno gráfico) usa la consola.
+ * Argumentos: {@code --consola} usa la pantalla por consola (también si no hay
+ * entorno gráfico); {@code --reiniciar-datos} vuelve la base a los datos de prueba.
  */
 public class App {
 
     public static void main(String[] args) {
-        Repositorio repositorio = new RepositorioEnMemoria();
-        if (Arrays.asList(args).contains("--consola") || GraphicsEnvironment.isHeadless()) {
+        List<String> argumentos = Arrays.asList(args);
+        Repositorio repositorio = new RepositorioJPA(RepositorioJPA.ARCHIVO_BD_POR_DEFECTO,
+                argumentos.contains("--reiniciar-datos"));
+        if (argumentos.contains("--consola") || GraphicsEnvironment.isHeadless()) {
             iniciarConsola(repositorio);
         } else {
             SwingUtilities.invokeLater(() -> iniciarVentana(repositorio));

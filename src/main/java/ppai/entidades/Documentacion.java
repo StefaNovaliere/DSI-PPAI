@@ -1,5 +1,18 @@
 package ppai.entidades;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,14 +30,31 @@ import ppai.entidades.estadodocumentacion.Registrada;
  * máquina de estados. No hay ningún if/switch sobre el estado: el estado
  * concreto decide si la transición es válida y cuál es el estado siguiente.
  */
+@Entity
+@Table(name = "documentacion")
 public class Documentacion {
 
-    private final int numero;
-    private final String asunto;
-    private final LocalDate fechaPase;
-    private final TipoDocumento tipoDocumento;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private int numero;
+    private String asunto;
+    private LocalDate fechaPase;
+    @ManyToOne
+    @JoinColumn(name = "tipo_documento_id")
+    private TipoDocumento tipoDocumento;
+    /** No se guarda como columna: se reconstruye desde el cambio de estado actual (ver restaurarEstadoActual). */
+    @Transient
     private EstadoDocumentacion estadoActual;
-    private final List<CambioEstadoDocumentacion> cambiosEstado = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "documentacion_id")
+    @OrderBy("id")
+    private List<CambioEstadoDocumentacion> cambiosEstado = new ArrayList<>();
+
+    protected Documentacion() {
+        // Requerido por JPA
+    }
 
     /**
      * CU 7 Registrar Documentación: new() -> Registrada.
@@ -41,8 +71,9 @@ public class Documentacion {
     }
 
     /**
-     * Materialización desde la persistencia: reconstruye la documentación con
-     * su historial. El estado actual es el del cambio de estado vigente.
+     * Reconstruye una documentación a partir de su historial de estados
+     * (se usa para cargar datos de prueba). El estado actual es el del cambio
+     * de estado vigente.
      */
     public Documentacion(int numero, String asunto, LocalDate fechaPase, TipoDocumento tipoDocumento,
                          List<CambioEstadoDocumentacion> historial) {
@@ -51,13 +82,23 @@ public class Documentacion {
         this.fechaPase = fechaPase;
         this.tipoDocumento = tipoDocumento;
         this.cambiosEstado.addAll(historial);
-        for (CambioEstadoDocumentacion cambioEstado : historial) {
+        restaurarEstadoActual();
+    }
+
+    /**
+     * Al materializar la documentación desde la base de datos, el estado
+     * actual (objeto del patrón State) es el del cambio de estado vigente.
+     */
+    @PostLoad
+    void restaurarEstadoActual() {
+        estadoActual = null;
+        for (CambioEstadoDocumentacion cambioEstado : cambiosEstado) {
             if (cambioEstado.sosActual()) {
-                this.estadoActual = cambioEstado.getEstado();
+                estadoActual = cambioEstado.getEstado();
             }
         }
         if (estadoActual == null) {
-            throw new IllegalArgumentException("La documentación " + numero + " no tiene un cambio de estado actual");
+            throw new IllegalStateException("La documentación " + numero + " no tiene un cambio de estado actual");
         }
     }
 

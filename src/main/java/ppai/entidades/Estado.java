@@ -1,5 +1,11 @@
 package ppai.entidades;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 /**
  * Estado de Bolsín y de Remito, tal como fue modelado en el análisis
  * (entidad con ámbito).
@@ -7,7 +13,13 @@ package ppai.entidades;
  * <p>Documentación NO usa esta clase: sus estados se modelan con el patrón
  * State (ver paquete {@code ppai.entidades.estadodocumentacion}).
  */
+@Entity
+@Table(name = "estado")
 public class Estado {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     public static final String AMBITO_BOLSIN = "Bolsin";
     public static final String AMBITO_REMITO = "Remito";
@@ -15,6 +27,10 @@ public class Estado {
     private String ambito;
     private String nombre;
     private String descripcion;
+
+    protected Estado() {
+        // Requerido por JPA
+    }
 
     public Estado(String ambito, String nombre, String descripcion) {
         this.ambito = ambito;

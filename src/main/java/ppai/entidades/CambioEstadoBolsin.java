@@ -1,16 +1,38 @@
 package ppai.entidades;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+
 import java.time.LocalDateTime;
 
 /**
  * Historial de estados del Bolsín.
  */
+@Entity
+@Table(name = "cambio_estado_bolsin")
 public class CambioEstadoBolsin {
 
-    private final LocalDateTime fechaHoraInicio;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalDateTime fechaHoraInicio;
     private LocalDateTime fechaHoraFin;
-    private final Estado estado;
-    private final Empleado responsableCE;
+    @ManyToOne
+    @JoinColumn(name = "estado_id")
+    private Estado estado;
+    @ManyToOne
+    @JoinColumn(name = "responsable_id")
+    private Empleado responsableCE;
+
+    protected CambioEstadoBolsin() {
+        // Requerido por JPA
+    }
 
     public CambioEstadoBolsin(LocalDateTime fechaHoraInicio, Estado estado, Empleado responsableCE) {
         this.fechaHoraInicio = fechaHoraInicio;

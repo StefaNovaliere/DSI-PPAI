@@ -251,6 +251,8 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
     @Override
     public void finCU() {
         mostrarMensaje("Fin del caso de uso.");
+        // La lista de bolsines queda desactualizada; se vuelve a buscar al iniciar el CU otra vez
+        modeloBolsines.setRowCount(0);
         habilitarControles(false, false);
         btnOpcRecepcionBolsin.setEnabled(true);
     }
@@ -265,7 +267,11 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
                 if (b == '\n') {
                     String linea = buffer.toString(StandardCharsets.UTF_8);
                     buffer.reset();
-                    SwingUtilities.invokeLater(() -> mostrarMensaje(linea));
+                    if (SwingUtilities.isEventDispatchThread()) {
+                        mostrarMensaje(linea);
+                    } else {
+                        SwingUtilities.invokeLater(() -> mostrarMensaje(linea));
+                    }
                 } else {
                     buffer.write(b);
                 }

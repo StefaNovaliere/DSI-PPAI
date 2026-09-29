@@ -1,15 +1,31 @@
 package ppai.entidades;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 /**
  * Comisión Médica: origen o destino de los bolsines y remitos.
  */
+@Entity
+@Table(name = "comision_medica")
 public class ComisionMedica {
 
-    private final int codigo;
-    private final String nombre;
-    private final String direccion;
-    private final String email;
-    private final String telefono;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private int codigo;
+    private String nombre;
+    private String direccion;
+    private String email;
+    private String telefono;
+
+    protected ComisionMedica() {
+        // Requerido por JPA
+    }
 
     public ComisionMedica(int codigo, String nombre, String direccion, String email, String telefono) {
         this.codigo = codigo;

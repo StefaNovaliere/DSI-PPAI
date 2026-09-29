@@ -1,5 +1,16 @@
 package ppai.entidades;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,14 +23,33 @@ import ppai.dto.DatosRemito;
 /**
  * Remito de documentación entre Comisiones Médicas.
  */
+@Entity
+@Table(name = "remito")
 public class Remito {
 
-    private final LocalDate fecha;
-    private final int numero;
-    private final ComisionMedica origen;
-    private final ComisionMedica destino;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalDate fecha;
+    private int numero;
+    @ManyToOne
+    @JoinColumn(name = "cm_origen_id")
+    private ComisionMedica origen;
+    @ManyToOne
+    @JoinColumn(name = "cm_destino_id")
+    private ComisionMedica destino;
+    @ManyToOne
+    @JoinColumn(name = "estado_id")
     private Estado estado;
-    private final List<DetalleRemito> detallesRemito = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "remito_id")
+    @OrderBy("id")
+    private List<DetalleRemito> detallesRemito = new ArrayList<>();
+
+    protected Remito() {
+        // Requerido por JPA
+    }
 
     public Remito(LocalDate fecha, int numero, ComisionMedica origen, ComisionMedica destino, Estado estado) {
         this.fecha = fecha;

@@ -1,5 +1,16 @@
 package ppai.entidades;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.Table;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,16 +23,36 @@ import ppai.dto.DatosRemito;
 /**
  * Bolsín: envío físico precintado de remitos entre Comisiones Médicas.
  */
+@Entity
+@Table(name = "bolsin")
 public class Bolsin {
 
-    private final LocalDate fecha;
-    private final int numeroBolsin;
-    private final String numeroPrecinto;
-    private final double peso;
-    private final ComisionMedica origen;
-    private final ComisionMedica destino;
-    private final List<Remito> remitos = new ArrayList<>();
-    private final List<CambioEstadoBolsin> cambiosEstado = new ArrayList<>();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalDate fecha;
+    private int numeroBolsin;
+    private String numeroPrecinto;
+    private double peso;
+    @ManyToOne
+    @JoinColumn(name = "cm_origen_id")
+    private ComisionMedica origen;
+    @ManyToOne
+    @JoinColumn(name = "cm_destino_id")
+    private ComisionMedica destino;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "bolsin_id")
+    @OrderBy("id")
+    private List<Remito> remitos = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "bolsin_id")
+    @OrderBy("id")
+    private List<CambioEstadoBolsin> cambiosEstado = new ArrayList<>();
+
+    protected Bolsin() {
+        // Requerido por JPA
+    }
 
     public Bolsin(LocalDate fecha, int numeroBolsin, String numeroPrecinto, double peso,
                   ComisionMedica origen, ComisionMedica destino) {

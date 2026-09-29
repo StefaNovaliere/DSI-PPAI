@@ -141,9 +141,20 @@ public class GestorRecepcionBolsin {
         Estado recibidoEnCMDestino = buscarEstadoRecibidoEnCMDestino();
         Estado recibidoYAceptado = buscarEstadoRecibidoYAceptado();
 
-        bolsinSeleccionado.recibirBolsin(fechaYHora, recibidoEnCMDestino, empleadoLogueado);
-        // Remito -> DetalleRemito -> Documentacion.recibir() -> estadoActual.recibir(): patrón State
-        bolsinSeleccionado.recibirYAceptarRemito(recibidoYAceptado, fechaYHora, empleadoLogueado);
+        repositorio.iniciarTransaccion();
+        try {
+            bolsinSeleccionado.recibirBolsin(fechaYHora, recibidoEnCMDestino, empleadoLogueado);
+            // Remito -> DetalleRemito -> Documentacion.recibir() -> estadoActual.recibir(): patrón State
+            bolsinSeleccionado.recibirYAceptarRemito(recibidoYAceptado, fechaYHora, empleadoLogueado);
+            repositorio.actualizar(bolsinSeleccionado);
+            repositorio.confirmarTransaccion();
+        } catch (RuntimeException e) {
+            repositorio.deshacerTransaccion();
+            pantalla.mostrarMensaje("No se pudo registrar la recepción: " + e.getMessage()
+                    + ". No se guardó ningún cambio.");
+            finCU();
+            return;
+        }
 
         buscarInformacionDocumentacion();
         pantalla.mostrarRecepcionRegistrada(bolsinSeleccionado.getNumeroBolsin(), documentacionRecibida);
