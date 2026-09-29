@@ -4,6 +4,11 @@ Rediseño e implementación de la realización del caso de uso de análisis
 `PPAI2026_3K2_G10_E1_Analisis`, aplicando el **patrón de diseño State (Gamma)** a la clase
 `Documentacion`, bajo el **Paradigma Orientado a Objetos**.
 
+> ### ▶ ¿Querés ejecutarlo? Seguí la guía paso a paso: **[COMO_EJECUTAR.md](COMO_EJECUTAR.md)**
+> Resumen: instalar Java 17+, descargar el proyecto y hacer doble clic en **`ejecutar.bat`**.
+> La guía incluye un guion para probar el flujo principal y los alternativos, y una tabla de
+> problemas frecuentes.
+
 ## 1. Detalles de implementación
 
 | Ítem | Elección |
@@ -15,25 +20,18 @@ Rediseño e implementación de la realización del caso de uso de análisis
 
 ## 2. Cómo ejecutarlo
 
-Requisito: JDK 17 o superior. **No hace falta instalar Maven**: el proyecto trae el Maven
-Wrapper (`mvnw` / `mvnw.cmd`), que lo descarga solo junto con las dependencias (Hibernate,
-driver de SQLite). En Windows (PowerShell) usar `.\mvnw.cmd` en lugar de `mvn`.
+Ver **[COMO_EJECUTAR.md](COMO_EJECUTAR.md)** (instalación de Java, descarga, ejecución,
+guion de prueba y problemas frecuentes). Resumen para quien ya tiene Java 17+:
 
-```bash
-mvn package        # o .\mvnw.cmd package en Windows: compila, corre las pruebas y arma el .jar
-java -jar target/ppai-bolsines-g10-1.0.0.jar             # abre la ventana
-java -jar target/ppai-bolsines-g10-1.0.0.jar --reiniciar-datos   # vuelve la base a los datos de prueba
-java -jar target/ppai-bolsines-g10-1.0.0.jar --consola   # versión por consola
-```
+| Sistema | Ejecutar | Volver a los datos de prueba |
+|---------|----------|------------------------------|
+| Windows | doble clic en `ejecutar.bat` | doble clic en `ejecutar-desde-cero.bat` |
+| Mac / Linux | `./ejecutar.sh` | `./ejecutar.sh --reiniciar-datos` |
+| Manual | `.\mvnw.cmd package` y `java -jar target\ppai-bolsines-g10-1.0.0.jar` | agregar `--reiniciar-datos` |
 
-También se puede abrir la carpeta como proyecto Maven en IntelliJ / NetBeans / Eclipse y
-ejecutar `ppai.App` (con `--reiniciar-datos` en los argumentos del programa si se quiere
-empezar de cero).
-
-La primera vez se crea `bolsines.db` en la carpeta desde donde se ejecuta y se carga con
-datos de prueba. **Los cambios quedan guardados**: si se cierra y se vuelve a abrir, los
-bolsines recibidos ya no aparecen. Para repetir la demo en la defensa usar
-`--reiniciar-datos`.
+No hace falta instalar Maven (el proyecto trae el Maven Wrapper) ni una base de datos
+(SQLite es el archivo `bolsines.db`, que se crea solo). **Los cambios quedan guardados**
+entre ejecuciones.
 
 Datos de prueba: el usuario logueado es `aperez` (CM Córdoba). Hay dos bolsines enviados a
 CM Córdoba (101 y 102), uno enviado a otra CM (103) y uno ya recibido (104); estos dos

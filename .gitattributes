@@ -1,0 +1,6 @@
+# Los scripts de Windows necesitan fin de línea CRLF y los de Mac/Linux LF,
+# también cuando se descarga el proyecto como ZIP.
+*.bat  -text
+*.cmd  -text
+*.sh   text eol=lf
+mvnw   text eol=lf
