@@ -237,7 +237,7 @@ grupo a partir de las actividades de descubrimiento hechas en el aula.
 
 ## 9. Pruebas
 
-`mvn test` ejecuta 13 pruebas:
+`mvn test` ejecuta 17 pruebas:
 
 - `EstadoDocumentacionTest`: la máquina de estados completa, incluidas las transiciones
   inválidas.

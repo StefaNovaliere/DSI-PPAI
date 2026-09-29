@@ -115,7 +115,7 @@ la prueba) hacé doble clic en **`ejecutar-desde-cero.bat`**.
    ```powershell
    .\mvnw.cmd package
    ```
-   Esto además corre las 13 pruebas automáticas.
+   Esto además corre las 17 pruebas automáticas.
 3. Ejecutá:
    ```powershell
    java -jar target\ppai-bolsines-g10-1.0.0.jar
