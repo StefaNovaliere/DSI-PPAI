@@ -9,7 +9,6 @@ import ppai.dto.DatosBolsin;
 import ppai.dto.DatosDocumentacion;
 import ppai.dto.DatosRemito;
 import ppai.entidades.Bolsin;
-import ppai.entidades.ComisionMedica;
 import ppai.entidades.Empleado;
 import ppai.entidades.Estado;
 import ppai.entidades.Usuario;
@@ -30,7 +29,7 @@ public class GestorRecepcionBolsin {
     private final GestorNotificacionCU29 gestorCU29;
 
     private Empleado empleadoLogueado;
-    private ComisionMedica cmUsuario;
+    private String nombreCMUsuario;
     private LocalDateTime fechaYHora;
     private List<Bolsin> bolsinesEnviados = new ArrayList<>();
     private Bolsin bolsinSeleccionado;
@@ -50,16 +49,16 @@ public class GestorRecepcionBolsin {
         documentacionRecibida = new ArrayList<>();
 
         buscarCMUsuarioLogged();
-        if (cmUsuario == null) {
+        if (nombreCMUsuario == null) {
             pantalla.mostrarMensaje("No se encontró la Comisión Médica del usuario logueado.");
             finCU();
             return;
         }
-        pantalla.mostrarCM(cmUsuario.getNombre());
+        pantalla.mostrarCM(nombreCMUsuario);
 
         buscarBolsinesEnviadosCM();
         if (bolsinesEnviados.isEmpty()) {
-            pantalla.mostrarMensaje("No hay bolsines enviados pendientes de recepción para " + cmUsuario.getNombre() + ".");
+            pantalla.mostrarMensaje("No hay bolsines enviados pendientes de recepción para " + nombreCMUsuario + ".");
             finCU();
             return;
         }
@@ -69,12 +68,14 @@ public class GestorRecepcionBolsin {
     private void buscarCMUsuarioLogged() {
         Usuario usuario = repositorio.getSesionActual().getUsuario();
         empleadoLogueado = null;
-        cmUsuario = null;
+        nombreCMUsuario = null;
         for (Empleado empleado : repositorio.getEmpleados()) {
             if (empleado.esTuUsuario(usuario)) {
                 empleadoLogueado = empleado;
-                cmUsuario = empleado.getCM();
             }
+        }
+        if (empleadoLogueado != null) {
+            nombreCMUsuario = empleadoLogueado.getCM();
         }
     }
 
@@ -110,10 +111,13 @@ public class GestorRecepcionBolsin {
             pantalla.solicitarSelBolsin(buscarCMOrigenBolsines());
             return;
         }
-        for (DatosRemito remito : buscarInformacionRemito()) {
-            pantalla.mostrarNroRemito(remito.numero());
-            pantalla.mostrarDatosDocumentacion(remito.documentacion());
+        List<DatosRemito> remitos = buscarInformacionRemito();
+        List<Integer> numerosRemito = new ArrayList<>();
+        for (DatosRemito remito : remitos) {
+            numerosRemito.add(remito.numero());
         }
+        pantalla.mostrarNroRemito(numerosRemito);
+        pantalla.mostrarDatosDocumentacion(remitos);
         pantalla.solicitarSelOpcionesRecBolsin();
     }
 
@@ -122,7 +126,7 @@ public class GestorRecepcionBolsin {
     }
 
     /** Primera opción: todo remito y documentación coincide con lo registrado. */
-    public void tomarSeleccionPrimerOpcion() {
+    public void tomarSeleccionPrimeraOpcion() {
         pantalla.solicitarConfirmacion();
     }
 

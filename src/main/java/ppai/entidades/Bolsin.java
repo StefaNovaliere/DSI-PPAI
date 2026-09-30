@@ -78,10 +78,12 @@ public class Bolsin {
         return actual != null && actual.sosEnviado();
     }
 
-    public ComisionMedica obtenerCMDestino() {
-        return destino;
+    /** Nombre de la Comisión Médica destino del bolsín. */
+    public String obtenerCMDestino() {
+        return destino.getNombre();
     }
 
+    /** Nombre de la Comisión Médica origen del bolsín. */
     public String obtenerCMOrigen() {
         return origen.getNombre();
     }
@@ -98,7 +100,7 @@ public class Bolsin {
     public List<DatosRemito> obtenerInformacionRemito() {
         List<DatosRemito> informacion = new ArrayList<>();
         for (Remito remito : remitos) {
-            informacion.add(remito.obtenerDatosRemito());
+            informacion.add(new DatosRemito(remito.obtenerNumero(), remito.obtenerDatosRemito()));
         }
         return informacion;
     }
@@ -126,8 +128,8 @@ public class Bolsin {
     /** Datos (con el estado vigente) de toda la documentación del bolsín. */
     public List<DatosDocumentacion> obtenerInformacionDocumentacion() {
         List<DatosDocumentacion> informacion = new ArrayList<>();
-        for (DatosRemito datosRemito : obtenerInformacionRemito()) {
-            informacion.addAll(datosRemito.documentacion());
+        for (Remito remito : remitos) {
+            informacion.addAll(remito.obtenerDatosRemito());
         }
         return informacion;
     }

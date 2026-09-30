@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableModel;
 import ppai.control.GestorRecepcionBolsin;
 import ppai.dto.DatosBolsin;
 import ppai.dto.DatosDocumentacion;
+import ppai.dto.DatosRemito;
 
 /**
  * Pantalla del CU 28 Registrar Recepción de Bolsín (Swing), con un diseño
@@ -41,7 +42,7 @@ import ppai.dto.DatosDocumentacion;
  * <ul>
  *   <li>elegir la opción del menú → {@code registrarNuevoRecBolsin()}</li>
  *   <li>hacer clic en un bolsín de la lista → {@code tomarSeleccionBolsin()}</li>
- *   <li>botón "Confirmar recepción" → {@code tomarSeleccionPrimerOpcion()}</li>
+ *   <li>botón "Confirmar recepción" → {@code tomarSeleccionPrimeraOpcion()}</li>
  *   <li>botón "Informar diferencias" → {@code tomarSeleccionSegundaOpcion()}</li>
  *   <li>diálogo de confirmación → {@code tomarConfirmacion()}</li>
  * </ul>
@@ -85,7 +86,6 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
 
     // Datos de la ejecución actual del caso de uso
     private final Map<Integer, DatosDocumentacion> documentos = new LinkedHashMap<>();
-    private int remitoActual;
     private int cantidadRemitos;
     private DatosBolsin bolsinEnPantalla;
     private boolean recepcionRegistrada;
@@ -193,7 +193,7 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
         btnConfirmar.setFont(btnConfirmar.getFont().deriveFont(Font.BOLD));
         btnConfirmar.setToolTipText("Todos los remitos y documentos llegaron y coinciden con lo registrado");
         btnDiferencias.setToolTipText("Falta algo o no coincide con lo registrado");
-        btnConfirmar.addActionListener(e -> tomarSeleccionPrimerOpcion());
+        btnConfirmar.addActionListener(e -> tomarSeleccionPrimeraOpcion());
         btnDiferencias.addActionListener(e -> tomarSeleccionSegundaOpcion());
 
         JPanel botones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -265,9 +265,9 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
         gestor.tomarSeleccionBolsin(bolsin.numeroBolsin());
     }
 
-    private void tomarSeleccionPrimerOpcion() {
+    private void tomarSeleccionPrimeraOpcion() {
         habilitarAcciones(false);
-        gestor.tomarSeleccionPrimerOpcion();
+        gestor.tomarSeleccionPrimeraOpcion();
     }
 
     private void tomarSeleccionSegundaOpcion() {
@@ -315,17 +315,18 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
     }
 
     @Override
-    public void mostrarNroRemito(int numeroRemito) {
-        remitoActual = numeroRemito;
-        cantidadRemitos++;
+    public void mostrarNroRemito(List<Integer> numerosRemito) {
+        cantidadRemitos = numerosRemito.size();
     }
 
     @Override
-    public void mostrarDatosDocumentacion(List<DatosDocumentacion> documentacion) {
-        for (DatosDocumentacion doc : documentacion) {
-            documentos.put(doc.numero(), doc);
-            modeloDocumentos.addRow(new Object[] {
-                remitoActual, doc.numero(), doc.tipoDocumento(), doc.asunto(), etiqueta(doc)});
+    public void mostrarDatosDocumentacion(List<DatosRemito> remitos) {
+        for (DatosRemito remito : remitos) {
+            for (DatosDocumentacion doc : remito.documentacion()) {
+                documentos.put(doc.numero(), doc);
+                modeloDocumentos.addRow(new Object[] {
+                    remito.numero(), doc.numero(), doc.tipoDocumento(), doc.asunto(), etiqueta(doc)});
+            }
         }
     }
 

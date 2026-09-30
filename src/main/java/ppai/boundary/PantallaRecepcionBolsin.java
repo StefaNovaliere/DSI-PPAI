@@ -5,6 +5,7 @@ import java.util.List;
 import ppai.control.GestorRecepcionBolsin;
 import ppai.dto.DatosBolsin;
 import ppai.dto.DatosDocumentacion;
+import ppai.dto.DatosRemito;
 
 /**
  * Pantalla (boundary) del CU 28 Registrar Recepción de Bolsín.
@@ -24,9 +25,11 @@ public interface PantallaRecepcionBolsin {
 
     void solicitarSelBolsin(List<DatosBolsin> bolsines);
 
-    void mostrarNroRemito(int numeroRemito);
+    /** Números de los remitos que contiene el bolsín seleccionado. */
+    void mostrarNroRemito(List<Integer> numerosRemito);
 
-    void mostrarDatosDocumentacion(List<DatosDocumentacion> documentacion);
+    /** Documentación del bolsín seleccionado, agrupada por remito. */
+    void mostrarDatosDocumentacion(List<DatosRemito> remitos);
 
     void solicitarSelOpcionesRecBolsin();
 

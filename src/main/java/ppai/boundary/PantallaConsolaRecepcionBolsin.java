@@ -7,6 +7,7 @@ import java.util.Scanner;
 import ppai.control.GestorRecepcionBolsin;
 import ppai.dto.DatosBolsin;
 import ppai.dto.DatosDocumentacion;
+import ppai.dto.DatosRemito;
 
 /**
  * Pantalla del CU 28 implementada por consola.
@@ -62,13 +63,21 @@ public class PantallaConsolaRecepcionBolsin implements PantallaRecepcionBolsin {
     }
 
     @Override
-    public void mostrarNroRemito(int numeroRemito) {
+    public void mostrarNroRemito(List<Integer> numerosRemito) {
         salida.println();
-        salida.println("Remito N° " + numeroRemito);
+        salida.println("Remitos del bolsín: " + numerosRemito);
     }
 
     @Override
-    public void mostrarDatosDocumentacion(List<DatosDocumentacion> documentacion) {
+    public void mostrarDatosDocumentacion(List<DatosRemito> remitos) {
+        for (DatosRemito remito : remitos) {
+            salida.println();
+            salida.println("Remito N° " + remito.numero());
+            imprimirDocumentacion(remito.documentacion());
+        }
+    }
+
+    private void imprimirDocumentacion(List<DatosDocumentacion> documentacion) {
         salida.printf("  %-8s %-24s %-40s %-20s%n", "N° Doc", "Tipo", "Asunto", "Estado");
         for (DatosDocumentacion doc : documentacion) {
             salida.printf("  %-8d %-24s %-40s %-20s%n", doc.numero(), doc.tipoDocumento(), doc.asunto(), doc.descripcionEstado());
@@ -86,14 +95,18 @@ public class PantallaConsolaRecepcionBolsin implements PantallaRecepcionBolsin {
             opcion = leerEntero("Opción inválida. Ingrese 1 o 2: ");
         }
         if (opcion == 1) {
-            tomarSeleccionPrimerOpcion();
+            tomarSeleccionPrimeraOpcion();
         } else {
-            gestor.tomarSeleccionSegundaOpcion();
+            tomarSeleccionSegundaOpcion();
         }
     }
 
-    private void tomarSeleccionPrimerOpcion() {
-        gestor.tomarSeleccionPrimerOpcion();
+    private void tomarSeleccionPrimeraOpcion() {
+        gestor.tomarSeleccionPrimeraOpcion();
+    }
+
+    private void tomarSeleccionSegundaOpcion() {
+        gestor.tomarSeleccionSegundaOpcion();
     }
 
     @Override
@@ -111,7 +124,7 @@ public class PantallaConsolaRecepcionBolsin implements PantallaRecepcionBolsin {
     public void mostrarRecepcionRegistrada(int numeroBolsin, List<DatosDocumentacion> documentacion) {
         salida.println();
         salida.println("Recepción del bolsín N° " + numeroBolsin + " registrada. Estado de la documentación:");
-        mostrarDatosDocumentacion(documentacion);
+        imprimirDocumentacion(documentacion);
     }
 
     @Override

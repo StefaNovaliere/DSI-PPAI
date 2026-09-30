@@ -91,14 +91,19 @@ Los nombres de clases y métodos respetan el diagrama de clases y el de secuenci
 análisis (`opcRegistrarRecBolsin`, `registrarNuevoRecBolsin`, `buscarCMUsuarioLogged`,
 `buscarBolsinesEnviadosCM`, `buscarCMOrigenBolsines`, `solicitarSelBolsin`,
 `tomarSeleccionBolsin`, `buscarInformacionRemito`, `solicitarSelOpcionesRecBolsin`,
-`tomarSeleccionPrimerOpcion`, `solicitarConfirmacion`, `tomarConfirmacion`,
+`tomarSeleccionPrimeraOpcion`, `solicitarConfirmacion`, `tomarConfirmacion`,
 `getFechaYHoraActual`, `buscarEstadoRecibidoEnCMDestino`, `recibirBolsin`,
 `recibirYAceptarRemito`, `recibirYAceptar`, `actualizarEstadoDoc`, `recibir`,
 `buscarInformacionDocumentacion`, `buscarCorreoCM`, `llamarCU29`, `finCU`).
 
+**Verificación contra el diagrama de secuencia:** en
+[`docs/VERIFICACION_DIAGRAMA_SECUENCIA.md`](docs/VERIFICACION_DIAGRAMA_SECUENCIA.md) está cada
+uno de los 69 mensajes de la Vista de Interacción del CU 28 con el método que lo implementa,
+los cambios por el patrón State, lo que el código agrega y la traza de una ejecución real.
+
 En la pantalla gráfica, cada acción del usuario dispara el mensaje correspondiente hacia el
 gestor: elegir la opción del menú → `registrarNuevoRecBolsin()`; hacer clic en un bolsín de
-la lista → `tomarSeleccionBolsin()`; "Confirmar recepción" → `tomarSeleccionPrimerOpcion()`;
+la lista → `tomarSeleccionBolsin()`; "Confirmar recepción" → `tomarSeleccionPrimeraOpcion()`;
 "Informar diferencias" → `tomarSeleccionSegundaOpcion()`; el diálogo de confirmación →
 `tomarConfirmacion()`.
 

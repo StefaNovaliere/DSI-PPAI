@@ -48,14 +48,14 @@ public class Empleado {
         return this.usuario == usuario;
     }
 
-    /** Devuelve la Comisión Médica en la que trabaja el empleado. */
-    public ComisionMedica getCM() {
-        return comisionMedica;
+    /** Devuelve el nombre de la Comisión Médica en la que trabaja el empleado. */
+    public String getCM() {
+        return comisionMedica.getNombre();
     }
 
-    /** Indica si la Comisión Médica recibida es aquella en la que trabaja el empleado. */
-    public boolean esTuCM(ComisionMedica cm) {
-        return comisionMedica == cm;
+    /** Indica si la Comisión Médica recibida (por su nombre) es aquella en la que trabaja el empleado. */
+    public boolean esTuCM(String nombreCM) {
+        return comisionMedica.getNombre().equals(nombreCM);
     }
 
     public String getEmail() {

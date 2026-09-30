@@ -18,7 +18,6 @@ import java.util.Collections;
 import java.util.List;
 
 import ppai.dto.DatosDocumentacion;
-import ppai.dto.DatosRemito;
 
 /**
  * Remito de documentación entre Comisiones Médicas.
@@ -67,13 +66,13 @@ public class Remito {
         return numero;
     }
 
-    /** Número del remito y datos de cada documentación incluida. */
-    public DatosRemito obtenerDatosRemito() {
+    /** Datos de cada documentación incluida en el remito. */
+    public List<DatosDocumentacion> obtenerDatosRemito() {
         List<DatosDocumentacion> documentacion = new ArrayList<>();
         for (DetalleRemito detalle : detallesRemito) {
             documentacion.add(detalle.obtenerDocumentacion());
         }
-        return new DatosRemito(obtenerNumero(), documentacion);
+        return documentacion;
     }
 
     /**
