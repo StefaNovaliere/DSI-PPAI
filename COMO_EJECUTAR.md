@@ -190,6 +190,22 @@ El detalle del diseño y de dónde interviene el patrón está en el [README](RE
 
 ---
 
+## Actualizar a una versión nueva
+
+- **Si lo bajaste como ZIP:** borrá la carpeta anterior y extraé el ZIP nuevo. **No lo
+  extraigas encima**, porque quedan archivos viejos que ya no compilan. En PowerShell:
+  ```powershell
+  cd $HOME\Documents
+  Remove-Item -Recurse -Force .\DSI-PPAI-claude-nice-ramanujan-nzbzys
+  Expand-Archive "$HOME\Downloads\DSI-PPAI-claude-nice-ramanujan-nzbzys.zip" -DestinationPath $HOME\Documents
+  ```
+  (Si en Descargas hay varios ZIP con el mismo nombre, el más nuevo puede terminar en `(1).zip`.)
+- **Si lo clonaste con Git:** `git pull`.
+
+Después, volver a ejecutar con `ejecutar-desde-cero.bat`.
+
+---
+
 ## Problemas frecuentes
 
 | Mensaje / síntoma | Causa | Solución |
@@ -200,6 +216,7 @@ El detalle del diseño y de dónde interviene el patrón está en el [README](RE
 | `git : El término 'git' no se reconoce…` | Git no está instalado | Usá la Opción A (ZIP) o `winget install Git.Git` |
 | `Unable to access jarfile target\ppai-bolsines-g10-1.0.0.jar` | No se compiló, o la compilación falló | Correr `.\mvnw.cmd package` y esperar `BUILD SUCCESS` |
 | La compilación falla con errores de descarga / `Could not resolve` | Sin Internet (la primera vez es necesaria) | Conectarse a Internet y volver a compilar |
+| Errores de compilación en archivos que no existen en GitHub (por ejemplo `DemostracionPatronState.java`) | Se descomprimió una versión nueva **encima** de la anterior: Windows no borra los archivos que se eliminaron | Borrar la carpeta del proyecto y extraer el ZIP nuevo en una carpeta limpia (ver "Actualizar a una versión nueva") |
 | `UnsupportedClassVersionError` | La versión de Java es menor a 17 | Instalar Java 21 (Paso 1) |
 | La lista de bolsines aparece vacía | Ya se recibieron el 101 y el 102 (los cambios quedan guardados) | Usar `ejecutar-desde-cero.bat` o `--reiniciar-datos` |
 | "Windows protegió su PC" al abrir el `.bat` | Protección de Windows para archivos descargados | **Más información → Ejecutar de todas formas** |
