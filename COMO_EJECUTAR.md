@@ -115,7 +115,7 @@ la prueba) hacé doble clic en **`ejecutar-desde-cero.bat`**.
    ```powershell
    .\mvnw.cmd package
    ```
-   Esto además corre las 17 pruebas automáticas.
+   Esto además corre las 16 pruebas automáticas.
 3. Ejecutá:
    ```powershell
    java -jar target\ppai-bolsines-g10-1.0.0.jar
@@ -150,51 +150,41 @@ bolsines enviados a CM Córdoba pendientes de recepción: **101** (desde CM Rosa
 
 > Empezá con `ejecutar-desde-cero.bat` para que los datos estén en su estado inicial.
 
-### Flujo principal (pestaña "Registrar recepción de bolsín")
+### Flujo principal
 
-1. Botón **Registrar recepción de bolsín** (arriba a la derecha).
-   → Aparecen los bolsines **101** y **102** en la sección 1.
-2. Seleccioná el **101** y apretá **Seleccionar bolsín**.
-   → En la sección 2 aparecen sus 2 remitos con 3 documentos: dos en `EnBolsinEnviado`
-   (celeste) y uno en `ParaRedirigir` (naranja).
-3. En la sección 3 dejá marcada **"Todo remito y documentación coincide con lo
-   registrado"** y apretá **Registrar recepción**.
-4. En el diálogo, apretá **Confirmar**.
-   → Aparece un cartel con el cambio de estado de cada documento, por ejemplo
-   `Doc 1003: ParaRedirigir → Recibida&Aceptada`, y en "Mensajes" el mail simulado del CU 29.
-   Los 3 documentos quedan en verde (`Recibida&Aceptada`).
+1. En el menú, elegí **Registrar recepción de bolsín**.
+   → A la izquierda aparecen los bolsines por recibir: **101** y **102**.
+2. Hacé clic en el **101**.
+   → A la derecha aparece su contenido: 2 remitos con 3 documentos, dos **En bolsín
+   enviado** (celeste) y uno **Para redirigir** (naranja).
+3. Apretá **Confirmar recepción** y, en el diálogo, **Registrar recepción**.
+   → Arriba aparece un aviso verde: *"Se registró la recepción del bolsín N° 101. Sus 3
+   documentos quedaron en estado «Recibida y aceptada»"* y que se envió la notificación por
+   correo (CU 29). Los 3 documentos quedan en verde y el 101 desaparece de la lista.
 
-![Resultado esperado](docs/capturas/7_dialogo_cambios.png)
+![Resultado esperado](docs/capturas/05_recepcion_registrada.png)
 
 ### Flujos alternativos
 
 | Flujo | Cómo probarlo | Resultado esperado |
 |-------|---------------|--------------------|
-| **A2 – Cancelar** | Registrar recepción → bolsín **102** → Seleccionar → Registrar recepción → **Cancelar** | "Operación cancelada". Los estados no cambian (siguen en celeste). |
-| **A3 – Hay diferencias** | Registrar recepción → **102** → Seleccionar → marcar **"Hay diferencias con lo registrado"** → Registrar recepción | Informa que corresponde el CU 31 y termina sin cambios. |
-| **A1 – No hay bolsines** | Recibir el 101 y el 102 (flujo principal) y volver a apretar **Registrar recepción de bolsín** | "No hay bolsines enviados pendientes de recepción". |
+| **A2 – No confirmar** | Clic en el **102** → **Confirmar recepción** → **Volver** | Aviso: *"No se registró la recepción del bolsín N° 102: la operación fue cancelada"*. Los estados no cambian y el 102 sigue en la lista. |
+| **A3 – Hay diferencias** | Clic en el **102** → **Informar diferencias** | Aviso: la recepción no se registra y corresponde el CU 31. Nada cambia. |
+| **A1 – No hay bolsines** | Recibir el 101 y el 102 (flujo principal) | Aviso *"No hay bolsines enviados pendientes de recepción"* y la lista queda vacía. |
 
 ### Verificar que se guardó en la base de datos
 
 1. Cerrá la aplicación y volvé a abrirla con **`ejecutar.bat`** (no el "desde cero").
-2. Registrar recepción de bolsín → el **101 ya no aparece**: la recepción quedó guardada en
-   `bolsines.db`.
+2. Menú → Registrar recepción de bolsín → el **101 ya no aparece**: la recepción quedó
+   guardada en `bolsines.db`.
 
-### Ver el patrón State
+### Dónde está el patrón State
 
-- Pestaña **"Historial de estados"**: elegí el bolsín **101** en el filtro. Cada documento
-  tiene su historial de `CambioEstadoDocumentacion`; el último (**ACTUAL**) es
-  `Recibida&Aceptada`, con responsable *Pérez, Ana*.
-- Pestaña **"Probar el patrón State"**: elegí una documentación y apretá los botones de
-  eventos. En "Qué pasó" se ve qué objeto estado resolvió cada evento (**OK**) o lo rechazó
-  (**RECHAZADO**). Por ejemplo, `recibir()` sobre la 1001 da OK y, si se repite, lo rechaza
-  `RecibidaYAceptada`. Esta pestaña trabaja sobre una copia en memoria: no toca la base.
-  - Con **"Ver máquina de estados"** se abre el diagrama del análisis para seguir el recorrido.
-  - Para llegar a los otros estados, usar los eventos del CU 31. Por ejemplo, sobre la 1002:
-    `marcarParaRedirigir()` → `rechazar()` → `darDeBaja()` recorre
-    EnBolsinEnviado → ParaRedirigir → Recibida&Rechazada → DeBaja.
-  - Sobre la 1004: `registrarNoRecibida()` → `registrar()` recorre
-    EnBolsinEnviado → NoRecibida → Registrada.
+El patrón no se ve en la pantalla: es una decisión de diseño interno. Se refleja en que el
+bolsín 101 trae documentación en **dos estados distintos** y las dos se reciben
+correctamente con la misma operación `recibir()`, cada una resuelta por su propio objeto
+estado. En el código, ver `Documentacion.recibir()`, `EnBolsinEnviado.recibir()` y
+`ParaRedirigir.recibir()`; y en las pruebas, `EstadoDocumentacionTest`.
 
 El detalle del diseño y de dónde interviene el patrón está en el [README](README.md#7-patrón-state).
 

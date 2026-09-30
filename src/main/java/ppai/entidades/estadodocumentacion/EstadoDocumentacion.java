@@ -9,68 +9,36 @@ import ppai.entidades.Empleado;
 /**
  * Patrón State - rol ESTADO ABSTRACTO.
  *
- * <p>Declara un método por cada evento de la máquina de estados de
- * Documentación. La implementación por defecto rechaza el evento: cada estado
- * concreto redefine sólo las transiciones que salen de él.
+ * <p>Declara el evento de la máquina de estados que usa el CU 28:
+ * {@link #recibir}. Por defecto un estado NO puede recibir la documentación;
+ * sólo lo redefinen los estados concretos desde los que la máquina de estados
+ * tiene esa transición (EnBolsinEnviado y ParaRedirigir).
  */
 public abstract class EstadoDocumentacion {
 
     private final String nombre;
+    private final String descripcion;
 
-    protected EstadoDocumentacion(String nombre) {
+    /**
+     * @param nombre      nombre del estado en la máquina de estados (se guarda en la base)
+     * @param descripcion texto para mostrarle al usuario
+     */
+    protected EstadoDocumentacion(String nombre, String descripcion) {
         this.nombre = nombre;
+        this.descripcion = descripcion;
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    public void remitar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("remitar");
+    public String getDescripcion() {
+        return descripcion;
     }
 
-    public void cancelarRemito(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("cancelar el remito de");
-    }
-
-    public void agregarAlBolsin(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("agregar al bolsín");
-    }
-
-    public void enviar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("enviar");
-    }
-
+    /** CU 28 Registrar Recepción de Bolsín. */
     public void recibir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("recibir");
-    }
-
-    /** CU 31: la documentación no llegó o no coincide con lo registrado. */
-    public void registrarNoRecibida(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("registrar como no recibida");
-    }
-
-    /** CU 31: la documentación debe redirigirse a otra CM. */
-    public void marcarParaRedirigir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("marcar para redirigir");
-    }
-
-    /** CU 31: la documentación se recibe pero se rechaza. */
-    public void rechazar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("rechazar");
-    }
-
-    public void registrar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("registrar");
-    }
-
-    public void darDeBaja(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        throw transicionInvalida("dar de baja");
-    }
-
-    /** Un estado final no tiene transiciones de salida. */
-    public boolean esFinal() {
-        return false;
+        throw new IllegalStateException("No se puede recibir una documentación en estado " + descripcion);
     }
 
     /**
@@ -99,11 +67,6 @@ public abstract class EstadoDocumentacion {
     protected CambioEstadoDocumentacion crearCambioEstado(EstadoDocumentacion estado, LocalDateTime fechaHora,
                                                           Empleado responsable) {
         return new CambioEstadoDocumentacion(fechaHora, estado, responsable);
-    }
-
-    private IllegalStateException transicionInvalida(String accion) {
-        return new IllegalStateException(
-                "No se puede " + accion + " una documentación en estado " + nombre);
     }
 
     @Override

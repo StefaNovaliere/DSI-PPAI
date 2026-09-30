@@ -40,61 +40,67 @@ CM Córdoba (101 y 102), uno enviado a otra CM (103) y uno ya recibido (104); es
 
 ## 3. Flujos del caso de uso implementados
 
-**Flujo principal:** el empleado elige "Registrar recepción de bolsín". El sistema muestra
-la CM del usuario y los bolsines enviados a ella (N° bolsín, precinto, CM origen). El
-empleado selecciona un bolsín y el sistema muestra sus remitos y documentación. El empleado
-elige la opción "todo coincide con lo registrado" y confirma. El sistema:
+Se implementa **sólo el CU 28**. Los casos de uso relacionados (CU 29, incluido; CU 31, al
+que deriva la opción "hay diferencias") se invocan o se mencionan, pero no se implementan.
+
+**Flujo principal:** el empleado elige "Registrar recepción de bolsín" en el menú. El
+sistema muestra la CM del usuario y los bolsines enviados a ella que todavía no se
+recibieron (N° bolsín, precinto, CM origen). El empleado selecciona el bolsín que llegó y el
+sistema muestra sus remitos y documentación. El empleado elige "Confirmar recepción" (todo
+coincide con lo registrado) y confirma. El sistema:
 
 1. registra el bolsín como RecibidoEnCMDestino;
 2. registra los remitos como RecibidoYAceptado;
-3. pasa la documentación a Recibida&Aceptada (patrón State);
+3. pasa cada documentación a Recibida&Aceptada (patrón State);
 4. guarda todo en la base en una transacción;
-5. notifica por mail (CU 29, simulado) y finaliza.
+5. llama al CU 29 para notificar por correo (simulado) y finaliza.
 
 **Flujos alternativos:**
 
 | # | Situación | Qué hace el sistema |
 |---|-----------|---------------------|
-| A1 | No hay bolsines enviados pendientes para la CM del usuario | Informa que no hay bolsines y finaliza el CU (se ve después de recibir el 101 y el 102) |
-| A2 | El empleado no confirma la recepción | Informa que se canceló; no cambia ningún estado ni se guarda nada |
-| A3 | El empleado indica que hay diferencias con lo registrado | Informa que corresponde el CU 31 Registrar Revisión de Documentación y finaliza |
-| A4 | Falla al registrar (por ejemplo, un evento inválido para el estado de una documentación) | Deshace la transacción (rollback), informa el error y no se guarda ningún cambio |
+| A1 | No hay bolsines enviados pendientes para la CM del usuario | Informa que no hay bolsines y finaliza (se ve después de recibir el 101 y el 102) |
+| A2 | El empleado no confirma la recepción ("Volver" en la confirmación) | Informa que no se registró; no cambia ningún estado ni se guarda nada |
+| A3 | El empleado indica que hay diferencias con lo registrado ("Informar diferencias") | Informa que la recepción no se registra y que corresponde el CU 31 Registrar Revisión de Documentación |
+| A4 | Falla al registrar (por ejemplo, una documentación en un estado que no admite la recepción) | Deshace la transacción (rollback), informa el error y no se guarda ningún cambio |
 
 ## 4. Capturas
 
-La ventana tiene tres pestañas:
-
-1. **Registrar recepción de bolsín**: el caso de uso.
-2. **Historial de estados**: los `CambioEstadoDocumentacion` guardados en la base, filtrables por bolsín.
-3. **Probar el patrón State**: herramienta para la defensa. Le aplica cualquier evento a cualquier documentación, sobre una copia en memoria que no toca la base.
-
-| Selección de bolsín y documentación | Confirmación |
+| Menú principal | Bolsines por recibir |
 |---|---|
-| ![](docs/capturas/2_documentacion.png) | ![](docs/capturas/3_confirmacion.png) |
-| **Cambios de estado al registrar la recepción** | **Historial de estados del bolsín 101** |
-| ![](docs/capturas/7_dialogo_cambios.png) | ![](docs/capturas/8_historial_filtrado.png) |
-| **Probar el patrón State (todas las transiciones, incluidas las del CU 31)** | **Flujo alternativo A2: cancelación** |
-| ![](docs/capturas/10_demo_cu31.png) | ![](docs/capturas/6_alternativo_cancelacion.png) |
+| ![](docs/capturas/01_menu.png) | ![](docs/capturas/02_lista_bolsines.png) |
+| **Contenido del bolsín seleccionado** | **Confirmación** |
+| ![](docs/capturas/03_detalle_bolsin.png) | ![](docs/capturas/04_confirmacion.png) |
+| **Recepción registrada** | **A3: hay diferencias** |
+| ![](docs/capturas/05_recepcion_registrada.png) | ![](docs/capturas/06_diferencias.png) |
+| **A2: el usuario no confirma** | **A1: no quedan bolsines por recibir** |
+| ![](docs/capturas/07_cancelacion.png) | ![](docs/capturas/08_sin_bolsines.png) |
 
 ## 5. Arquitectura (capas)
 
 | Capa | Paquete | Clases |
 |------|---------|--------|
-| Herramientas de la defensa (fuera del CU) | `ppai` | `VisorHistorialEstados`, `DemostracionPatronState` |
-| Interfaz (boundary) | `ppai.boundary` | `PantallaRecepcionBolsin` (interfaz), `PantallaGraficaRecepcionBolsin` (Swing), `PantallaConsolaRecepcionBolsin` |
-| Control | `ppai.control` | `GestorRecepcionBolsin`, `GestorNotificacionCU29` |
-| Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Estado`, `Empleado`, `Sesion`, `ComisionMedica`, `TipoDocumento` |
+| Interfaz (boundary) | `ppai.boundary` | `PantallaRecepcionBolsin` (interfaz), `PantallaGraficaRecepcionBolsin` (Swing), `PantallaConsolaRecepcionBolsin`, `PantallaPrincipal` (menú) |
+| Control | `ppai.control` | `GestorRecepcionBolsin`, `GestorNotificacionCU29` (CU incluido, simulado) |
+| Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Estado`, `Empleado`, `Usuario`, `Sesion`, `ComisionMedica`, `TipoDocumento` |
 | Patrón State | `ppai.entidades.estadodocumentacion` | `EstadoDocumentacion` + 9 estados concretos |
 | Persistencia | `ppai.persistencia` | `Repositorio` (esquema de persistencia), `RepositorioJPA` (SQLite + Hibernate), `ConversorEstadoDocumentacion`, `DatosDePrueba`, `RepositorioEnMemoria` (sólo pruebas) |
 | Configuración JPA | `src/main/resources/META-INF` | `persistence.xml` |
 
 Los nombres de clases y métodos respetan el diagrama de clases y el de secuencia del
-análisis (`registrarNuevoRecBolsin`, `buscarCMUsuarioLogged`, `buscarBolsinesEnviadosCM`,
-`buscarCMOrigenBolsines`, `tomarSeleccionBolsin`, `buscarInformacionRemito`,
-`tomarSeleccionPrimerOpcion`, `tomarConfirmacion`, `getFechaYHoraActual`,
-`buscarEstadoRecibidoEnCMDestino`, `recibirBolsin`, `recibirYAceptarRemito`,
-`recibirYAceptar`, `actualizarEstadoDoc`, `recibir`, `buscarInformacionDocumentacion`,
-`buscarCorreoCM`, `llamarCU29`, `finCU`, etc.).
+análisis (`opcRegistrarRecBolsin`, `registrarNuevoRecBolsin`, `buscarCMUsuarioLogged`,
+`buscarBolsinesEnviadosCM`, `buscarCMOrigenBolsines`, `solicitarSelBolsin`,
+`tomarSeleccionBolsin`, `buscarInformacionRemito`, `solicitarSelOpcionesRecBolsin`,
+`tomarSeleccionPrimerOpcion`, `solicitarConfirmacion`, `tomarConfirmacion`,
+`getFechaYHoraActual`, `buscarEstadoRecibidoEnCMDestino`, `recibirBolsin`,
+`recibirYAceptarRemito`, `recibirYAceptar`, `actualizarEstadoDoc`, `recibir`,
+`buscarInformacionDocumentacion`, `buscarCorreoCM`, `llamarCU29`, `finCU`).
+
+En la pantalla gráfica, cada acción del usuario dispara el mensaje correspondiente hacia el
+gestor: elegir la opción del menú → `registrarNuevoRecBolsin()`; hacer clic en un bolsín de
+la lista → `tomarSeleccionBolsin()`; "Confirmar recepción" → `tomarSeleccionPrimerOpcion()`;
+"Informar diferencias" → `tomarSeleccionSegundaOpcion()`; el diálogo de confirmación →
+`tomarConfirmacion()`.
 
 El gestor accede a los objetos persistentes sólo a través de la interfaz `Repositorio`
 (esquema de persistencia). Por eso el mismo gestor funciona con la base SQLite
@@ -103,18 +109,18 @@ El gestor accede a los objetos persistentes sólo a través de la interfaz `Repo
 ## 6. Persistencia (SQLite + JPA/Hibernate)
 
 - **Mapeo:** cada entidad tiene anotaciones JPA (`@Entity`, `@Id`, `@ManyToOne`,
-  `@OneToMany`). Hibernate crea las tablas (`bolsin`, `remito`, `detalle_remito`,
-  `documentacion`, `cambio_estado_documentacion`, `cambio_estado_bolsin`, `estado`,
-  `empleado`, `comision_medica`, `tipo_documento`, `sesion`).
+  `@OneToMany`, `@OneToOne`). Hibernate crea las tablas (`bolsin`, `remito`,
+  `detalle_remito`, `documentacion`, `cambio_estado_documentacion`, `cambio_estado_bolsin`,
+  `estado`, `empleado`, `usuario`, `sesion`, `comision_medica`, `tipo_documento`).
 - **Identidad de objeto:** cada entidad tiene un `id` autogenerado (clave primaria).
 - **Materialización y desmaterialización:** las hace Hibernate. Al guardar el bolsín, en
   cascada se guardan sus remitos, detalles, documentación y cambios de estado.
 - **Estados del patrón State:** los estados concretos no tienen atributos, así que no
   tienen tabla propia. `ConversorEstadoDocumentacion` guarda en la columna `estado` de
   `cambio_estado_documentacion` el nombre del estado y, al leer, crea el objeto del estado
-  concreto. El `estadoActual` de `Documentacion` no se guarda como columna: se reconstruye
-  desde el cambio de estado vigente con `@PostLoad`, para que nunca pueda quedar
-  inconsistente con el historial.
+  concreto. El `estadoActual` de `Documentacion` no se guarda como columna: se obtiene del
+  cambio de estado vigente con `@PostLoad`, para que nunca pueda quedar inconsistente con el
+  historial.
 - **Transacciones:** la recepción se registra entre `iniciarTransaccion()` y
   `confirmarTransaccion()` (commit). Si algo falla, `deshacerTransaccion()` hace rollback.
 - **Materialización perezosa:** las colecciones (`@OneToMany`) se cargan bajo demanda.
@@ -123,32 +129,35 @@ El gestor accede a los objetos persistentes sólo a través de la interfaz `Repo
 
 Participantes (según la plantilla de la cátedra):
 
-- **Contexto: `Documentacion`.** Conoce su `estadoActual` y **delega** cada evento de su
-  máquina de estados: `remitar`, `cancelarRemito`, `agregarAlBolsin`, `enviar`, `recibir`
-  (CU 28), `registrarNoRecibida`, `marcarParaRedirigir` y `rechazar` (CU 31), `registrar` y
-  `darDeBaja`.
-- **Estado abstracto: `EstadoDocumentacion`.** Declara un método por evento. Por defecto
-  lanza `IllegalStateException` (transición inválida). Además tiene los pasos comunes de
-  toda transición: cerrar el `CambioEstadoDocumentacion` actual, crear el nuevo y hacer
-  `setEstado` en el contexto.
-- **Estados concretos:** `Registrada`, `EnRemito`, `EnBolsinSaliente`, `EnBolsinEnviado`,
-  `ParaRedirigir`, `NoRecibida`, `RecibidaYAceptada`, `RecibidaYRechazada`, `DeBaja`.
-  Cada uno redefine sólo las transiciones que salen de él en la máquina de estados.
+- **Contexto: `Documentacion`.** Conoce su `estadoActual` y le **delega** el evento del CU 28,
+  `recibir()`.
+- **Estado abstracto: `EstadoDocumentacion`.** Declara `recibir()`; por defecto lo rechaza
+  (lanza `IllegalStateException`). Además tiene los pasos comunes de toda transición: cerrar
+  el `CambioEstadoDocumentacion` actual, crear el nuevo y hacer `setEstado` en el contexto.
+- **Estados concretos:** los 9 estados de la máquina de estados (`Registrada`, `EnRemito`,
+  `EnBolsinSaliente`, `EnBolsinEnviado`, `ParaRedirigir`, `NoRecibida`, `RecibidaYAceptada`,
+  `RecibidaYRechazada`, `DeBaja`). Todos existen porque una documentación puede estar en
+  cualquiera de ellos, pero **sólo `EnBolsinEnviado` y `ParaRedirigir` redefinen `recibir()`**:
+  son las dos transiciones del CU 28 en la máquina de estados. Los demás heredan el rechazo.
 
 ```mermaid
 classDiagram
     class Documentacion {
         -estadoActual: EstadoDocumentacion
         +recibir(fechaHora, responsable)
-        +remitar(...) / enviar(...) / ...
         +setEstado(estado)
         +agregarCambioEstado(ce)
     }
     class EstadoDocumentacion {
         <<abstract>>
         +recibir(doc, fechaHora, responsable)
-        +remitar(...) / enviar(...) / ...
         #cambiarEstado(doc, proximo, fechaHora, responsable)
+    }
+    class EnBolsinEnviado {
+        +recibir(doc, fechaHora, responsable)
+    }
+    class ParaRedirigir {
+        +recibir(doc, fechaHora, responsable)
     }
     class CambioEstadoDocumentacion {
         -fechaHoraInicio
@@ -159,16 +168,19 @@ classDiagram
     Documentacion --> EstadoDocumentacion : estadoActual
     Documentacion --> "1..*" CambioEstadoDocumentacion : cambioEstado
     CambioEstadoDocumentacion --> EstadoDocumentacion : estado
+    EstadoDocumentacion <|-- EnBolsinEnviado
+    EstadoDocumentacion <|-- ParaRedirigir
+    EstadoDocumentacion <|-- RecibidaYAceptada
     EstadoDocumentacion <|-- Registrada
     EstadoDocumentacion <|-- EnRemito
     EstadoDocumentacion <|-- EnBolsinSaliente
-    EstadoDocumentacion <|-- EnBolsinEnviado
-    EstadoDocumentacion <|-- ParaRedirigir
     EstadoDocumentacion <|-- NoRecibida
-    EstadoDocumentacion <|-- RecibidaYAceptada
     EstadoDocumentacion <|-- RecibidaYRechazada
     EstadoDocumentacion <|-- DeBaja
 ```
+
+La máquina de estados de Documentación del análisis está en
+[`docs/maquina_estados_documentacion.png`](docs/maquina_estados_documentacion.png).
 
 ### Dinámica en el CU 28
 
@@ -193,67 +205,75 @@ GestorRecepcionBolsin.tomarConfirmacion()
   `EstadoDocumentacion`.
 - Una documentación en `ParaRedirigir` también se recibe correctamente, sin agregar
   ningún `if` (las dos transiciones del CU 28 de la máquina de estados).
-- Un evento inválido para el estado actual, por ejemplo recibir una documentación
-  `Registrada`, se rechaza con una excepción en lugar de dejar un estado inconsistente.
+- Si una documentación está en un estado que no admite la recepción, el objeto estado la
+  rechaza y la transacción se deshace, en lugar de dejar datos inconsistentes.
+
+### Correcciones de la Entrega 1
+
+- **Clase `Usuario`:** `Sesion` conoce al `Usuario` logueado y cada `Empleado` conoce su
+  `Usuario`. El gestor hace `sesion.getUsuario()` y busca el empleado con
+  `*esTuUsuario(usuario)`, como en el diagrama de secuencia.
+- **Llamada al CU incluido:** `llamarCU29()` le pasa el control al gestor del CU 29
+  (`GestorNotificacionCU29.notificarRecepcion(...)`), con el correo y la documentación
+  recibida.
 
 ### Cómo mostrar el patrón en la defensa
 
-**¿Dónde interviene State?** No en el historial, que es sólo el resultado. Interviene en la
-lógica: el gestor le dice a cada documentación `recibir()` sin preguntar en qué estado está,
-y la documentación delega en su objeto estado. La clase de ese objeto decide si hay
-transición y cuál es el estado siguiente.
+El patrón no se "ve" en la pantalla: es una decisión de diseño interno, y se refleja en el
+comportamiento y en el código.
 
-1. **Pestaña "Registrar recepción de bolsín"**, bolsín 101. Trae documentación en dos
-   estados distintos (`EnBolsinEnviado` y `ParaRedirigir`). El mismo `recibir()` lo resuelven
-   dos clases distintas, y el diálogo final muestra cada transición.
+1. **Comportamiento:** el bolsín 101 trae documentación en dos estados distintos
+   (`En bolsín enviado` y `Para redirigir`). Al confirmar la recepción, el gestor le pide a
+   cada una `recibir()` sin preguntar en qué estado está, y las dos quedan
+   `Recibida y aceptada`, cada una resuelta por su propio objeto estado.
 2. **Código:** `Documentacion.recibir()` sólo hace `estadoActual.recibir(this, ...)`.
-   `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()` hacen la transición. `Registrada`
-   no redefine `recibir()`, así que hereda el rechazo de `EstadoDocumentacion`.
-3. **Pestaña "Probar el patrón State"**: elegir una documentación y apretar el mismo botón
-   en distintos estados. Por ejemplo, `recibir()` sobre la 1001 pasa a Recibida&Aceptada; si
-   se aprieta otra vez, `RecibidaYAceptada` lo rechaza. Con "Nueva documentación" se crea
-   una en `Registrada` y se puede recorrer toda la máquina de estados: `remitar()` →
-   `agregarAlBolsin()` → `enviar()` → `recibir()`. Con los eventos del CU 31 se llega a
-   `NoRecibida`, `ParaRedirigir`, `Recibida&Rechazada` y `DeBaja`. El botón **"Ver máquina de
-   estados"** muestra el diagrama del análisis para seguir el recorrido.
-4. **Pestaña "Historial de estados"**: muestra los `CambioEstadoDocumentacion` que crearon los
-   estados concretos, tal como quedaron en la base.
+   `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()` hacen la transición; los demás
+   estados heredan el rechazo de `EstadoDocumentacion`. En todo el sistema no hay ningún
+   `if` o `switch` que pregunte por el estado de la documentación.
+3. **Pruebas:** `EstadoDocumentacionTest` recibe la documentación desde cada uno de los 9
+   estados: desde `EnBolsinEnviado` y `ParaRedirigir` pasa a `Recibida y aceptada`; desde los
+   otros 7, se rechaza y el historial no cambia.
 
 ## 8. Diseño de la interfaz de usuario
 
 Patrones y criterios de diseño de GUI aplicados en `PantallaGraficaRecepcionBolsin`:
 
-- **Asistente por pasos:** secciones numeradas 1 → 2 → 3 que siguen el orden del caso de
-  uso; sólo está habilitado el control del paso actual (**prevención de errores**).
-- **Confirmación antes de una acción que modifica datos:** diálogo "Confirmar / Cancelar".
-- **Retroalimentación inmediata:** el área de Mensajes informa el resultado, los errores y
-  el mail enviado (CU 29). La columna Estado se actualiza al registrar la recepción.
-- **Codificación por color de estados:** EnBolsinEnviado (celeste), ParaRedirigir
-  (naranja), Recibida&Aceptada (verde).
-- **Visibilidad del contexto:** siempre se ve la CM del usuario logueado.
+- **Menú de tareas como punto de entrada:** la opción "Registrar recepción de bolsín" es el
+  `opcRegistrarRecBolsin()` del caso de uso.
+- **Maestro-detalle:** a la izquierda, los bolsines por recibir; al hacer clic en uno, a la
+  derecha aparecen sus remitos y documentos. No hay botones intermedios.
+- **Acciones con verbos del negocio:** "Confirmar recepción" (acción principal) e "Informar
+  diferencias". Sólo están habilitadas cuando hay un bolsín seleccionado (**prevención de
+  errores**).
+- **Confirmación con resumen** antes de modificar datos: qué bolsín, con cuántos remitos y
+  documentos.
+- **Retroalimentación en el contexto:** un aviso arriba informa el resultado (éxito, cancelación,
+  diferencias, error) y la columna Estado se actualiza. Al terminar, la lista se refresca
+  (el bolsín recibido desaparece) y se puede seguir con el próximo sin volver al menú.
+- **Estados legibles y codificados por color:** "En bolsín enviado" (celeste), "Para
+  redirigir" (naranja), "Recibida y aceptada" (verde).
+- **Estado vacío explícito:** cuando no quedan bolsines, la lista lo indica.
+- **Visibilidad del contexto:** siempre se ven el usuario logueado y la CM.
 
 El diseño de experiencia de usuario (mapas de empatía, journey, modo board) lo aporta el
 grupo a partir de las actividades de descubrimiento hechas en el aula.
 
 ## 9. Pruebas
 
-`mvn test` ejecuta 17 pruebas:
+`mvn test` ejecuta 16 pruebas:
 
-- `EstadoDocumentacionTest`: la máquina de estados completa, incluidas las transiciones
-  inválidas.
-- `RegistrarRecepcionBolsinTest`: el flujo principal y los alternativos, en memoria.
+- `EstadoDocumentacionTest`: el evento `recibir()` desde cada estado de la documentación
+  (patrón State).
+- `RegistrarRecepcionBolsinTest`: el flujo principal y los alternativos, con datos en memoria.
 - `RepositorioJPATest`: guarda en SQLite, vuelve a abrir la base y verifica los estados;
   también verifica que al cancelar no se guarda nada.
 
 ## 10. Alcance
 
+- Se implementa **sólo el CU 28**. El CU 29 (notificación por correo) se invoca como caso
+  de uso incluido y su envío se simula. La opción "Informar diferencias" termina el CU 28
+  indicando que corresponde el CU 31, que no se implementa.
+- La documentación de prueba se carga con su historial de estados, como si la hubieran
+  registrado y enviado los casos de uso anteriores (CU 7, 15, 19, 27).
 - `Bolsin` y `Remito` mantienen la entidad `Estado` con ámbito, tal como en el análisis,
-  porque la entrega sólo modela la máquina de estados de Documentación. Si se modelan sus
-  máquinas de estados, se les puede aplicar State de la misma forma.
-- **La máquina de estados de Documentación está completa**, incluidas las transiciones
-  del CU 31. En el diagrama son `recibir()` con distintas guardas; en el diseño cada guarda es
-  un evento propio (`registrarNoRecibida`, `marcarParaRedirigir`, `rechazar`), así ningún estado
-  necesita un `if` para evaluarla. Se pueden probar todas en la pestaña "Probar el patrón
-  State". Lo que no se implementa es la **pantalla y el gestor del CU 31**: en el CU 28, la
-  opción "Hay diferencias con lo registrado" informa que corresponde el CU 31.
-- El CU 29 (notificación por correo) se simula mostrando el mail en el área de Mensajes o en la consola.
+  porque la entrega sólo modela la máquina de estados de Documentación.

@@ -6,11 +6,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 /**
- * Empleado de una Comisión Médica. Es el usuario del sistema y el responsable
- * de cada cambio de estado.
+ * Empleado de una Comisión Médica. Opera el sistema con su Usuario y es el
+ * responsable de cada cambio de estado.
  */
 @Entity
 @Table(name = "empleado")
@@ -23,7 +24,9 @@ public class Empleado {
     private String apellido;
     private String nombre;
     private String mail;
-    private String usuario;
+    @OneToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
     @ManyToOne
     @JoinColumn(name = "comision_medica_id")
     private ComisionMedica comisionMedica;
@@ -32,7 +35,7 @@ public class Empleado {
         // Requerido por JPA
     }
 
-    public Empleado(String apellido, String nombre, String mail, String usuario, ComisionMedica comisionMedica) {
+    public Empleado(String apellido, String nombre, String mail, Usuario usuario, ComisionMedica comisionMedica) {
         this.apellido = apellido;
         this.nombre = nombre;
         this.mail = mail;
@@ -40,8 +43,9 @@ public class Empleado {
         this.comisionMedica = comisionMedica;
     }
 
-    public boolean esTuUsuario(String usuario) {
-        return this.usuario.equals(usuario);
+    /** Indica si el usuario recibido es el del empleado. */
+    public boolean esTuUsuario(Usuario usuario) {
+        return this.usuario == usuario;
     }
 
     /** Devuelve la Comisión Médica en la que trabaja el empleado. */

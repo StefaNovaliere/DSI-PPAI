@@ -35,7 +35,7 @@ class RepositorioJPATest {
     private void ejecutarCU(RepositorioJPA repositorio, String entradaUsuario) {
         PrintStream out = new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8);
         PantallaRecepcionBolsin pantalla = new PantallaConsolaRecepcionBolsin(new Scanner(entradaUsuario), out);
-        GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio, new GestorNotificacionCU29(out));
+        GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio, new GestorNotificacionCU29(out::println));
         pantalla.setGestor(gestor);
         pantalla.opcRegistrarRecBolsin();
     }
@@ -49,7 +49,7 @@ class RepositorioJPATest {
         String archivo = carpeta.resolve("prueba.db").toString();
         try (RepositorioJPA repositorio = new RepositorioJPA(archivo, true)) {
             assertEquals(4, repositorio.getBolsines().size());
-            assertEquals("aperez", repositorio.getSesionActual().getUsuario());
+            assertEquals("aperez", repositorio.getSesionActual().getUsuario().getNombre());
             // El conversor materializa el objeto del estado concreto
             Documentacion redirigida = bolsin(repositorio, 101).getRemitos().get(1)
                     .getDetallesRemito().get(0).getDocumentacion();

@@ -9,7 +9,7 @@ import ppai.entidades.Empleado;
 public class ParaRedirigir extends EstadoDocumentacion {
 
     public ParaRedirigir() {
-        super("ParaRedirigir");
+        super("ParaRedirigir", "Para redirigir");
     }
 
     /**
@@ -19,11 +19,5 @@ public class ParaRedirigir extends EstadoDocumentacion {
     @Override
     public void recibir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
         cambiarEstado(documentacion, new RecibidaYAceptada(), fechaHora, responsable);
-    }
-
-    /** CU 31 [documentación correcta = False]: ParaRedirigir -> Recibida&amp;Rechazada. */
-    @Override
-    public void rechazar(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable) {
-        cambiarEstado(documentacion, new RecibidaYRechazada(), fechaHora, responsable);
     }
 }

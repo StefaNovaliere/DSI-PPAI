@@ -17,6 +17,7 @@ import ppai.entidades.Estado;
 import ppai.entidades.Remito;
 import ppai.entidades.Sesion;
 import ppai.entidades.TipoDocumento;
+import ppai.entidades.Usuario;
 import ppai.entidades.estadodocumentacion.EnBolsinEnviado;
 import ppai.entidades.estadodocumentacion.EnBolsinSaliente;
 import ppai.entidades.estadodocumentacion.EnRemito;
@@ -32,6 +33,7 @@ public class DatosDePrueba {
 
     private final List<ComisionMedica> comisiones = new ArrayList<>();
     private final List<TipoDocumento> tiposDocumento = new ArrayList<>();
+    private final List<Usuario> usuarios = new ArrayList<>();
     private final List<Empleado> empleados = new ArrayList<>();
     private final List<Bolsin> bolsines = new ArrayList<>();
     private final List<Estado> estados = new ArrayList<>();
@@ -46,14 +48,20 @@ public class DatosDePrueba {
         comisiones.add(cmRosario);
         comisiones.add(cmMendoza);
 
-        // Empleados y sesión (el usuario logueado trabaja en CM Córdoba)
-        Empleado empCordoba = new Empleado("Pérez", "Ana", "ana.perez@cm.gob.ar", "aperez", cmCordoba);
-        Empleado empRosario = new Empleado("Gómez", "Juan", "juan.gomez@cm.gob.ar", "jgomez", cmRosario);
-        Empleado empMendoza = new Empleado("López", "Carla", "carla.lopez@cm.gob.ar", "clopez", cmMendoza);
+        // Usuarios, empleados y sesión (el usuario logueado trabaja en CM Córdoba)
+        Usuario aperez = new Usuario("aperez");
+        Usuario jgomez = new Usuario("jgomez");
+        Usuario clopez = new Usuario("clopez");
+        usuarios.add(aperez);
+        usuarios.add(jgomez);
+        usuarios.add(clopez);
+        Empleado empCordoba = new Empleado("Pérez", "Ana", "ana.perez@cm.gob.ar", aperez, cmCordoba);
+        Empleado empRosario = new Empleado("Gómez", "Juan", "juan.gomez@cm.gob.ar", jgomez, cmRosario);
+        Empleado empMendoza = new Empleado("López", "Carla", "carla.lopez@cm.gob.ar", clopez, cmMendoza);
         empleados.add(empCordoba);
         empleados.add(empRosario);
         empleados.add(empMendoza);
-        sesionActual = new Sesion(LocalDateTime.now(), "aperez");
+        sesionActual = new Sesion(LocalDateTime.now(), aperez);
 
         // Estados de Bolsín y Remito (Documentación usa el patrón State)
         Estado bolsinGenerado = new Estado(Estado.AMBITO_BOLSIN, "Generado", "Bolsín armado en la CM origen");
@@ -106,41 +114,40 @@ public class DatosDePrueba {
                 bolsinGenerado, bolsinEnviado, bolsinRecibido, r8001));
     }
 
-    /**
-     * Crea la documentación y la lleva hasta EnBolsinEnviado disparando los
-     * eventos de la máquina de estados (CU 7, 15, 19 y 27).
-     */
+    /** Documentación que viaja en un bolsín enviado: su estado actual es EnBolsinEnviado. */
     private Documentacion documentacionEnviada(int numero, String asunto, TipoDocumento tipo,
                                                LocalDateTime t0, Empleado responsable) {
-        Documentacion documentacion = new Documentacion(numero, asunto, t0.toLocalDate(), tipo, t0, responsable);
-        documentacion.remitar(t0.plusHours(1), responsable);
-        documentacion.agregarAlBolsin(t0.plusHours(2), responsable);
-        documentacion.enviar(t0.plusDays(1), responsable);
-        return documentacion;
+        return documentacion(numero, asunto, tipo, t0.minusDays(2), responsable,
+                new Registrada(), new EnRemito(), new EnBolsinSaliente(), new EnBolsinEnviado());
     }
 
     /**
-     * Materializa una documentación que ya está en ParaRedirigir (resultado
-     * de un CU 31 en otra CM), reconstruyendo su historial de estados.
+     * Documentación que llegó por error a otra CM, se revisó allí (CU 31) y se
+     * reenvía a la CM correcta: su estado actual es ParaRedirigir.
      */
     private Documentacion documentacionParaRedirigir(int numero, String asunto, TipoDocumento tipo,
                                                      LocalDateTime t0, Empleado responsable) {
-        List<CambioEstadoDocumentacion> historial = new ArrayList<>();
-        historial.add(cambioEstado(new Registrada(), t0.minusDays(10), t0.minusDays(9), responsable));
-        historial.add(cambioEstado(new EnRemito(), t0.minusDays(9), t0.minusDays(8), responsable));
-        historial.add(cambioEstado(new EnBolsinSaliente(), t0.minusDays(8), t0.minusDays(7), responsable));
-        historial.add(cambioEstado(new EnBolsinEnviado(), t0.minusDays(7), t0.minusDays(5), responsable));
-        historial.add(cambioEstado(new ParaRedirigir(), t0.minusDays(5), null, responsable));
-        return new Documentacion(numero, asunto, t0.minusDays(10).toLocalDate(), tipo, historial);
+        return documentacion(numero, asunto, tipo, t0.minusDays(10), responsable,
+                new Registrada(), new EnRemito(), new EnBolsinSaliente(), new EnBolsinEnviado(), new ParaRedirigir());
     }
 
-    private CambioEstadoDocumentacion cambioEstado(EstadoDocumentacion estado,
-                                                   LocalDateTime inicio, LocalDateTime fin, Empleado responsable) {
-        CambioEstadoDocumentacion cambioEstado = new CambioEstadoDocumentacion(inicio, estado, responsable);
-        if (fin != null) {
-            cambioEstado.setFechaHoraFin(fin);
+    /**
+     * Crea una documentación con su historial de estados, tal como la dejaron
+     * los casos de uso anteriores: cada estado dura un día y el último es el actual.
+     */
+    private Documentacion documentacion(int numero, String asunto, TipoDocumento tipo, LocalDateTime inicio,
+                                        Empleado responsable, EstadoDocumentacion... estados) {
+        List<CambioEstadoDocumentacion> historial = new ArrayList<>();
+        LocalDateTime desde = inicio;
+        for (int i = 0; i < estados.length; i++) {
+            CambioEstadoDocumentacion cambioEstado = new CambioEstadoDocumentacion(desde, estados[i], responsable);
+            desde = desde.plusDays(1);
+            if (i < estados.length - 1) {
+                cambioEstado.setFechaHoraFin(desde);
+            }
+            historial.add(cambioEstado);
         }
-        return cambioEstado;
+        return new Documentacion(numero, asunto, inicio.toLocalDate(), tipo, historial);
     }
 
     private Remito remito(int numero, LocalDateTime t0, ComisionMedica origen, ComisionMedica destino,
@@ -169,6 +176,10 @@ public class DatosDePrueba {
             bolsin.agregarCambioEstado(new CambioEstadoBolsin(t0.plusDays(2), recibido, responsable));
         }
         return bolsin;
+    }
+
+    public List<Usuario> getUsuarios() {
+        return Collections.unmodifiableList(usuarios);
     }
 
     public List<ComisionMedica> getComisiones() {

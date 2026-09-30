@@ -12,14 +12,16 @@ import ppai.entidades.Bolsin;
 import ppai.entidades.ComisionMedica;
 import ppai.entidades.Empleado;
 import ppai.entidades.Estado;
+import ppai.entidades.Usuario;
 import ppai.persistencia.Repositorio;
 
 /**
  * Controlador del CU 28 Registrar Recepción de Bolsín.
  *
- * <p>Con el patrón State el gestor ya no busca el estado Recibida&amp;Aceptada
- * de la documentación (se eliminó buscarEstadoRecibidaYAceptada() y su loop
- * sobre Estado): cada documentación resuelve su propia transición.
+ * <p>Con el patrón State el gestor no busca ni decide el estado siguiente de
+ * la documentación (se eliminó buscarEstadoRecibidaYAceptada() y su loop sobre
+ * Estado): le pide a cada documentación que se reciba y el objeto estado de
+ * esa documentación resuelve la transición.
  */
 public class GestorRecepcionBolsin {
 
@@ -65,7 +67,7 @@ public class GestorRecepcionBolsin {
     }
 
     private void buscarCMUsuarioLogged() {
-        String usuario = repositorio.getSesionActual().getUsuario();
+        Usuario usuario = repositorio.getSesionActual().getUsuario();
         empleadoLogueado = null;
         cmUsuario = null;
         for (Empleado empleado : repositorio.getEmpleados()) {
@@ -103,7 +105,8 @@ public class GestorRecepcionBolsin {
             }
         }
         if (bolsinSeleccionado == null) {
-            pantalla.mostrarMensaje("El bolsín N° " + numeroBolsin + " no está entre los bolsines enviados a su CM.");
+            pantalla.mostrarMensaje("El bolsín N° " + numeroBolsin + " no está entre los bolsines enviados a su "
+                    + "Comisión Médica.");
             pantalla.solicitarSelBolsin(buscarCMOrigenBolsines());
             return;
         }
@@ -123,16 +126,25 @@ public class GestorRecepcionBolsin {
         pantalla.solicitarConfirmacion();
     }
 
-    /** Hay diferencias con lo registrado: corresponde el CU 31 (fuera de alcance). */
+    /**
+     * Segunda opción: hay diferencias con lo registrado. La recepción no se
+     * registra aquí sino con el CU 31 Registrar Revisión de Documentación.
+     */
     public void tomarSeleccionSegundaOpcion() {
-        pantalla.mostrarMensaje("Existen diferencias con lo registrado: corresponde ejecutar el "
-                + "CU 31 Registrar Revisión de Documentación (fuera del alcance de esta implementación).");
+        pantalla.mostrarMensaje("No se registró la recepción del bolsín N° " + bolsinSeleccionado.getNumeroBolsin()
+                + " porque hay diferencias con lo registrado. Regístrelas con la opción "
+                + "\"Registrar revisión de documentación\" (CU 31).");
         finCU();
     }
 
     public void tomarConfirmacion(boolean confirma) {
+        if (bolsinSeleccionado == null) {
+            pantalla.mostrarMensaje("Seleccione primero el bolsín recibido.");
+            return;
+        }
         if (!confirma) {
-            pantalla.mostrarMensaje("Operación cancelada. No se registró la recepción.");
+            pantalla.mostrarMensaje("No se registró la recepción del bolsín N° "
+                    + bolsinSeleccionado.getNumeroBolsin() + ": la operación fue cancelada.");
             finCU();
             return;
         }
@@ -150,8 +162,8 @@ public class GestorRecepcionBolsin {
             repositorio.confirmarTransaccion();
         } catch (RuntimeException e) {
             repositorio.deshacerTransaccion();
-            pantalla.mostrarMensaje("No se pudo registrar la recepción: " + e.getMessage()
-                    + ". No se guardó ningún cambio.");
+            pantalla.mostrarMensaje("No se pudo registrar la recepción del bolsín N° "
+                    + bolsinSeleccionado.getNumeroBolsin() + " (" + e.getMessage() + "). No se guardó ningún cambio.");
             finCU();
             return;
         }
@@ -194,15 +206,12 @@ public class GestorRecepcionBolsin {
         correoEmpleado = empleadoLogueado.getEmail();
     }
 
+    /** Include del CU 29: el gestor del CU 28 le pasa el control al gestor del CU 29. */
     private void llamarCU29() {
         gestorCU29.notificarRecepcion(correoEmpleado, bolsinSeleccionado.getNumeroBolsin(), documentacionRecibida);
     }
 
     private void finCU() {
         pantalla.finCU();
-    }
-
-    public Bolsin getBolsinSeleccionado() {
-        return bolsinSeleccionado;
     }
 }

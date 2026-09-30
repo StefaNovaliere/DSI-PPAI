@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -21,18 +23,20 @@ public class Sesion {
 
     private LocalDateTime fechaHoraInicio;
     private LocalDateTime fechaHoraFin;
-    private String usuario;
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
     protected Sesion() {
         // Requerido por JPA
     }
 
-    public Sesion(LocalDateTime fechaHoraInicio, String usuario) {
+    public Sesion(LocalDateTime fechaHoraInicio, Usuario usuario) {
         this.fechaHoraInicio = fechaHoraInicio;
         this.usuario = usuario;
     }
 
-    public String getUsuario() {
+    public Usuario getUsuario() {
         return usuario;
     }
 

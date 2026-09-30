@@ -17,6 +17,7 @@ import ppai.entidades.Empleado;
 import ppai.entidades.Estado;
 import ppai.entidades.Sesion;
 import ppai.entidades.TipoDocumento;
+import ppai.entidades.Usuario;
 
 /**
  * Esquema de persistencia sobre una base de datos SQLite, usando JPA
@@ -65,6 +66,9 @@ public class RepositorioJPA implements Repositorio, AutoCloseable {
         }
         for (Estado estado : datos.getEstados()) {
             em.persist(estado);
+        }
+        for (Usuario usuario : datos.getUsuarios()) {
+            em.persist(usuario);
         }
         for (Empleado empleado : datos.getEmpleados()) {
             em.persist(empleado);

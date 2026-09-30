@@ -69,9 +69,9 @@ public class PantallaConsolaRecepcionBolsin implements PantallaRecepcionBolsin {
 
     @Override
     public void mostrarDatosDocumentacion(List<DatosDocumentacion> documentacion) {
-        salida.printf("  %-8s %-24s %-40s %-18s%n", "N° Doc", "Tipo", "Asunto", "Estado");
+        salida.printf("  %-8s %-24s %-40s %-20s%n", "N° Doc", "Tipo", "Asunto", "Estado");
         for (DatosDocumentacion doc : documentacion) {
-            salida.printf("  %-8d %-24s %-40s %-18s%n", doc.numero(), doc.tipoDocumento(), doc.asunto(), doc.estado());
+            salida.printf("  %-8d %-24s %-40s %-20s%n", doc.numero(), doc.tipoDocumento(), doc.asunto(), doc.descripcionEstado());
         }
     }
 

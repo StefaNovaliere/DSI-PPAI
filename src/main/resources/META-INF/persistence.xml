@@ -8,6 +8,7 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <class>ppai.entidades.ComisionMedica</class>
+        <class>ppai.entidades.Usuario</class>
         <class>ppai.entidades.Empleado</class>
         <class>ppai.entidades.Sesion</class>
         <class>ppai.entidades.TipoDocumento</class>

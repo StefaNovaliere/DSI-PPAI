@@ -33,7 +33,7 @@ class RegistrarRecepcionBolsinTest {
         PrintStream out = new PrintStream(salida, true, StandardCharsets.UTF_8);
         PantallaRecepcionBolsin pantalla = new PantallaConsolaRecepcionBolsin(new Scanner(entradaUsuario), out);
         GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio,
-                new GestorNotificacionCU29(out));
+                new GestorNotificacionCU29(out::println));
         pantalla.setGestor(gestor);
         pantalla.opcRegistrarRecBolsin();
     }
@@ -62,7 +62,7 @@ class RegistrarRecepcionBolsinTest {
                 assertInstanceOf(RecibidaYAceptada.class, detalle.getDocumentacion().getEstadoActual());
             }
         }
-        assertTrue(texto.contains("[CU 29] Enviando correo a ana.perez@cm.gob.ar"));
+        assertTrue(texto.contains("[CU 29] Correo enviado a ana.perez@cm.gob.ar"));
 
         // El otro bolsín no se modificó
         assertEquals("Enviado", bolsin(102).getEstadoActual().getNombre());
@@ -77,7 +77,7 @@ class RegistrarRecepcionBolsinTest {
                 assertInstanceOf(EnBolsinEnviado.class, detalle.getDocumentacion().getEstadoActual());
             }
         }
-        assertTrue(salida.toString(StandardCharsets.UTF_8).contains("Operación cancelada"));
+        assertTrue(salida.toString(StandardCharsets.UTF_8).contains("la operación fue cancelada"));
     }
 
     @Test
