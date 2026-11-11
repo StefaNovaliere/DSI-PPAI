@@ -1,0 +1,40 @@
+# =====================================================================
+# Configuración del envío de correo (CU 29 - notificación de la recepción)
+#
+# 1. Copiá este archivo con el nombre  correo.properties  (en la misma carpeta).
+# 2. Completá los datos de UNA de las opciones de abajo.
+# 3. Volvé a abrir el programa: en el menú tiene que decir
+#    "Notificaciones por correo: se envían por SMTP (...)".
+#
+# correo.properties NO se sube al repositorio (tiene tu contraseña).
+# Si no existe, el programa funciona igual y guarda los correos como
+# archivos en la carpeta correos-simulados.
+# =====================================================================
+
+# ---------- Opción A: Gmail (llega a una casilla real) ----------
+# Necesita una "contraseña de aplicación" (ver COMO_EJECUTAR.md):
+# NO es la contraseña normal de la cuenta.
+correo.smtp.host=smtp.gmail.com
+correo.smtp.puerto=587
+correo.smtp.starttls=true
+correo.smtp.ssl=false
+correo.usuario=tu.cuenta@gmail.com
+correo.contrasenia=xxxx xxxx xxxx xxxx
+correo.remitente=tu.cuenta@gmail.com
+
+# ---------- Opción B: Mailtrap (bandeja de prueba, no envía a nadie) ----------
+# Datos en mailtrap.io > Email Testing > tu Inbox > SMTP Settings.
+#correo.smtp.host=sandbox.smtp.mailtrap.io
+#correo.smtp.puerto=2525
+#correo.smtp.starttls=true
+#correo.smtp.ssl=false
+#correo.usuario=usuario-de-mailtrap
+#correo.contrasenia=contrasenia-de-mailtrap
+#correo.remitente=bolsines@grupo10.example
+
+# ---------- Para la demo ----------
+# Los empleados de prueba tienen correos ficticios (@...example).
+# Poné acá tu casilla y TODOS los correos te van a llegar a vos
+# (el correo aclara a quién iba dirigido). Dejalo vacío para enviar
+# al correo real del empleado.
+correo.redirigirA=tu.cuenta@gmail.com

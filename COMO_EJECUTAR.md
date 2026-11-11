@@ -17,7 +17,8 @@ no hace falta instalar nada más que **Java**.
 | Maven | No: el proyecto trae `mvnw.cmd`, que lo descarga solo |
 | Base de datos | No: es SQLite, un archivo (`bolsines.db`) que se crea solo |
 | Git | No: se puede bajar el proyecto como ZIP |
-| Internet | Sólo **la primera vez** que se compila (descarga dependencias) |
+| Internet | Sólo **la primera vez** que se compila (descarga dependencias), y para enviar el correo |
+| Cuenta de correo | Para que el correo de notificación se envíe de verdad (Paso 3b). Si no se configura, el programa funciona igual y guarda el correo como archivo |
 
 > ⚠️ **Para el día de la defensa:** compilen al menos una vez **antes** en la PC que van a
 > usar, con Internet. Después funciona sin conexión.
@@ -142,6 +143,67 @@ la prueba) hacé doble clic en **`ejecutar-desde-cero.bat`**.
 
 ---
 
+## Paso 3b — Configurar el envío de correo
+
+Al registrar una recepción, el sistema envía un correo de notificación (CU 29). Para que se
+envíe de verdad hay que decirle qué servidor de correo usar. **Sin este paso el programa
+funciona igual**, pero guarda el correo como archivo en la carpeta `correos-simulados`.
+
+1. En la carpeta del proyecto, copiá `correo.properties.ejemplo` con el nombre
+   **`correo.properties`**.
+   > ⚠️ En Windows, si lo creás con el Bloc de notas, fijate que no quede
+   > `correo.properties.txt`: en "Guardar como" elegí *Tipo: Todos los archivos*.
+2. Abrilo y completá **una** de las dos opciones.
+
+### Opción A: Gmail (el correo llega a una casilla real)
+
+Gmail no deja usar la contraseña normal: hace falta una **contraseña de aplicación**.
+
+1. Activá la **verificación en dos pasos** de la cuenta: <https://myaccount.google.com/security>.
+2. Entrá a <https://myaccount.google.com/apppasswords>, escribí un nombre (por ejemplo
+   "PPAI Bolsines") y tocá **Crear**.
+3. Copiá la contraseña de 16 letras que aparece. Va en `correo.contrasenia`, con o sin
+   espacios.
+4. Completá en `correo.properties`:
+   ```properties
+   correo.smtp.host=smtp.gmail.com
+   correo.smtp.puerto=587
+   correo.smtp.starttls=true
+   correo.smtp.ssl=false
+   correo.usuario=tu.cuenta@gmail.com
+   correo.contrasenia=abcd efgh ijkl mnop
+   correo.remitente=tu.cuenta@gmail.com
+   correo.redirigirA=tu.cuenta@gmail.com
+   ```
+
+Las cuentas de la facultad o de una empresa a veces no permiten contraseñas de aplicación:
+en ese caso usá una cuenta de Gmail personal.
+
+### Opción B: Mailtrap (bandeja de prueba, no le llega a nadie)
+
+1. Creá una cuenta gratis en <https://mailtrap.io>.
+2. Entrá a **Email Testing → Inboxes → My Inbox → SMTP** y copiá host, puerto, usuario y
+   contraseña.
+3. Completá la "Opción B" del archivo de ejemplo. Los correos se ven en la página de Mailtrap.
+
+### `correo.redirigirA`: para la demo
+
+Los empleados de prueba tienen correos ficticios (`ana.perez@cmcordoba.example`). Con
+`correo.redirigirA=tu.cuenta@gmail.com`, **todos los correos te llegan a vos**, y el correo
+aclara a quién iba dirigido. Dejalo vacío solo si los empleados tienen correos reales.
+
+### Comprobar que quedó bien
+
+Abrí el programa. Debajo de la opción del menú tiene que decir:
+*"Notificaciones por correo: se envían por SMTP (smtp.gmail.com:587)…"*. Si dice "no se
+envían porque…", el motivo indica qué falta.
+
+> ⚠️ **Para la defensa:** probalo antes **en la red de la facultad**. Algunas redes bloquean
+> el puerto 587. Si pasa, probá `correo.smtp.puerto=465`, `correo.smtp.ssl=true` y
+> `correo.smtp.starttls=false`, o usá los datos del celular.
+
+---
+
 ## Paso 4 — Probar el caso de uso (guion)
 
 Datos de prueba: el usuario logueado es **Ana Pérez (`aperez`) de CM Córdoba**. Hay dos
@@ -159,8 +221,13 @@ bolsines enviados a CM Córdoba pendientes de recepción: **101** (desde CM Rosa
    enviado** (celeste) y uno **Para redirigir** (naranja).
 3. Apretá **Confirmar recepción** y, en el diálogo, **Registrar recepción**.
    → Arriba aparece un aviso verde: *"Se registró la recepción del bolsín N° 101. Sus 3
-   documentos quedaron en estado «Recibida y aceptada»"* y que se envió la notificación por
-   correo (CU 29). Los 3 documentos quedan en verde y el 101 desaparece de la lista.
+   documentos quedaron en estado «Recibida y aceptada»"*. Debajo dice *"Enviando la
+   notificación por correo…"*, y en unos segundos cambia a *"…se envió a …"*. Los 3
+   documentos quedan en verde y el 101 desaparece de la lista.
+4. Revisá la casilla de `correo.redirigirA` (o Mailtrap): llega el correo *"Recepción
+   registrada del bolsín N° 101 (precinto PR-0101)"* con la tabla de documentación. Si no
+   configuraste el correo, el aviso indica en qué archivo de `correos-simulados` quedó
+   guardado.
 
 ![Resultado esperado](docs/capturas/05_recepcion_registrada.png)
 
@@ -171,6 +238,7 @@ bolsines enviados a CM Córdoba pendientes de recepción: **101** (desde CM Rosa
 | **A2 – No confirmar** | Clic en el **102** → **Confirmar recepción** → **Volver** | Aviso: *"No se registró la recepción del bolsín N° 102: la operación fue cancelada"*. Los estados no cambian y el 102 sigue en la lista. |
 | **A3 – Hay diferencias** | Clic en el **102** → **Informar diferencias** | Aviso: la recepción no se registra y corresponde el CU 31. Nada cambia. |
 | **A1 – No hay bolsines** | Recibir el 101 y el 102 (flujo principal) | Aviso *"No hay bolsines enviados pendientes de recepción"* y la lista queda vacía. |
+| **A5 – Falla el correo** | Poner una contraseña incorrecta en `correo.properties`, abrir el programa y recibir un bolsín | Aviso *"No se pudo enviar la notificación por correo… rechazó el usuario o la contraseña. La recepción quedó registrada igual."* |
 
 ### Verificar que se guardó en la base de datos
 
@@ -220,4 +288,8 @@ Después, volver a ejecutar con `ejecutar-desde-cero.bat`.
 | `UnsupportedClassVersionError` | La versión de Java es menor a 17 | Instalar Java 21 (Paso 1) |
 | La lista de bolsines aparece vacía | Ya se recibieron el 101 y el 102 (los cambios quedan guardados) | Usar `ejecutar-desde-cero.bat` o `--reiniciar-datos` |
 | "Windows protegió su PC" al abrir el `.bat` | Protección de Windows para archivos descargados | **Más información → Ejecutar de todas formas** |
+| *"No se pudo enviar la notificación… rechazó el usuario o la contraseña"* | Gmail no acepta la contraseña normal | Usar una **contraseña de aplicación** (Paso 3b, Opción A) |
+| *"No se pudo enviar la notificación… no se pudo conectar con smtp.gmail.com:587"* | La red bloquea el puerto, o no hay Internet | Probar puerto 465 con `correo.smtp.ssl=true` y `correo.smtp.starttls=false`, o usar los datos del celular |
+| El menú dice *"no se envían porque no hay un servidor de correo configurado"* | No está `correo.properties` en la carpeta del proyecto, o se llama `correo.properties.txt` | Revisar el nombre exacto y que esté junto a `ejecutar.bat` (Paso 3b) |
+| El correo dice que se envió pero no llega | Fue a la casilla ficticia del empleado | Completar `correo.redirigirA` con tu casilla; revisar también Spam |
 | En la versión por consola los acentos se ven como `?` | Codificación de la consola de Windows | Ejecutar `chcp 65001` antes, o usar la ventana gráfica |

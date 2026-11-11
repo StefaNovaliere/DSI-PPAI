@@ -29,12 +29,16 @@ public class PantallaPrincipal extends JFrame {
     private final JPanel contenido = new JPanel(tarjetas);
     private final PantallaGraficaRecepcionBolsin pantallaRecepcion;
 
-    public PantallaPrincipal(String nombreUsuario, PantallaGraficaRecepcionBolsin pantallaRecepcion) {
+    /**
+     * @param estadoCorreo cómo se envían las notificaciones por correo (se muestra en el menú)
+     */
+    public PantallaPrincipal(String nombreUsuario, String estadoCorreo,
+                             PantallaGraficaRecepcionBolsin pantallaRecepcion) {
         super("Sistema de Bolsines");
         this.pantallaRecepcion = pantallaRecepcion;
         pantallaRecepcion.setAccionVolver(() -> tarjetas.show(contenido, MENU));
 
-        contenido.add(crearMenu(), MENU);
+        contenido.add(crearMenu(estadoCorreo), MENU);
         contenido.add(pantallaRecepcion, RECEPCION);
 
         JPanel raiz = new JPanel(new BorderLayout());
@@ -64,7 +68,7 @@ public class PantallaPrincipal extends JFrame {
         return encabezado;
     }
 
-    private JPanel crearMenu() {
+    private JPanel crearMenu(String estadoCorreo) {
         JLabel titulo = new JLabel("Seleccione una tarea");
         titulo.setFont(titulo.getFont().deriveFont(Font.BOLD, 20f));
 
@@ -87,6 +91,12 @@ public class PantallaPrincipal extends JFrame {
         columna.add(titulo);
         columna.add(javax.swing.Box.createVerticalStrut(16));
         columna.add(opcionRecepcion);
+        JLabel correo = new JLabel("<html><div style='width:300px'>Notificaciones por correo: "
+                + estadoCorreo + "</div></html>");
+        correo.setForeground(new Color(0x666666));
+        correo.setAlignmentX(LEFT_ALIGNMENT);
+        columna.add(javax.swing.Box.createVerticalStrut(10));
+        columna.add(correo);
 
         JPanel menu = new JPanel(new GridBagLayout());
         menu.add(columna);

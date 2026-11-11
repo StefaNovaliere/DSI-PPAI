@@ -16,6 +16,7 @@ import ppai.boundary.PantallaConsolaRecepcionBolsin;
 import ppai.boundary.PantallaRecepcionBolsin;
 import ppai.control.GestorNotificacionCU29;
 import ppai.control.GestorRecepcionBolsin;
+import ppai.correo.ServicioCorreoSimulado;
 import ppai.entidades.Bolsin;
 import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.DetalleRemito;
@@ -35,7 +36,7 @@ class RepositorioJPATest {
     private void ejecutarCU(RepositorioJPA repositorio, String entradaUsuario) {
         PrintStream out = new PrintStream(new ByteArrayOutputStream(), true, StandardCharsets.UTF_8);
         PantallaRecepcionBolsin pantalla = new PantallaConsolaRecepcionBolsin(new Scanner(entradaUsuario), out);
-        GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio, new GestorNotificacionCU29(out::println));
+        GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio, new GestorNotificacionCU29(new ServicioCorreoSimulado(carpeta.resolve("correos"), "es una prueba"), Runnable::run, out::println));
         pantalla.setGestor(gestor);
         pantalla.opcRegistrarRecBolsin();
     }

@@ -7,15 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import ppai.boundary.PantallaConsolaRecepcionBolsin;
 import ppai.boundary.PantallaRecepcionBolsin;
 import ppai.control.GestorNotificacionCU29;
 import ppai.control.GestorRecepcionBolsin;
+import ppai.correo.ServicioCorreoSimulado;
 import ppai.entidades.Bolsin;
 import ppai.entidades.DetalleRemito;
 import ppai.entidades.Remito;
@@ -26,6 +29,9 @@ import ppai.persistencia.RepositorioEnMemoria;
 /** Prueba de punta a punta del CU 28 con la pantalla por consola. */
 class RegistrarRecepcionBolsinTest {
 
+    @TempDir
+    Path carpeta;
+
     private final RepositorioEnMemoria repositorio = new RepositorioEnMemoria();
     private final ByteArrayOutputStream salida = new ByteArrayOutputStream();
 
@@ -33,7 +39,7 @@ class RegistrarRecepcionBolsinTest {
         PrintStream out = new PrintStream(salida, true, StandardCharsets.UTF_8);
         PantallaRecepcionBolsin pantalla = new PantallaConsolaRecepcionBolsin(new Scanner(entradaUsuario), out);
         GestorRecepcionBolsin gestor = new GestorRecepcionBolsin(pantalla, repositorio,
-                new GestorNotificacionCU29(out::println));
+                new GestorNotificacionCU29(new ServicioCorreoSimulado(carpeta, "es una prueba"), Runnable::run, out::println));
         pantalla.setGestor(gestor);
         pantalla.opcRegistrarRecBolsin();
     }
@@ -62,7 +68,7 @@ class RegistrarRecepcionBolsinTest {
                 assertInstanceOf(RecibidaYAceptada.class, detalle.getDocumentacion().getEstadoActual());
             }
         }
-        assertTrue(texto.contains("[CU 29] Correo enviado a ana.perez@cm.gob.ar"));
+        assertTrue(texto.contains("Enviando la notificación por correo a ana.perez@cmcordoba.example"));
 
         // El otro bolsín no se modificó
         assertEquals("Enviado", bolsin(102).getEstadoActual().getNombre());

@@ -19,53 +19,53 @@ esta revisión para que siga al diagrama · 🔄 cambia por el rediseño con el 
 
 | # | Emisor → receptor | Mensaje del diagrama | Implementación | Resultado |
 |---|-------------------|----------------------|----------------|-----------|
-| 1 | EB → Pantalla | `opcRegistrarRecBolsin()` | [`PantallaGraficaRecepcionBolsin.opcRegistrarRecBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L226) (opción del menú) | ✅ |
-| 2 | Pantalla → Pantalla | `habilitarPantalla()` | [`PantallaGraficaRecepcionBolsin.habilitarPantalla()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L232) | ✅ |
-| 3 | Pantalla → Gestor | `registrarNuevoRecBolsin()` | [`GestorRecepcionBolsin.registrarNuevoRecBolsin()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L47) | ✅ |
-| 4 | Gestor → Gestor | `buscarCMUsuarioLogged()` | [`GestorRecepcionBolsin.buscarCMUsuarioLogged()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L68) | ✅ |
+| 1 | EB → Pantalla | `opcRegistrarRecBolsin()` | [`PantallaGraficaRecepcionBolsin.opcRegistrarRecBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L227) (opción del menú) | ✅ |
+| 2 | Pantalla → Pantalla | `habilitarPantalla()` | [`PantallaGraficaRecepcionBolsin.habilitarPantalla()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L233) | ✅ |
+| 3 | Pantalla → Gestor | `registrarNuevoRecBolsin()` | [`GestorRecepcionBolsin.registrarNuevoRecBolsin()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L48) | ✅ |
+| 4 | Gestor → Gestor | `buscarCMUsuarioLogged()` | [`GestorRecepcionBolsin.buscarCMUsuarioLogged()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L69) | ✅ |
 | 5 | Gestor → actual:Sesion | `getUsuario()` | [`Sesion.getUsuario()`](../src/main/java/ppai/entidades/Sesion.java#L39) (devuelve el `Usuario`) | ✅ corrección E1 |
 | 6 | Gestor → :Empleado | `*esTuUsuario()` | [`Empleado.esTuUsuario()`](../src/main/java/ppai/entidades/Empleado.java#L47) | ✅ corrección E1 |
 | 7 | Gestor → Logueado:Empleado | `getCM()` | [`Empleado.getCM()`](../src/main/java/ppai/entidades/Empleado.java#L52) | ✅ ajustado |
 | 8 | Empleado → :ComisionMedica | `getNombre()` | [`ComisionMedica.getNombre()`](../src/main/java/ppai/entidades/ComisionMedica.java#L38) | ✅ |
-| 9 | Gestor → Pantalla | `mostrarCM()` | [`PantallaGraficaRecepcionBolsin.mostrarCM()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L287) | ✅ |
-| 10 | Gestor → Gestor | `buscarBolsinesEnviadosCM()` | [`GestorRecepcionBolsin.buscarBolsinesEnviadosCM()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L83) | ✅ |
+| 9 | Gestor → Pantalla | `mostrarCM()` | [`PantallaGraficaRecepcionBolsin.mostrarCM()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L288) | ✅ |
+| 10 | Gestor → Gestor | `buscarBolsinesEnviadosCM()` | [`GestorRecepcionBolsin.buscarBolsinesEnviadosCM()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L84) | ✅ |
 | 11 | Gestor → :Bolsin (loop) | `sosEnviado()` | [`Bolsin.sosEnviado()`](../src/main/java/ppai/entidades/Bolsin.java#L76) | ✅ |
 | 12 | Bolsin → :CambioEstadoBolsin | `*sosActual()` | [`CambioEstadoBolsin.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L44) (desde [`Bolsin.buscarCambioEstadoActual()`](../src/main/java/ppai/entidades/Bolsin.java#L142)) | ✅ |
 | 13 | Bolsin → actual:CambioEstadoBolsin | `sosEnviado()` | [`CambioEstadoBolsin.sosEnviado()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L48) | ✅ |
 | 14 | Gestor → enviado:Bolsin | `obtenerCMDestino()` | [`Bolsin.obtenerCMDestino()`](../src/main/java/ppai/entidades/Bolsin.java#L82) | ✅ ajustado |
 | 15 | Bolsin → :ComisionMedica | `getNombre()` | [`ComisionMedica.getNombre()`](../src/main/java/ppai/entidades/ComisionMedica.java#L38) | ✅ |
 | 16 | Gestor → Logueado:Empleado | `esTuCM()` | [`Empleado.esTuCM()`](../src/main/java/ppai/entidades/Empleado.java#L57) | ✅ ajustado |
-| 17 | Gestor → Gestor | `buscarCMOrigenbolsines()` | [`GestorRecepcionBolsin.buscarCMOrigenBolsines()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L92) | ✅ (1) |
+| 17 | Gestor → Gestor | `buscarCMOrigenbolsines()` | [`GestorRecepcionBolsin.buscarCMOrigenBolsines()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L93) | ✅ (1) |
 | 18 | Gestor → enviadoUSLog:Bolsin (loop) | `obtenerCMOrigen()` | [`Bolsin.obtenerCMOrigen()`](../src/main/java/ppai/entidades/Bolsin.java#L87) | ✅ |
 | 19 | Bolsin → :ComisionMedica | `getNombre()` | [`ComisionMedica.getNombre()`](../src/main/java/ppai/entidades/ComisionMedica.java#L38) | ✅ |
 | 20 | Gestor → enviadoUSLog:Bolsin | `getNumeroPrecinto()` | [`Bolsin.getNumeroPrecinto()`](../src/main/java/ppai/entidades/Bolsin.java#L95) | ✅ |
-| 21 | Gestor → Pantalla | `solicitarSelBolsin()` | [`PantallaGraficaRecepcionBolsin.solicitarSelBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L293) | ✅ |
-| 22 | EB → Pantalla | `tomarSeleccionBolsin()` | [`PantallaGraficaRecepcionBolsin.tomarSeleccionBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L255) (clic en la lista) | ✅ |
-| 23 | Pantalla → Gestor | `tomarSeleccionBolsin()` | [`GestorRecepcionBolsin.tomarSeleccionBolsin()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L101) | ✅ |
-| 24 | Gestor → Gestor | `buscarInformacionRemito()` | [`GestorRecepcionBolsin.buscarInformacionRemito()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L124) | ✅ |
+| 21 | Gestor → Pantalla | `solicitarSelBolsin()` | [`PantallaGraficaRecepcionBolsin.solicitarSelBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L294) | ✅ |
+| 22 | EB → Pantalla | `tomarSeleccionBolsin()` | [`PantallaGraficaRecepcionBolsin.tomarSeleccionBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L256) (clic en la lista) | ✅ |
+| 23 | Pantalla → Gestor | `tomarSeleccionBolsin()` | [`GestorRecepcionBolsin.tomarSeleccionBolsin()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L102) | ✅ |
+| 24 | Gestor → Gestor | `buscarInformacionRemito()` | [`GestorRecepcionBolsin.buscarInformacionRemito()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L125) | ✅ |
 | 25 | Gestor → seleccionado:Bolsin | `obtenerInformacionRemito()` | [`Bolsin.obtenerInformacionRemito()`](../src/main/java/ppai/entidades/Bolsin.java#L100) | ✅ |
 | 26 | Bolsin → :Remito (loop) | `obtenerNumero()` | [`Remito.obtenerNumero()`](../src/main/java/ppai/entidades/Remito.java#L65) | ✅ ajustado |
 | 27 | Remito → :DetalleRemito (loop) | `obtenerDocumentacion()` | [`DetalleRemito.obtenerDocumentacion()`](../src/main/java/ppai/entidades/DetalleRemito.java#L42) (desde [`Remito.obtenerDatosRemito()`](../src/main/java/ppai/entidades/Remito.java#L70)) | ✅ (2) |
 | 28 | DetalleRemito → :Documentación | `getAsunto()` | [`Documentacion.getAsunto()`](../src/main/java/ppai/entidades/Documentacion.java#L111) | ✅ (2) |
 | 29 | DetalleRemito → :Documentación | `mostrarTipoDocumentacion()` | [`Documentacion.mostrarTipoDocumentacion()`](../src/main/java/ppai/entidades/Documentacion.java#L123) | ✅ (2) |
 | 30 | Documentación → :TipoDocumentación | `getNombre()` | [`TipoDocumento.getNombre()`](../src/main/java/ppai/entidades/TipoDocumento.java#L32) | ✅ |
-| 31 | Gestor → Pantalla | `mostrarNroRemito()` | [`PantallaGraficaRecepcionBolsin.mostrarNroRemito()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L318) | ✅ ajustado |
-| 32 | Gestor → Pantalla | `mostrarDatosDocumentacion()` | [`PantallaGraficaRecepcionBolsin.mostrarDatosDocumentacion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L323) | ✅ ajustado |
-| 33 | Gestor → Pantalla | `solicitarSelOpcionesRecBolsin()` | [`PantallaGraficaRecepcionBolsin.solicitarSelOpcionesRecBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L334) | ✅ |
-| 34 | EB → Pantalla | `tomarSeleccionPrimeraOpcion()` | [`PantallaGraficaRecepcionBolsin.tomarSeleccionPrimeraOpcion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L268) (botón "Confirmar recepción") | ✅ renombrado (3) |
-| 35 | Pantalla → Gestor | `tomarSeleccionPrimeraOpcion()` | [`GestorRecepcionBolsin.tomarSeleccionPrimeraOpcion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L129) | ✅ renombrado (3) |
-| 36 | Gestor → Pantalla | `solicitarConfirmacion()` | [`PantallaGraficaRecepcionBolsin.solicitarConfirmacion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L341) | ✅ |
-| 37 | EB → Pantalla | `tomarConfirmacion()` | [`PantallaGraficaRecepcionBolsin.tomarConfirmacion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L278) (diálogo de confirmación) | ✅ |
-| 38 | Pantalla → Gestor | `tomarConfirmacion()` | [`GestorRecepcionBolsin.tomarConfirmacion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L144) | ✅ |
-| 39 | Gestor → Gestor | `getFechaYHoraActual()` | [`GestorRecepcionBolsin.getFechaYHoraActual()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L183) | ✅ |
-| 40 | Gestor → Gestor | `buscarEstadoRecibidoEnCMDestino()` | [`GestorRecepcionBolsin.buscarEstadoRecibidoEnCMDestino()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L187) | ✅ |
+| 31 | Gestor → Pantalla | `mostrarNroRemito()` | [`PantallaGraficaRecepcionBolsin.mostrarNroRemito()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L319) | ✅ ajustado |
+| 32 | Gestor → Pantalla | `mostrarDatosDocumentacion()` | [`PantallaGraficaRecepcionBolsin.mostrarDatosDocumentacion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L324) | ✅ ajustado |
+| 33 | Gestor → Pantalla | `solicitarSelOpcionesRecBolsin()` | [`PantallaGraficaRecepcionBolsin.solicitarSelOpcionesRecBolsin()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L335) | ✅ |
+| 34 | EB → Pantalla | `tomarSeleccionPrimeraOpcion()` | [`PantallaGraficaRecepcionBolsin.tomarSeleccionPrimeraOpcion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L269) (botón "Confirmar recepción") | ✅ renombrado (3) |
+| 35 | Pantalla → Gestor | `tomarSeleccionPrimeraOpcion()` | [`GestorRecepcionBolsin.tomarSeleccionPrimeraOpcion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L130) | ✅ renombrado (3) |
+| 36 | Gestor → Pantalla | `solicitarConfirmacion()` | [`PantallaGraficaRecepcionBolsin.solicitarConfirmacion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L342) | ✅ |
+| 37 | EB → Pantalla | `tomarConfirmacion()` | [`PantallaGraficaRecepcionBolsin.tomarConfirmacion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L279) (diálogo de confirmación) | ✅ |
+| 38 | Pantalla → Gestor | `tomarConfirmacion()` | [`GestorRecepcionBolsin.tomarConfirmacion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L145) | ✅ |
+| 39 | Gestor → Gestor | `getFechaYHoraActual()` | [`GestorRecepcionBolsin.getFechaYHoraActual()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L184) | ✅ |
+| 40 | Gestor → Gestor | `buscarEstadoRecibidoEnCMDestino()` | [`GestorRecepcionBolsin.buscarEstadoRecibidoEnCMDestino()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L188) | ✅ |
 | 41 | Gestor → :Estado (loop) | `esAmbitoBolsin()` | [`Estado.esAmbitoBolsin()`](../src/main/java/ppai/entidades/Estado.java#L41) | ✅ |
 | 42 | Gestor → :Estado (loop) | `esRecibidoEnCMDestino()` | [`Estado.esRecibidoEnCMDestino()`](../src/main/java/ppai/entidades/Estado.java#L53) | ✅ |
 | 43 | Gestor → seleccionado:Bolsin | `recibirBolsin()` | [`Bolsin.recibirBolsin()`](../src/main/java/ppai/entidades/Bolsin.java#L109) | ✅ |
 | 44 | Bolsin → actual:CambioEstadoBolsin | `setFechaHoraFin()` | [`CambioEstadoBolsin.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L52) | ✅ |
 | 45 | Bolsin → Bolsin | `crearCEBolsin()` | [`Bolsin.crearCEBolsin()`](../src/main/java/ppai/entidades/Bolsin.java#L117) | ✅ |
 | 46 | Bolsin → nuevo:CambioEstadoBolsin | `new()` | [`new CambioEstadoBolsin()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L37) | ✅ |
-| 47 | Gestor → Gestor | `buscarEstadoRecibidoYAceptado()` | [`GestorRecepcionBolsin.buscarEstadoRecibidoYAceptado()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L196) | ✅ |
+| 47 | Gestor → Gestor | `buscarEstadoRecibidoYAceptado()` | [`GestorRecepcionBolsin.buscarEstadoRecibidoYAceptado()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L197) | ✅ |
 | 48 | Gestor → :Estado (loop) | `esAmbitoRemito()` | [`Estado.esAmbitoRemito()`](../src/main/java/ppai/entidades/Estado.java#L45) | ✅ |
 | 49 | Gestor → :Estado (loop) | `esRecibidoYAceptado()` | [`Estado.esRecibidoYAceptado()`](../src/main/java/ppai/entidades/Estado.java#L57) | ✅ |
 | 50 | Gestor → Gestor | `buscarEstadoRecibidaYAceptada()` | — (se eliminó) | 🔄 patrón State |
@@ -78,16 +78,16 @@ esta revisión para que siga al diagrama · 🔄 cambia por el rediseño con el 
 | 57 | Documentación → :CambioEstadoDocumentacion | `*sosActual()` | [`CambioEstadoDocumentacion.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L49) (desde [`EstadoDocumentacion.buscarCambioEstadoActual()`](../src/main/java/ppai/entidades/estadodocumentacion/EstadoDocumentacion.java#L58)) | 🔄 lo hace el estado |
 | 58 | Documentación → actual:CambioEstadoDocumentacion | `setFechaHoraFin()` | [`CambioEstadoDocumentacion.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L53) (desde [`EstadoDocumentacion.cambiarEstado()`](../src/main/java/ppai/entidades/estadodocumentacion/EstadoDocumentacion.java#L48)) | 🔄 lo hace el estado |
 | 59 | Documentación → RecibidaYAceptada:CambioEstadoDocumentacion | `new()` | [`new CambioEstadoDocumentacion()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L41) (desde [`EstadoDocumentacion.crearCambioEstado()`](../src/main/java/ppai/entidades/estadodocumentacion/EstadoDocumentacion.java#L67)) | 🔄 lo hace el estado |
-| 60 | Gestor → Gestor | `buscarInformacionDocumentacion()` | [`GestorRecepcionBolsin.buscarInformacionDocumentacion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L205) | ✅ |
+| 60 | Gestor → Gestor | `buscarInformacionDocumentacion()` | [`GestorRecepcionBolsin.buscarInformacionDocumentacion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L206) | ✅ |
 | 61 | Gestor → seleccionado:Bolsin | `obtenerInformacionDocumentacion()` | [`Bolsin.obtenerInformacionDocumentacion()`](../src/main/java/ppai/entidades/Bolsin.java#L129) | ✅ |
 | 62 | Bolsin → :Remito (loop) | `obtenerDatosRemito()` | [`Remito.obtenerDatosRemito()`](../src/main/java/ppai/entidades/Remito.java#L70) | ✅ ajustado |
 | 63 | Remito → :DetalleRemito (loop) | `obtenerDocumentacion()` | [`DetalleRemito.obtenerDocumentacion()`](../src/main/java/ppai/entidades/DetalleRemito.java#L42) | ✅ |
 | 64 | DetalleRemito → :Documentación | `getDatosDocumentacion()` | [`Documentacion.getDatosDocumentacion()`](../src/main/java/ppai/entidades/Documentacion.java#L131) | ✅ |
-| 65 | Gestor → Gestor | `buscarCorreoCM()` | [`GestorRecepcionBolsin.buscarCorreoCM()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L209) | ✅ |
+| 65 | Gestor → Gestor | `buscarCorreoCM()` | [`GestorRecepcionBolsin.buscarCorreoCM()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L210) | ✅ |
 | 66 | Gestor → Logueado:Empleado | `getEmail()` | [`Empleado.getEmail()`](../src/main/java/ppai/entidades/Empleado.java#L61) | ✅ |
-| 67 | Gestor → Gestor | `llamarCU29()` | [`GestorRecepcionBolsin.llamarCU29()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L214) | ✅ |
-| 68 | Gestor → CU 29 | `«include»` | [`GestorNotificacionCU29.notificarRecepcion()`](../src/main/java/ppai/control/GestorNotificacionCU29.java#L22) | ✅ corrección E1 |
-| 69 | Gestor → Gestor | `finCU()` | [`GestorRecepcionBolsin.finCU()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L218) | ✅ |
+| 67 | Gestor → Gestor | `llamarCU29()` | [`GestorRecepcionBolsin.llamarCU29()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L218) | ✅ |
+| 68 | Gestor → CU 29 | `«include»` | [`GestorNotificacionCU29.notificarRecepcion()`](../src/main/java/ppai/control/GestorNotificacionCU29.java#L47) | ✅ corrección E1 |
+| 69 | Gestor → Gestor | `finCU()` | [`GestorRecepcionBolsin.finCU()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L225) | ✅ |
 
 **Resultado:** los 69 mensajes del diagrama tienen soporte en el código, salvo los 3 que el
 rediseño con el patrón State elimina a propósito (50 a 52).
@@ -148,6 +148,11 @@ rediseñado de la entrega 2 o, al menos, poder explicarlos en la defensa:
   Está en el diagrama de clases, pero no en el de secuencia.
 - **`getDatosDocumentacion()` también informa el estado actual** (`EstadoDocumentacion.getNombre()`
   y `getDescripcion()`), que la pantalla muestra en la columna Estado.
+- **CU 29 con envío real del correo:** `llamarCU29()` arma un `DatosRecepcion` con
+  `getNumeroBolsin()`, `getNumeroPrecinto()`, `obtenerCMOrigen()`, la CM del usuario, la fecha y
+  hora, `getNombreCompleto()` del empleado y la documentación recibida, y se lo pasa a
+  `GestorNotificacionCU29.notificarRecepcion()`. Ese gestor arma el correo y lo envía con
+  `ServicioCorreo.enviar()` (SMTP con Jakarta Mail) en segundo plano.
 - **Pantalla:** `mostrarRecepcionRegistrada()` (resultado de la recepción),
   `mostrarMensaje()` (flujos alternativos) y `finCU()`.
 - **Flujo alternativo A3:** `tomarSeleccionSegundaOpcion()` ("Informar diferencias").

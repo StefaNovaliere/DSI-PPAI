@@ -5,3 +5,7 @@ out/
 *.iml
 .vscode/
 bolsines.db
+
+# Configuración local del correo (tiene la contraseña)
+correo.properties
+correos-simulados/

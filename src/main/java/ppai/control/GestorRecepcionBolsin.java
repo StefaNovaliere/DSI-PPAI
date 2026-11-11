@@ -7,6 +7,7 @@ import java.util.List;
 import ppai.boundary.PantallaRecepcionBolsin;
 import ppai.dto.DatosBolsin;
 import ppai.dto.DatosDocumentacion;
+import ppai.dto.DatosRecepcion;
 import ppai.dto.DatosRemito;
 import ppai.entidades.Bolsin;
 import ppai.entidades.Empleado;
@@ -210,9 +211,15 @@ public class GestorRecepcionBolsin {
         correoEmpleado = empleadoLogueado.getEmail();
     }
 
-    /** Include del CU 29: el gestor del CU 28 le pasa el control al gestor del CU 29. */
+    /**
+     * Include del CU 29: el gestor del CU 28 le pasa el control al gestor del
+     * CU 29, que envía el correo con los datos de la recepción.
+     */
     private void llamarCU29() {
-        gestorCU29.notificarRecepcion(correoEmpleado, bolsinSeleccionado.getNumeroBolsin(), documentacionRecibida);
+        DatosRecepcion recepcion = new DatosRecepcion(bolsinSeleccionado.getNumeroBolsin(),
+                bolsinSeleccionado.getNumeroPrecinto(), bolsinSeleccionado.obtenerCMOrigen(), nombreCMUsuario,
+                fechaYHora, empleadoLogueado.getNombreCompleto(), documentacionRecibida);
+        gestorCU29.notificarRecepcion(correoEmpleado, recepcion);
     }
 
     private void finCU() {

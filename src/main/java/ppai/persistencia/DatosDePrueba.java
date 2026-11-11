@@ -41,9 +41,9 @@ public class DatosDePrueba {
 
     public DatosDePrueba() {
         // Comisiones Médicas
-        ComisionMedica cmCordoba = new ComisionMedica(1, "CM Córdoba", "Av. Colón 1234", "cm.cordoba@cm.gob.ar", "351-4000000");
-        ComisionMedica cmRosario = new ComisionMedica(2, "CM Rosario", "Bv. Oroño 567", "cm.rosario@cm.gob.ar", "341-4000000");
-        ComisionMedica cmMendoza = new ComisionMedica(3, "CM Mendoza", "San Martín 890", "cm.mendoza@cm.gob.ar", "261-4000000");
+        ComisionMedica cmCordoba = new ComisionMedica(1, "CM Córdoba", "Av. Colón 1234", "mesa.entradas@cmcordoba.example", "351-4000000");
+        ComisionMedica cmRosario = new ComisionMedica(2, "CM Rosario", "Bv. Oroño 567", "mesa.entradas@cmrosario.example", "341-4000000");
+        ComisionMedica cmMendoza = new ComisionMedica(3, "CM Mendoza", "San Martín 890", "mesa.entradas@cmmendoza.example", "261-4000000");
         comisiones.add(cmCordoba);
         comisiones.add(cmRosario);
         comisiones.add(cmMendoza);
@@ -55,9 +55,9 @@ public class DatosDePrueba {
         usuarios.add(aperez);
         usuarios.add(jgomez);
         usuarios.add(clopez);
-        Empleado empCordoba = new Empleado("Pérez", "Ana", "ana.perez@cm.gob.ar", aperez, cmCordoba);
-        Empleado empRosario = new Empleado("Gómez", "Juan", "juan.gomez@cm.gob.ar", jgomez, cmRosario);
-        Empleado empMendoza = new Empleado("López", "Carla", "carla.lopez@cm.gob.ar", clopez, cmMendoza);
+        Empleado empCordoba = new Empleado("Pérez", "Ana", "ana.perez@cmcordoba.example", aperez, cmCordoba);
+        Empleado empRosario = new Empleado("Gómez", "Juan", "juan.gomez@cmrosario.example", jgomez, cmRosario);
+        Empleado empMendoza = new Empleado("López", "Carla", "carla.lopez@cmmendoza.example", clopez, cmMendoza);
         empleados.add(empCordoba);
         empleados.add(empRosario);
         empleados.add(empMendoza);

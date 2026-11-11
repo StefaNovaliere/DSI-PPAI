@@ -27,6 +27,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import ppai.control.GestorNotificacionCU29;
 import ppai.control.GestorRecepcionBolsin;
 import ppai.dto.DatosBolsin;
 import ppai.dto.DatosDocumentacion;
@@ -364,9 +365,29 @@ public class PantallaGraficaRecepcionBolsin extends JPanel implements PantallaRe
                 + resumirEstados(documentacion));
     }
 
-    /** Canal del CU 29 (simulado): informa que se envió la notificación por correo. */
-    public void mostrarNotificacionEnviada(String textoCorreo) {
-        agregarLineaAviso("Se envió la notificación de la recepción por correo electrónico (CU 29).");
+    /**
+     * Canal de avisos del CU 29. El correo se envía en segundo plano: primero
+     * llega "Enviando…" y después el resultado, que reemplaza a esa línea.
+     */
+    public void mostrarNotificacionEnviada(String aviso) {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(() -> mostrarNotificacionEnviada(aviso));
+            return;
+        }
+        String linea = aviso.startsWith(GestorNotificacionCU29.PREFIJO_ERROR)
+                ? "<span style='color:#A15C00'><b>" + aviso + "</b></span>" : aviso;
+        for (int i = 0; i < lineasAviso.size(); i++) {
+            if (lineasAviso.get(i).startsWith(GestorNotificacionCU29.PREFIJO_ENVIANDO)) {
+                lineasAviso.set(i, linea);
+                actualizarTextoAviso();
+                return;
+            }
+        }
+        if (panelAviso.isVisible()) {
+            agregarLineaAviso(linea);
+        } else {
+            mostrarAviso(Aviso.INFORMACION, linea);
+        }
     }
 
     @Override

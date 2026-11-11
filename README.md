@@ -17,6 +17,7 @@ Rediseño e implementación de la realización del caso de uso de análisis
 | b. Framework de programación | **Maven** (build y dependencias) · **JUnit 5** (pruebas). La interfaz gráfica usa **Swing** (incluido en Java). |
 | c. Tecnología | **Escritorio** (aplicación Swing). También se puede ejecutar por consola. |
 | d. Base de datos y persistencia | **SQLite** (archivo `bolsines.db`, no requiere instalar nada) con **JPA (Jakarta Persistence) implementado por Hibernate 6** como framework de persistencia |
+| Envío de correo (CU 29) | **SMTP** con **Jakarta Mail** (implementación Eclipse Angus). Se configura en `correo.properties` (Gmail, Mailtrap u otro servidor). Sin configuración, los correos se guardan como archivos. Ver [sección 11](#11-envío-de-correo-cu-29) |
 
 ## 2. Cómo ejecutarlo
 
@@ -40,8 +41,9 @@ CM Córdoba (101 y 102), uno enviado a otra CM (103) y uno ya recibido (104); es
 
 ## 3. Flujos del caso de uso implementados
 
-Se implementa **sólo el CU 28**. Los casos de uso relacionados (CU 29, incluido; CU 31, al
-que deriva la opción "hay diferencias") se invocan o se mencionan, pero no se implementan.
+Se implementa el **CU 28**, incluido el **envío real del correo** de notificación que hace el
+CU 29 (caso de uso incluido). El CU 31, al que deriva la opción "hay diferencias", no se
+implementa.
 
 **Flujo principal:** el empleado elige "Registrar recepción de bolsín" en el menú. El
 sistema muestra la CM del usuario y los bolsines enviados a ella que todavía no se
@@ -53,7 +55,8 @@ coincide con lo registrado) y confirma. El sistema:
 2. registra los remitos como RecibidoYAceptado;
 3. pasa cada documentación a Recibida&Aceptada (patrón State);
 4. guarda todo en la base en una transacción;
-5. llama al CU 29 para notificar por correo (simulado) y finaliza.
+5. llama al CU 29, que envía por correo la notificación de la recepción (SMTP, en segundo
+   plano), y finaliza.
 
 **Flujos alternativos:**
 
@@ -63,6 +66,7 @@ coincide con lo registrado) y confirma. El sistema:
 | A2 | El empleado no confirma la recepción ("Volver" en la confirmación) | Informa que no se registró; no cambia ningún estado ni se guarda nada |
 | A3 | El empleado indica que hay diferencias con lo registrado ("Informar diferencias") | Informa que la recepción no se registra y que corresponde el CU 31 Registrar Revisión de Documentación |
 | A4 | Falla al registrar (por ejemplo, una documentación en un estado que no admite la recepción) | Deshace la transacción (rollback), informa el error y no se guarda ningún cambio |
+| A5 | Falla el envío del correo (sin red, servidor caído, contraseña incorrecta) | Informa el motivo. La recepción ya quedó registrada: la notificación no la deshace |
 
 ## 4. Capturas
 
@@ -81,11 +85,12 @@ coincide con lo registrado) y confirma. El sistema:
 | Capa | Paquete | Clases |
 |------|---------|--------|
 | Interfaz (boundary) | `ppai.boundary` | `PantallaRecepcionBolsin` (interfaz), `PantallaGraficaRecepcionBolsin` (Swing), `PantallaConsolaRecepcionBolsin`, `PantallaPrincipal` (menú) |
-| Control | `ppai.control` | `GestorRecepcionBolsin`, `GestorNotificacionCU29` (CU incluido, simulado) |
+| Control | `ppai.control` | `GestorRecepcionBolsin`, `GestorNotificacionCU29` (CU incluido: arma y envía el correo) |
 | Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Estado`, `Empleado`, `Usuario`, `Sesion`, `ComisionMedica`, `TipoDocumento` |
 | Patrón State | `ppai.entidades.estadodocumentacion` | `EstadoDocumentacion` + 9 estados concretos |
 | Persistencia | `ppai.persistencia` | `Repositorio` (esquema de persistencia), `RepositorioJPA` (SQLite + Hibernate), `ConversorEstadoDocumentacion`, `DatosDePrueba`, `RepositorioEnMemoria` (sólo pruebas) |
 | Configuración JPA | `src/main/resources/META-INF` | `persistence.xml` |
+| Servicio externo de correo | `ppai.correo` | `ServicioCorreo` (interfaz), `ServicioCorreoSmtp` (Jakarta Mail), `ServicioCorreoSimulado` (sin servidor configurado), `ConfiguracionCorreo` (lee `correo.properties`), `Correo` |
 
 Los nombres de clases y métodos respetan el diagrama de clases y el de secuencia del
 análisis (`opcRegistrarRecBolsin`, `registrarNuevoRecBolsin`, `buscarCMUsuarioLogged`,
@@ -265,20 +270,57 @@ grupo a partir de las actividades de descubrimiento hechas en el aula.
 
 ## 9. Pruebas
 
-`mvn test` ejecuta 16 pruebas:
+`mvn test` ejecuta 22 pruebas:
 
 - `EstadoDocumentacionTest`: el evento `recibir()` desde cada estado de la documentación
   (patrón State).
 - `RegistrarRecepcionBolsinTest`: el flujo principal y los alternativos, con datos en memoria.
 - `RepositorioJPATest`: guarda en SQLite, vuelve a abrir la base y verifica los estados;
   también verifica que al cancelar no se guarda nada.
+- `NotificacionCorreoTest`: envía los correos a un servidor SMTP de prueba (GreenMail) y
+  verifica destinatario, asunto y contenido; también la redirección para la demo, el
+  servidor caído y el modo sin configuración. Incluye el CU 28 de punta a punta: registrar la
+  recepción del bolsín 101 y comprobar que llegó el correo.
 
 ## 10. Alcance
 
-- Se implementa **sólo el CU 28**. El CU 29 (notificación por correo) se invoca como caso
-  de uso incluido y su envío se simula. La opción "Informar diferencias" termina el CU 28
-  indicando que corresponde el CU 31, que no se implementa.
+- Se implementa el **CU 28** y el **envío del correo** del CU 29, que incluye. La opción
+  "Informar diferencias" termina el CU 28 indicando que corresponde el CU 31, que no se
+  implementa.
 - La documentación de prueba se carga con su historial de estados, como si la hubieran
   registrado y enviado los casos de uso anteriores (CU 7, 15, 19, 27).
 - `Bolsin` y `Remito` mantienen la entidad `Estado` con ámbito, tal como en el análisis,
   porque la entrega sólo modela la máquina de estados de Documentación.
+
+## 11. Envío de correo (CU 29)
+
+Al registrar la recepción, `llamarCU29()` le pasa al gestor del CU 29 el correo del
+destinatario y los datos de la recepción (`DatosRecepcion`: bolsín, precinto, CM origen y
+destino, fecha y hora, quién registró y la documentación con su estado). El gestor del CU 29:
+
+1. **arma el correo**, con asunto y cuerpo en texto plano y en HTML (tabla con la documentación);
+2. **lo envía** con el `ServicioCorreo` configurado, **en segundo plano**, para que la ventana no
+   se congele mientras se conecta con el servidor;
+3. **informa el resultado** en el aviso de la pantalla: primero "Enviando…" y después "se envió
+   a …" o el motivo del error.
+
+- **Destinatario:** como en el diagrama de secuencia, `buscarCorreoCM()` toma el correo del
+  empleado logueado (`getEmail()`).
+- **Configuración:** archivo `correo.properties` en la carpeta del proyecto. Hay una plantilla
+  en [`correo.properties.ejemplo`](correo.properties.ejemplo), y los pasos para Gmail y Mailtrap
+  están en [COMO_EJECUTAR.md](COMO_EJECUTAR.md#paso-3b--configurar-el-envío-de-correo). Ese
+  archivo **no se sube al repositorio** porque tiene la contraseña.
+- **Demo:** los empleados de prueba tienen correos ficticios (dominios `.example`, reservados).
+  Con `correo.redirigirA` todos los correos llegan a la casilla que se indique, y el correo
+  aclara a quién iba dirigido.
+- **Sin configuración**, o si el archivo está incompleto, el programa funciona igual: el correo
+  se guarda como HTML en la carpeta `correos-simulados` y el aviso lo indica.
+- **Si el envío falla**, la recepción ya quedó guardada: el aviso informa el motivo
+  (contraseña rechazada, servidor inaccesible, puerto bloqueado).
+
+**Estructura:** el gestor del CU 29 depende de la interfaz propia `ServicioCorreo`. Solo
+`ServicioCorreoSmtp` conoce la API de Jakarta Mail (`Session`, `MimeMessage`, `Transport`), así
+que cambiar de proveedor o de librería no toca el gestor. Esa estructura, una interfaz que
+espera el sistema más una clase que traduce a la API externa, es la del patrón **Adapter**. Se
+puede mencionar si lo preguntan, pero el patrón acordado con la cátedra es State.
+

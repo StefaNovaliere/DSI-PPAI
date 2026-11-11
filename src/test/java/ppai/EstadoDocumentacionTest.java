@@ -43,7 +43,7 @@ class EstadoDocumentacionTest {
 
     private static final LocalDateTime T0 = LocalDateTime.of(2026, 9, 1, 8, 0);
     private static final LocalDateTime RECEPCION = T0.plusDays(3);
-    private final Empleado responsable = new Empleado("Pérez", "Ana", "ana@cm.gob.ar", new Usuario("aperez"),
+    private final Empleado responsable = new Empleado("Pérez", "Ana", "ana@cmcordoba.example", new Usuario("aperez"),
             new ComisionMedica(1, "CM Córdoba", "", "", ""));
 
     /** Documentación cuyo historial termina en el estado indicado (el actual). */
