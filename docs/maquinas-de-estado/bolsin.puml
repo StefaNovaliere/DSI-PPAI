@@ -1,0 +1,29 @@
+@startuml
+!pragma layout smetana
+title Máquina de estados de la clase Bolsín (según ERS v1.2)
+skinparam state {
+  BackgroundColor #F8CECC
+  BorderColor #B85450
+  FontName Arial
+}
+skinparam ArrowFontName Arial
+skinparam ArrowFontSize 11
+hide empty description
+
+state "Creado" as Creado
+state "Cerrado" as Cerrado
+state "Enviado" as Enviado
+state "Recibido en CM destino" as RecibidoEnCMDestino
+state "De baja" as DeBaja
+
+[*] --> Creado : CU 19 Generar bolsín /\nnew()
+Creado --> Creado : CU 20 Modificar bolsín\n(agregar o quitar remitos) /\nmodificar()
+Creado --> Cerrado : CU 39 Cerrar bolsín /\ncerrar(nroPrecinto)
+Cerrado --> Creado : CU 40 Reabrir bolsín /\nreabrir()
+Creado --> DeBaja : CU 21 Eliminar bolsín /\ndarDeBaja()
+Cerrado --> DeBaja : CU 21 Eliminar bolsín /\ndarDeBaja()
+Cerrado --> Enviado : CU 27 Registrar el retiro\nde bolsines / enviar()
+Enviado -[#C0392B,bold]-> RecibidoEnCMDestino : <color:#C0392B><b>CU 28 Registrar recepción\n<color:#C0392B><b>de bolsín / recibir()
+RecibidoEnCMDestino --> [*]
+DeBaja --> [*]
+@enduml
