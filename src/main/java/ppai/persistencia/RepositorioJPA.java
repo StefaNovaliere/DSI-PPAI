@@ -1,5 +1,12 @@
 package ppai.persistencia;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +21,6 @@ import jakarta.persistence.Persistence;
 import ppai.entidades.Bolsin;
 import ppai.entidades.ComisionMedica;
 import ppai.entidades.Empleado;
-import ppai.entidades.Estado;
 import ppai.entidades.Sesion;
 import ppai.entidades.TipoDocumento;
 import ppai.entidades.Usuario;
@@ -30,6 +36,11 @@ import ppai.entidades.Usuario;
 public class RepositorioJPA implements Repositorio, AutoCloseable {
 
     public static final String ARCHIVO_BD_POR_DEFECTO = "bolsines.db";
+    /**
+     * Versión del esquema de la base. Si el archivo es de una versión anterior
+     * del programa (otras tablas), se vuelve a crear con los datos de prueba.
+     */
+    static final int VERSION_ESQUEMA = 2;
     private static final Logger LOG_HIBERNATE = Logger.getLogger("org.hibernate");
 
     private final EntityManagerFactory fabrica;
@@ -41,14 +52,42 @@ public class RepositorioJPA implements Repositorio, AutoCloseable {
      */
     public RepositorioJPA(String archivoBD, boolean reiniciarDatos) {
         LOG_HIBERNATE.setLevel(Level.SEVERE);
+        boolean reiniciar = reiniciarDatos || esDeOtraVersion(archivoBD);
         Map<String, Object> propiedades = new HashMap<>();
         propiedades.put("jakarta.persistence.jdbc.url", "jdbc:sqlite:" + archivoBD);
-        propiedades.put("hibernate.hbm2ddl.auto", reiniciarDatos ? "create" : "update");
+        propiedades.put("hibernate.hbm2ddl.auto", reiniciar ? "create" : "update");
         fabrica = Persistence.createEntityManagerFactory("ppai-bolsines", propiedades);
         em = fabrica.createEntityManager();
         if (estaVacia()) {
             cargarDatosDePrueba();
         }
+        guardarVersionEsquema();
+    }
+
+    private static boolean esDeOtraVersion(String archivoBD) {
+        if (!Files.exists(Path.of(archivoBD))) {
+            return false;
+        }
+        int version;
+        try (Connection conexion = DriverManager.getConnection("jdbc:sqlite:" + archivoBD);
+             Statement consulta = conexion.createStatement();
+             ResultSet resultado = consulta.executeQuery("PRAGMA user_version")) {
+            version = resultado.next() ? resultado.getInt(1) : 0;
+        } catch (SQLException e) {
+            version = 0;
+        }
+        if (version == VERSION_ESQUEMA) {
+            return false;
+        }
+        System.out.println("La base " + archivoBD + " es de una version anterior del programa: "
+                + "se vuelve a crear con los datos de prueba.");
+        return true;
+    }
+
+    private void guardarVersionEsquema() {
+        iniciarTransaccion();
+        em.createNativeQuery("PRAGMA user_version = " + VERSION_ESQUEMA).executeUpdate();
+        confirmarTransaccion();
     }
 
     private boolean estaVacia() {
@@ -63,9 +102,6 @@ public class RepositorioJPA implements Repositorio, AutoCloseable {
         }
         for (TipoDocumento tipo : datos.getTiposDocumento()) {
             em.persist(tipo);
-        }
-        for (Estado estado : datos.getEstados()) {
-            em.persist(estado);
         }
         for (Usuario usuario : datos.getUsuarios()) {
             em.persist(usuario);
@@ -96,11 +132,6 @@ public class RepositorioJPA implements Repositorio, AutoCloseable {
     @Override
     public List<Bolsin> getBolsines() {
         return em.createQuery("select b from Bolsin b order by b.numeroBolsin", Bolsin.class).getResultList();
-    }
-
-    @Override
-    public List<Estado> getEstados() {
-        return em.createQuery("select e from Estado e", Estado.class).getResultList();
     }
 
     @Override

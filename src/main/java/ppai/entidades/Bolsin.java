@@ -9,7 +9,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,11 +19,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import ppai.dto.DatosDocumentacion;
 import ppai.dto.DatosRemito;
+import ppai.entidades.estadobolsin.EstadoBolsin;
 
 /**
  * Bolsín: envío físico precintado de remitos entre Comisiones Médicas.
+ *
+ * <p>Patrón State - rol CONTEXTO: conoce su estado actual y le DELEGA la
+ * recepción. El estado concreto decide si el bolsín puede recibirse y cuál es
+ * su estado siguiente.
  */
 @Entity
 @Table(name = "bolsin")
@@ -49,6 +55,9 @@ public class Bolsin {
     @JoinColumn(name = "bolsin_id")
     @OrderBy("id")
     private List<CambioEstadoBolsin> cambiosEstado = new ArrayList<>();
+    /** No se guarda como columna: se obtiene del cambio de estado actual (ver restaurarEstadoActual). */
+    @Transient
+    private EstadoBolsin estadoActual;
 
     protected Bolsin() {
         // Requerido por JPA
@@ -68,8 +77,26 @@ public class Bolsin {
         remitos.add(remito);
     }
 
+    /**
+     * El estado actual (objeto del patrón State) es el del cambio de estado
+     * vigente. Se ejecuta al materializar el bolsín desde la base y cada vez que
+     * los datos de prueba le agregan un cambio de estado.
+     */
+    @PostLoad
+    void restaurarEstadoActual() {
+        CambioEstadoBolsin actual = buscarCambioEstadoActual();
+        estadoActual = actual == null ? null : actual.getEstado();
+    }
+
+    /** Agrega un cambio de estado al historial; el último sin fecha de fin es el estado actual. */
     public void agregarCambioEstado(CambioEstadoBolsin cambioEstado) {
         cambiosEstado.add(cambioEstado);
+        restaurarEstadoActual();
+    }
+
+    /** Lo usa el estado concreto al hacer la transición. */
+    public void setEstado(EstadoBolsin estado) {
+        this.estadoActual = estado;
     }
 
     /** Indica si el estado actual del bolsín es Enviado. */
@@ -96,47 +123,64 @@ public class Bolsin {
         return numeroPrecinto;
     }
 
-    /** Número y documentación de cada remito del bolsín. */
+    /** CU 28, paso 4: ¿el número de precinto del bolsín es el ingresado? (sin distinguir mayúsculas). */
+    public boolean tenesPrecinto(String precinto) {
+        return numeroPrecinto.trim().equalsIgnoreCase(precinto.trim());
+    }
+
+    /** CU 28, paso 4: ¿la CM origen del bolsín coincide con el texto ingresado? */
+    public boolean sosDeCMOrigen(String textoCMOrigen) {
+        return origen.coincideNombre(textoCMOrigen);
+    }
+
+    /** CU 28, flujo A5: la opción de redirigir sólo corresponde si la CM destino es la CMC. */
+    public boolean esDestinoCMC() {
+        return destino.esCentral();
+    }
+
+    /** CU 28, flujos A3 a A5: ¿la documentación con ese número está en algún remito del bolsín? */
+    public boolean contenesDocumentacion(int numeroDocumentacion) {
+        for (Remito remito : remitos) {
+            if (remito.contenesDocumentacion(numeroDocumentacion)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Número, estado y documentación de cada remito del bolsín. */
     public List<DatosRemito> obtenerInformacionRemito() {
         List<DatosRemito> informacion = new ArrayList<>();
         for (Remito remito : remitos) {
-            informacion.add(new DatosRemito(remito.obtenerNumero(), remito.obtenerDatosRemito()));
+            informacion.add(new DatosRemito(remito.obtenerNumero(), remito.obtenerDescripcionEstado(),
+                    remito.obtenerDatosRemito()));
         }
         return informacion;
     }
 
-    /** CU 28: el bolsín pasa a RecibidoEnCMDestino. */
-    public void recibirBolsin(LocalDateTime fechaHora, Estado recibidoEnCMDestino, Empleado responsable) {
-        CambioEstadoBolsin actual = buscarCambioEstadoActual();
-        if (actual != null) {
-            actual.setFechaHoraFin(fechaHora);
-        }
-        crearCEBolsin(fechaHora, recibidoEnCMDestino, responsable);
+    /** CU 28, paso 11: delega en el estado actual, que lo pasa a Recibido en CM destino. */
+    public void recibirBolsin(LocalDateTime fechaHora, Empleado responsable) {
+        estadoActual.recibir(this, fechaHora, responsable);
     }
 
-    private void crearCEBolsin(LocalDateTime fechaHora, Estado estado, Empleado responsable) {
-        agregarCambioEstado(new CambioEstadoBolsin(fechaHora, estado, responsable));
-    }
-
-    /** CU 28: recibe y acepta cada remito del bolsín. */
-    public void recibirYAceptarRemito(Estado recibidoYAceptado, LocalDateTime fechaHora, Empleado responsable) {
+    /**
+     * CU 28, paso 11 y flujos A3 a A5: recibe cada remito del bolsín según la
+     * opción elegida y la documentación que indicó el usuario.
+     */
+    public void recibirYAceptarRemito(OpcionRecepcion opcion, List<Integer> documentacionIndicada,
+                                      LocalDateTime fechaHora, Empleado responsable) {
         for (Remito remito : remitos) {
-            remito.recibirYAceptar(recibidoYAceptado, fechaHora, responsable);
+            remito.recibirYAceptar(opcion, documentacionIndicada, fechaHora, responsable);
         }
     }
 
-    /** Datos (con el estado vigente) de toda la documentación del bolsín. */
-    public List<DatosDocumentacion> obtenerInformacionDocumentacion() {
-        List<DatosDocumentacion> informacion = new ArrayList<>();
-        for (Remito remito : remitos) {
-            informacion.addAll(remito.obtenerDatosRemito());
-        }
-        return informacion;
+    /** CU 29: la notificación se envía a la CM origen del bolsín. */
+    public String obtenerCorreoCMOrigen() {
+        return origen.getEmail();
     }
 
-    public Estado getEstadoActual() {
-        CambioEstadoBolsin actual = buscarCambioEstadoActual();
-        return actual == null ? null : actual.getEstado();
+    public EstadoBolsin getEstadoActual() {
+        return estadoActual;
     }
 
     private CambioEstadoBolsin buscarCambioEstadoActual() {

@@ -12,7 +12,6 @@
         <class>ppai.entidades.Empleado</class>
         <class>ppai.entidades.Sesion</class>
         <class>ppai.entidades.TipoDocumento</class>
-        <class>ppai.entidades.Estado</class>
         <class>ppai.entidades.Bolsin</class>
         <class>ppai.entidades.CambioEstadoBolsin</class>
         <class>ppai.entidades.Remito</class>
@@ -20,6 +19,8 @@
         <class>ppai.entidades.Documentacion</class>
         <class>ppai.entidades.CambioEstadoDocumentacion</class>
         <class>ppai.persistencia.ConversorEstadoDocumentacion</class>
+        <class>ppai.persistencia.ConversorEstadoBolsin</class>
+        <class>ppai.persistencia.ConversorEstadoRemito</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
 
         <properties>

@@ -33,8 +33,8 @@ correo.remitente=tu.cuenta@gmail.com
 #correo.remitente=bolsines@grupo10.example
 
 # ---------- Para la demo ----------
-# Los empleados de prueba tienen correos ficticios (@...example).
-# Poné acá tu casilla y TODOS los correos te van a llegar a vos
-# (el correo aclara a quién iba dirigido). Dejalo vacío para enviar
-# al correo real del empleado.
+# El correo se le envía a la CM origen del bolsín, y las CM de prueba
+# tienen correos ficticios (@...example). Poné acá tu casilla y TODOS
+# los correos te van a llegar a vos (el correo aclara a quién iba
+# dirigido). Dejalo vacío para enviar al correo real de la CM origen.
 correo.redirigirA=tu.cuenta@gmail.com

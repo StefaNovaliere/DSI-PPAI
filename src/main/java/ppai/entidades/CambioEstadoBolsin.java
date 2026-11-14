@@ -1,5 +1,6 @@
 package ppai.entidades;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,8 +11,11 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
+import ppai.entidades.estadobolsin.EstadoBolsin;
+
 /**
- * Historial de estados del Bolsín.
+ * Historial de estados del Bolsín. Referencia al estado concreto (patrón
+ * State) que tuvo el bolsín en ese período.
  */
 @Entity
 @Table(name = "cambio_estado_bolsin")
@@ -23,9 +27,9 @@ public class CambioEstadoBolsin {
 
     private LocalDateTime fechaHoraInicio;
     private LocalDateTime fechaHoraFin;
-    @ManyToOne
-    @JoinColumn(name = "estado_id")
-    private Estado estado;
+    /** Se guarda el nombre del estado; lo convierte ConversorEstadoBolsin. */
+    @Column(name = "estado", nullable = false)
+    private EstadoBolsin estado;
     @ManyToOne
     @JoinColumn(name = "responsable_id")
     private Empleado responsableCE;
@@ -34,7 +38,7 @@ public class CambioEstadoBolsin {
         // Requerido por JPA
     }
 
-    public CambioEstadoBolsin(LocalDateTime fechaHoraInicio, Estado estado, Empleado responsableCE) {
+    public CambioEstadoBolsin(LocalDateTime fechaHoraInicio, EstadoBolsin estado, Empleado responsableCE) {
         this.fechaHoraInicio = fechaHoraInicio;
         this.estado = estado;
         this.responsableCE = responsableCE;
@@ -61,7 +65,7 @@ public class CambioEstadoBolsin {
         return fechaHoraFin;
     }
 
-    public Estado getEstado() {
+    public EstadoBolsin getEstado() {
         return estado;
     }
 

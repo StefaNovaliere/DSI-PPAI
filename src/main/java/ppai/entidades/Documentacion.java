@@ -87,9 +87,13 @@ public class Documentacion {
         }
     }
 
-    /** CU 28 Registrar Recepción de Bolsín: delega en el estado actual. */
-    public void recibir(LocalDateTime fechaHora, Empleado responsable) {
-        estadoActual.recibir(this, fechaHora, responsable);
+    /**
+     * Evento recibir() del CU 28: delega en el estado actual, que según la
+     * situación de la documentación (la guarda de la transición) decide a qué
+     * estado pasa, o rechaza la recepción si no tiene esa transición.
+     */
+    public void recibir(LocalDateTime fechaHora, Empleado responsable, SituacionDocumentacion situacion) {
+        estadoActual.recibir(this, situacion, fechaHora, responsable);
     }
 
     // Métodos que usa el estado concreto para hacer la transición

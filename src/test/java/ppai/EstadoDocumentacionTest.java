@@ -5,6 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static ppai.entidades.SituacionDocumentacion.IGUAL_A_LA_REGISTRADA;
+import static ppai.entidades.SituacionDocumentacion.NO_CORRESPONDE_A_LA_CM_DESTINO;
+import static ppai.entidades.SituacionDocumentacion.NO_RECIBIDA;
+import static ppai.entidades.SituacionDocumentacion.PARA_REDIRIGIR;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,6 +26,7 @@ import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.ComisionMedica;
 import ppai.entidades.Documentacion;
 import ppai.entidades.Empleado;
+import ppai.entidades.SituacionDocumentacion;
 import ppai.entidades.TipoDocumento;
 import ppai.entidades.Usuario;
 import ppai.entidades.estadodocumentacion.DeBaja;
@@ -37,14 +42,15 @@ import ppai.entidades.estadodocumentacion.Registrada;
 
 /**
  * Pruebas del patrón State en el CU 28: el mismo evento recibir() se resuelve
- * distinto según el objeto estado que tenga la documentación.
+ * distinto según el objeto estado que tenga la documentación y la guarda
+ * (situación), siguiendo la máquina de estados de Documentación de la Entrega 1.
  */
 class EstadoDocumentacionTest {
 
     private static final LocalDateTime T0 = LocalDateTime.of(2026, 9, 1, 8, 0);
     private static final LocalDateTime RECEPCION = T0.plusDays(3);
     private final Empleado responsable = new Empleado("Pérez", "Ana", "ana@cmcordoba.example", new Usuario("aperez"),
-            new ComisionMedica(1, "CM Córdoba", "", "", ""));
+            new ComisionMedica(0, "Comisión Médica Central", "", "", "", true));
 
     /** Documentación cuyo historial termina en el estado indicado (el actual). */
     private Documentacion documentacionEn(EstadoDocumentacion estadoActual) {
@@ -57,18 +63,38 @@ class EstadoDocumentacionTest {
                 historial);
     }
 
-    @Test
-    void enBolsinEnviadoAlRecibirseQuedaRecibidaYAceptada() {
-        Documentacion doc = documentacionEn(new EnBolsinEnviado());
-        doc.recibir(RECEPCION, responsable);
-        assertInstanceOf(RecibidaYAceptada.class, doc.getEstadoActual());
+    static Stream<Arguments> transicionesDelCU28() {
+        return Stream.of(
+                // EnBolsinEnviado: cuatro transiciones con recibir(), según la guarda
+                Arguments.of(new EnBolsinEnviado(), IGUAL_A_LA_REGISTRADA, RecibidaYAceptada.class),
+                Arguments.of(new EnBolsinEnviado(), NO_RECIBIDA, NoRecibida.class),
+                Arguments.of(new EnBolsinEnviado(), NO_CORRESPONDE_A_LA_CM_DESTINO, RecibidaYRechazada.class),
+                Arguments.of(new EnBolsinEnviado(), PARA_REDIRIGIR, ParaRedirigir.class),
+                // ParaRedirigir: [documentación correcta = True] y [documentación correcta = False]
+                Arguments.of(new ParaRedirigir(), IGUAL_A_LA_REGISTRADA, RecibidaYAceptada.class),
+                Arguments.of(new ParaRedirigir(), NO_CORRESPONDE_A_LA_CM_DESTINO, RecibidaYRechazada.class));
+    }
+
+    @ParameterizedTest(name = "{0} + recibir() [{1}] -> {2}")
+    @MethodSource("transicionesDelCU28")
+    void recibirPasaAlEstadoQueIndicaLaMaquinaDeEstados(EstadoDocumentacion estado, SituacionDocumentacion situacion,
+                                                        Class<? extends EstadoDocumentacion> estadoEsperado) {
+        Documentacion doc = documentacionEn(estado);
+        doc.recibir(RECEPCION, responsable, situacion);
+        assertInstanceOf(estadoEsperado, doc.getEstadoActual());
+        assertEquals(3, doc.getCambiosEstado().size());
     }
 
     @Test
-    void paraRedirigirAlRecibirseQuedaRecibidaYAceptada() {
+    void paraRedirigirNoTieneTransicionSiNoLlegoOSiSeVuelveARedirigir() {
         Documentacion doc = documentacionEn(new ParaRedirigir());
-        doc.recibir(RECEPCION, responsable);
-        assertInstanceOf(RecibidaYAceptada.class, doc.getEstadoActual());
+        IllegalStateException error = assertThrows(IllegalStateException.class,
+                () -> doc.recibir(RECEPCION, responsable, NO_RECIBIDA));
+        assertEquals("No se puede recibir la documentación N° 1 como «no recibida» porque está en estado "
+                + "«Para redirigir»", error.getMessage());
+        assertThrows(IllegalStateException.class, () -> doc.recibir(RECEPCION, responsable, PARA_REDIRIGIR));
+        assertInstanceOf(ParaRedirigir.class, doc.getEstadoActual());
+        assertEquals(2, doc.getCambiosEstado().size());
     }
 
     @Test
@@ -76,7 +102,7 @@ class EstadoDocumentacionTest {
         Documentacion doc = documentacionEn(new EnBolsinEnviado());
         CambioEstadoDocumentacion enviado = doc.getCambiosEstado().get(1);
 
-        doc.recibir(RECEPCION, responsable);
+        doc.recibir(RECEPCION, responsable, IGUAL_A_LA_REGISTRADA);
 
         List<CambioEstadoDocumentacion> historial = doc.getCambiosEstado();
         assertEquals(3, historial.size());
@@ -99,7 +125,9 @@ class EstadoDocumentacionTest {
     @MethodSource("estadosQueNoPuedenRecibirse")
     void losDemasEstadosRechazanLaRecepcion(EstadoDocumentacion estado) {
         Documentacion doc = documentacionEn(estado);
-        assertThrows(IllegalStateException.class, () -> doc.recibir(RECEPCION, responsable));
+        for (SituacionDocumentacion situacion : SituacionDocumentacion.values()) {
+            assertThrows(IllegalStateException.class, () -> doc.recibir(RECEPCION, responsable, situacion));
+        }
         // El estado y el historial no cambian
         assertSame(estado, doc.getEstadoActual());
         assertEquals(2, doc.getCambiosEstado().size());

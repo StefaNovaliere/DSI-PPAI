@@ -4,7 +4,6 @@ import java.util.List;
 
 import ppai.entidades.Bolsin;
 import ppai.entidades.Empleado;
-import ppai.entidades.Estado;
 import ppai.entidades.Sesion;
 
 /**
@@ -28,11 +27,6 @@ public class RepositorioEnMemoria implements Repositorio {
     @Override
     public List<Bolsin> getBolsines() {
         return datos.getBolsines();
-    }
-
-    @Override
-    public List<Estado> getEstados() {
-        return datos.getEstados();
     }
 
     @Override

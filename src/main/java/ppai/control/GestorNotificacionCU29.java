@@ -10,10 +10,11 @@ import ppai.correo.Html;
 import ppai.correo.ServicioCorreo;
 import ppai.dto.DatosDocumentacion;
 import ppai.dto.DatosRecepcion;
+import ppai.dto.DatosRemito;
 
 /**
- * CU 29 (incluido por el CU 28): notifica por correo electrónico la recepción
- * de un bolsín.
+ * CU 29 (incluido por el CU 28): notifica por correo electrónico a la CM
+ * origen la recepción de un bolsín y la situación de la documentación recibida.
  *
  * <p>Arma el correo con los datos de la recepción y lo envía con el
  * {@link ServicioCorreo} configurado. El envío se hace con el {@link Executor}
@@ -43,10 +44,10 @@ public class GestorNotificacionCU29 {
         this.avisos = avisos;
     }
 
-    /** Arma el correo de la recepción y lo envía al destinatario. */
+    /** Arma el correo de la recepción y lo envía a la CM origen. */
     public void notificarRecepcion(String correoDestino, DatosRecepcion recepcion) {
         Correo correo = armarCorreo(correoDestino, recepcion);
-        avisos.accept(PREFIJO_ENVIANDO + " a " + correoDestino + "…");
+        avisos.accept(PREFIJO_ENVIANDO + " a " + recepcion.cmOrigen() + " (" + correoDestino + ")…");
         ejecutor.execute(() -> enviar(correo, recepcion.numeroBolsin()));
     }
 
@@ -61,41 +62,52 @@ public class GestorNotificacionCU29 {
         }
     }
 
+    /** El correo le informa a la CM origen la situación de cada remito y de su documentación (Obs. 2). */
     private Correo armarCorreo(String destinatario, DatosRecepcion r) {
-        String asunto = "Recepción registrada del bolsín N° " + r.numeroBolsin() + " (precinto "
-                + r.numeroPrecinto() + ")";
+        String asunto = "Recepción del bolsín N° " + r.numeroBolsin() + " (precinto " + r.numeroPrecinto()
+                + ") en " + r.cmDestino();
         String fecha = r.fechaHora().format(FORMATO_FECHA);
 
         StringBuilder texto = new StringBuilder();
-        texto.append("Se registró la recepción del bolsín N° ").append(r.numeroBolsin())
-                .append(" (precinto ").append(r.numeroPrecinto()).append("), enviado desde ")
-                .append(r.cmOrigen()).append(" a ").append(r.cmDestino()).append(".\n\n");
+        texto.append(r.cmDestino()).append(" registró la recepción del bolsín N° ").append(r.numeroBolsin())
+                .append(" (precinto ").append(r.numeroPrecinto()).append(") enviado por ").append(r.cmOrigen())
+                .append(".\n\n");
         texto.append("Fecha y hora: ").append(fecha).append('\n');
-        texto.append("Registró: ").append(r.responsable()).append("\n\n");
-        texto.append("Documentación recibida:\n");
-        for (DatosDocumentacion doc : r.documentacion()) {
-            texto.append("  - N° ").append(doc.numero()).append(" · ").append(doc.tipoDocumento()).append(" · ")
-                    .append(doc.asunto()).append(" · ").append(doc.descripcionEstado()).append('\n');
+        texto.append("Registró: ").append(r.responsable()).append('\n');
+        texto.append("Opción de recepción: ").append(r.opcionRecepcion()).append("\n\n");
+        texto.append("Situación de la documentación:\n");
+        for (DatosRemito remito : r.remitos()) {
+            texto.append("Remito N° ").append(remito.numero()).append(" - ").append(remito.descripcionEstado())
+                    .append('\n');
+            for (DatosDocumentacion doc : remito.documentacion()) {
+                texto.append("  - N° ").append(doc.numero()).append(" · ").append(doc.tipoDocumento())
+                        .append(" · ").append(doc.asunto()).append(" · ").append(doc.descripcionEstado())
+                        .append('\n');
+            }
         }
         texto.append("\nEste es un mensaje automático del Sistema de Bolsines.\n");
 
         StringBuilder html = new StringBuilder();
         html.append("<div style=\"font-family:Arial,sans-serif;font-size:14px;color:#222\">");
         html.append("<h2 style=\"color:#1F3A5F;margin:0 0 12px\">Recepción de bolsín registrada</h2>");
-        html.append("<p>Se registró la recepción del <b>bolsín N° ").append(r.numeroBolsin()).append("</b> (precinto ")
-                .append(Html.escapar(r.numeroPrecinto())).append("), enviado desde <b>")
-                .append(Html.escapar(r.cmOrigen())).append("</b> a <b>").append(Html.escapar(r.cmDestino()))
-                .append("</b>.</p>");
+        html.append("<p><b>").append(Html.escapar(r.cmDestino())).append("</b> registró la recepción del <b>bolsín N° ")
+                .append(r.numeroBolsin()).append("</b> (precinto ").append(Html.escapar(r.numeroPrecinto()))
+                .append(") enviado por <b>").append(Html.escapar(r.cmOrigen())).append("</b>.</p>");
         html.append("<p>Fecha y hora: ").append(fecha).append("<br>Registró: ")
-                .append(Html.escapar(r.responsable())).append("</p>");
+                .append(Html.escapar(r.responsable())).append("<br>Opción de recepción: ")
+                .append(Html.escapar(r.opcionRecepcion())).append("</p>");
         html.append("<table style=\"border-collapse:collapse\" cellpadding=\"6\">");
         html.append("<tr style=\"background:#1F3A5F;color:#fff\"><th align=\"left\">N° Doc</th>"
                 + "<th align=\"left\">Tipo</th><th align=\"left\">Asunto</th><th align=\"left\">Estado</th></tr>");
-        for (DatosDocumentacion doc : r.documentacion()) {
-            html.append("<tr style=\"border-bottom:1px solid #ddd\"><td>").append(doc.numero()).append("</td><td>")
-                    .append(Html.escapar(doc.tipoDocumento())).append("</td><td>")
-                    .append(Html.escapar(doc.asunto())).append("</td><td>")
-                    .append(Html.escapar(doc.descripcionEstado())).append("</td></tr>");
+        for (DatosRemito remito : r.remitos()) {
+            html.append("<tr style=\"background:#EEF2F7\"><td colspan=\"4\"><b>Remito N° ").append(remito.numero())
+                    .append("</b> · ").append(Html.escapar(remito.descripcionEstado())).append("</td></tr>");
+            for (DatosDocumentacion doc : remito.documentacion()) {
+                html.append("<tr style=\"border-bottom:1px solid #ddd\"><td>").append(doc.numero())
+                        .append("</td><td>").append(Html.escapar(doc.tipoDocumento())).append("</td><td>")
+                        .append(Html.escapar(doc.asunto())).append("</td><td>")
+                        .append(Html.escapar(doc.descripcionEstado())).append("</td></tr>");
+            }
         }
         html.append("</table>");
         html.append("<p style=\"color:#777;font-size:12px;margin-top:16px\">"

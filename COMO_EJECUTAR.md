@@ -188,9 +188,10 @@ en ese caso usá una cuenta de Gmail personal.
 
 ### `correo.redirigirA`: para la demo
 
-Los empleados de prueba tienen correos ficticios (`ana.perez@cmcordoba.example`). Con
+El correo se le envía a la **CM origen** del bolsín, y las CM de prueba tienen correos
+ficticios (por ejemplo `mesa.entradas@cmrosario.example`). Con
 `correo.redirigirA=tu.cuenta@gmail.com`, **todos los correos te llegan a vos**, y el correo
-aclara a quién iba dirigido. Dejalo vacío solo si los empleados tienen correos reales.
+aclara a quién iba dirigido. Dejalo vacío solo si las CM tienen correos reales.
 
 ### Comprobar que quedó bien
 
@@ -206,53 +207,80 @@ envían porque…", el motivo indica qué falta.
 
 ## Paso 4 — Probar el caso de uso (guion)
 
-Datos de prueba: el usuario logueado es **Ana Pérez (`aperez`) de CM Córdoba**. Hay dos
-bolsines enviados a CM Córdoba pendientes de recepción: **101** (desde CM Rosario) y **102**
-(desde CM Mendoza). Los bolsines 103 (va a otra CM) y 104 (ya recibido) no deben aparecer.
+Datos de prueba: el usuario logueado es **Ana Pérez (`aperez`), de la Comisión Médica
+Central (CMC)**. Hay tres bolsines enviados a la CMC pendientes de recepción:
 
-> Empezá con `ejecutar-desde-cero.bat` para que los datos estén en su estado inicial.
+| Bolsín | Precinto | Desde | Contenido |
+|---|---|---|---|
+| **101** | PR-0101 | CM Rosario | Remito 5001 (docs 1001 y 1002) y remito 5002 (doc 1003, que está **Para redirigir**) |
+| **102** | PR-0102 | CM Mendoza | Remito 6001 (docs 1004 y 1005) |
+| **105** | PR-0105 | CM Córdoba | Remito 9001 (docs 1008 y 1009) y remito 9002 (doc 1010) |
 
-### Flujo principal
+Los bolsines 103 (va a CM Rosario) y 104 (ya recibido) no deben aparecer.
+
+> Empezá con `ejecutar-desde-cero.bat` para que los datos estén en su estado inicial. Cada
+> bolsín se puede recibir una sola vez; para repetir la prueba, volvé a ejecutar
+> `ejecutar-desde-cero.bat`.
+
+### Flujo principal (opción 1)
 
 1. En el menú, elegí **Registrar recepción de bolsín**.
-   → A la izquierda aparecen los bolsines por recibir: **101** y **102**.
+   → A la izquierda aparecen los bolsines por recibir: **101**, **102** y **105**.
 2. Hacé clic en el **101**.
    → A la derecha aparece su contenido: 2 remitos con 3 documentos, dos **En bolsín
-   enviado** (celeste) y uno **Para redirigir** (naranja).
-3. Apretá **Confirmar recepción** y, en el diálogo, **Registrar recepción**.
-   → Arriba aparece un aviso verde: *"Se registró la recepción del bolsín N° 101. Sus 3
-   documentos quedaron en estado «Recibida y aceptada»"*. Debajo dice *"Enviando la
-   notificación por correo…"*, y en unos segundos cambia a *"…se envió a …"*. Los 3
-   documentos quedan en verde y el 101 desaparece de la lista.
-4. Revisá la casilla de `correo.redirigirA` (o Mailtrap): llega el correo *"Recepción
-   registrada del bolsín N° 101 (precinto PR-0101)"* con la tabla de documentación. Si no
-   configuraste el correo, el aviso indica en qué archivo de `correos-simulados` quedó
-   guardado.
-
-![Resultado esperado](docs/capturas/05_recepcion_registrada.png)
+   enviado** (celeste) y uno **Para redirigir** (naranja). Abajo están las cuatro opciones
+   de recepción; está elegida la 1, *"El contenido del bolsín es igual al registrado"*.
+3. Apretá **Registrar recepción** y, en el diálogo, **Registrar recepción**.
+   → Arriba aparece un aviso verde: *"Se registró la recepción del bolsín N° 101. Remitos
+   N° 5001 «Recibido y aceptado», N° 5002 «Recibido y aceptado». Sus 3 documentos quedaron
+   en estado «Recibida y aceptada»"*. Debajo dice *"Enviando la notificación por correo a
+   CM Rosario…"*, y en unos segundos cambia a *"…se envió a …"*. El 101 desaparece de la
+   lista.
+4. Revisá la casilla de `correo.redirigirA` (o Mailtrap): llega el correo *"Recepción del
+   bolsín N° 101 (precinto PR-0101) en Comisión Médica Central"*, dirigido a CM Rosario, con
+   la situación de cada remito y documento. Si no configuraste el correo, el aviso indica en
+   qué archivo de `correos-simulados` quedó guardado.
 
 ### Flujos alternativos
 
 | Flujo | Cómo probarlo | Resultado esperado |
 |-------|---------------|--------------------|
-| **A2 – No confirmar** | Clic en el **102** → **Confirmar recepción** → **Volver** | Aviso: *"No se registró la recepción del bolsín N° 102: la operación fue cancelada"*. Los estados no cambian y el 102 sigue en la lista. |
-| **A3 – Hay diferencias** | Clic en el **102** → **Informar diferencias** | Aviso: la recepción no se registra y corresponde el CU 31. Nada cambia. |
-| **A1 – No hay bolsines** | Recibir el 101 y el 102 (flujo principal) | Aviso *"No hay bolsines enviados pendientes de recepción"* y la lista queda vacía. |
-| **A5 – Falla el correo** | Poner una contraseña incorrecta en `correo.properties`, abrir el programa y recibir un bolsín | Aviso *"No se pudo enviar la notificación por correo… rechazó el usuario o la contraseña. La recepción quedó registrada igual."* |
+| **A1 – Precinto inexistente** | En *Filtrar*, escribí `PR-9999` en **Precinto** → **Buscar** | Aviso: *"No se encontró ningún bolsín enviado a Comisión Médica Central con el número de precinto «PR-9999». Se muestran todos los bolsines pendientes."* |
+| **A2 – CM origen inexistente** | Escribí `Salta` en **CM origen** → **Buscar** | Aviso parecido, *"…desde la CM de origen «Salta»…"* |
+| Filtro con resultado | Escribí `rosario` en **CM origen** → **Buscar** (no importan mayúsculas ni tildes) | La lista muestra sólo el **101**. **Limpiar** vuelve a mostrar todos |
+| **A3 – No llegó toda la documentación** | Clic en el **105** → opción **2** → tildá la **1009** en la columna *No llegó* → **Registrar recepción** → **Registrar recepción** | La 1009 queda **No recibida** (rojo), la 1008 y la 1010 **Recibida y aceptada**. El remito 9001 queda **Recibido y aceptado parcial** y el 9002, **Recibido y aceptado** |
+| **A4 – Documentación que no corresponde** | Clic en el **102** → opción **3** → tildá la **1005** → registrar | La 1005 queda **Recibida y rechazada** y el remito 6001, **Recibido y aceptado parcial** |
+| **A5 – Redirigir a otra área** | Clic en el **102** → opción **4** → tildá la **1004** → registrar | La 1004 queda **Para redirigir** y el remito 6001, **Recibido y aceptado** (la opción 4 sólo vale cuando la CM destino es la CMC) |
+| **A6 – No confirmar** | Elegí una opción → **Registrar recepción** → **Volver** | Aviso: *"No se registró la recepción … porque no se confirmó"*. Vuelve a las opciones con lo que habías tildado; nada cambia |
+| Opción 2 a 4 sin tildar nada | Elegí la opción 2 y apretá **Registrar recepción** sin tildar | Aviso: *"No se indicó ninguna documentación…"* |
+| **Transición que no existe** | Clic en el **101** → opción **2** → tildá la **1003** (Para redirigir) → registrar | Aviso: *"No se puede recibir la documentación N° 1003 como «no recibida» porque está en estado «Para redirigir». No se guardó ningún cambio."* (en la máquina de estados no hay esa transición) |
+| No quedan bolsines | Recibí el 101, el 102 y el 105 | Aviso *"No hay bolsines enviados pendientes de recepción"* y la lista queda vacía |
+| Falla el correo | Poner una contraseña incorrecta en `correo.properties`, abrir el programa y recibir un bolsín | Aviso *"No se pudo enviar la notificación por correo… rechazó el usuario o la contraseña. La recepción quedó registrada igual."* |
+
+![A3: remito recibido y aceptado parcial](docs/capturas/08_recepcion_parcial.png)
 
 ### Verificar que se guardó en la base de datos
 
 1. Cerrá la aplicación y volvé a abrirla con **`ejecutar.bat`** (no el "desde cero").
-2. Menú → Registrar recepción de bolsín → el **101 ya no aparece**: la recepción quedó
-   guardada en `bolsines.db`.
+2. Menú → Registrar recepción de bolsín → los bolsines que recibiste **ya no aparecen**: la
+   recepción quedó guardada en `bolsines.db`.
 
 ### Dónde está el patrón State
 
-El patrón no se ve en la pantalla: es una decisión de diseño interno. Se refleja en que el
-bolsín 101 trae documentación en **dos estados distintos** y las dos se reciben
-correctamente con la misma operación `recibir()`, cada una resuelta por su propio objeto
-estado. En el código, ver `Documentacion.recibir()`, `EnBolsinEnviado.recibir()` y
-`ParaRedirigir.recibir()`; y en las pruebas, `EstadoDocumentacionTest`.
+El patrón no se ve en la pantalla: es una decisión de diseño interno. Se aplica a
+**Documentación, Bolsín y Remito**, y se refleja en el comportamiento:
+
+- El bolsín 101 trae documentación en **dos estados distintos** y las dos se reciben
+  correctamente con el mismo evento `recibir()`, cada una resuelta por su propio objeto
+  estado.
+- Con las opciones 2 a 4, la misma documentación *En bolsín enviado* pasa a estados
+  distintos según la guarda, como en la máquina de estados de la Entrega 1.
+- Si se pide una transición que no existe (la 1003 como "no llegó"), el objeto estado la
+  rechaza y no se guarda nada.
+
+En el código, ver `Documentacion.recibir()` y los estados de los paquetes
+`estadodocumentacion`, `estadobolsin` y `estadoremito`; en las pruebas,
+`EstadoDocumentacionTest` y `EstadoBolsinYRemitoTest`.
 
 El detalle del diseño y de dónde interviene el patrón está en el [README](README.md#7-patrón-state).
 
@@ -270,7 +298,8 @@ El detalle del diseño y de dónde interviene el patrón está en el [README](RE
   (Si en Descargas hay varios ZIP con el mismo nombre, el más nuevo puede terminar en `(1).zip`.)
 - **Si lo clonaste con Git:** `git pull`.
 
-Después, volver a ejecutar con `ejecutar-desde-cero.bat`.
+Después, volver a ejecutar con `ejecutar-desde-cero.bat`. (Si la base es de una versión
+anterior, el programa la vuelve a crear solo y lo avisa en la ventana negra.)
 
 ---
 
@@ -286,10 +315,10 @@ Después, volver a ejecutar con `ejecutar-desde-cero.bat`.
 | La compilación falla con errores de descarga / `Could not resolve` | Sin Internet (la primera vez es necesaria) | Conectarse a Internet y volver a compilar |
 | Errores de compilación en archivos que no existen en GitHub (por ejemplo `DemostracionPatronState.java`) | Se descomprimió una versión nueva **encima** de la anterior: Windows no borra los archivos que se eliminaron | Borrar la carpeta del proyecto y extraer el ZIP nuevo en una carpeta limpia (ver "Actualizar a una versión nueva") |
 | `UnsupportedClassVersionError` | La versión de Java es menor a 17 | Instalar Java 21 (Paso 1) |
-| La lista de bolsines aparece vacía | Ya se recibieron el 101 y el 102 (los cambios quedan guardados) | Usar `ejecutar-desde-cero.bat` o `--reiniciar-datos` |
+| La lista de bolsines aparece vacía | Ya se recibieron el 101, el 102 y el 105 (los cambios quedan guardados) | Usar `ejecutar-desde-cero.bat` o `--reiniciar-datos` |
 | "Windows protegió su PC" al abrir el `.bat` | Protección de Windows para archivos descargados | **Más información → Ejecutar de todas formas** |
 | *"No se pudo enviar la notificación… rechazó el usuario o la contraseña"* | Gmail no acepta la contraseña normal | Usar una **contraseña de aplicación** (Paso 3b, Opción A) |
 | *"No se pudo enviar la notificación… no se pudo conectar con smtp.gmail.com:587"* | La red bloquea el puerto, o no hay Internet | Probar puerto 465 con `correo.smtp.ssl=true` y `correo.smtp.starttls=false`, o usar los datos del celular |
 | El menú dice *"no se envían porque no hay un servidor de correo configurado"* | No está `correo.properties` en la carpeta del proyecto, o se llama `correo.properties.txt` | Revisar el nombre exacto y que esté junto a `ejecutar.bat` (Paso 3b) |
-| El correo dice que se envió pero no llega | Fue a la casilla ficticia del empleado | Completar `correo.redirigirA` con tu casilla; revisar también Spam |
+| El correo dice que se envió pero no llega | Fue a la casilla ficticia de la CM origen | Completar `correo.redirigirA` con tu casilla; revisar también Spam |
 | En la versión por consola los acentos se ven como `?` | Codificación de la consola de Windows | Ejecutar `chcp 65001` antes, o usar la ventana gráfica |

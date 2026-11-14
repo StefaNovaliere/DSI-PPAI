@@ -4,7 +4,6 @@ import java.util.List;
 
 import ppai.control.GestorRecepcionBolsin;
 import ppai.dto.DatosBolsin;
-import ppai.dto.DatosDocumentacion;
 import ppai.dto.DatosRemito;
 
 /**
@@ -23,6 +22,7 @@ public interface PantallaRecepcionBolsin {
 
     void mostrarCM(String nombreCM);
 
+    /** Paso 4: muestra los bolsines y permite seleccionar uno o filtrar por precinto o CM origen. */
     void solicitarSelBolsin(List<DatosBolsin> bolsines);
 
     /** Números de los remitos que contiene el bolsín seleccionado. */
@@ -31,11 +31,16 @@ public interface PantallaRecepcionBolsin {
     /** Documentación del bolsín seleccionado, agrupada por remito. */
     void mostrarDatosDocumentacion(List<DatosRemito> remitos);
 
+    /** Paso 7: las cuatro opciones de recepción del bolsín. */
     void solicitarSelOpcionesRecBolsin();
+
+    /** Flujos A3 a A5: pide la documentación que no llegó, no corresponde o se redirige. */
+    void solicitarSelDocumentacion(String indicacion);
 
     void solicitarConfirmacion();
 
-    void mostrarRecepcionRegistrada(int numeroBolsin, List<DatosDocumentacion> documentacion);
+    /** Estado final de cada remito y de su documentación. */
+    void mostrarRecepcionRegistrada(int numeroBolsin, List<DatosRemito> remitos);
 
     void mostrarMensaje(String mensaje);
 

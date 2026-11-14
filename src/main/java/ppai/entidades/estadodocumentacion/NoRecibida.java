@@ -3,8 +3,8 @@ package ppai.entidades.estadodocumentacion;
 /**
  * Patrón State - ESTADO CONCRETO: No recibida.
  *
- * <p>No redefine recibir(): desde este estado la documentación no puede
- * recibirse (la máquina de estados no tiene esa transición).
+ * <p>No redefine recibir(): en la máquina de estados las transiciones que
+ * salen de este estado son de otros casos de uso (registrar() y darDeBaja()).
  */
 public class NoRecibida extends EstadoDocumentacion {
 

@@ -1,19 +1,53 @@
-# Máquinas de estado (borrador según la ERS v1.2)
+# Máquinas de estado
 
-Armadas a partir de la ERS *2026 DSI Bolsines ERS v1.2*: reglas de negocio (sección 2.2),
-listado de casos de uso (3.3) y descripción del CU 28 y del CU 19 (4.1). Las transiciones en
-**rojo** son las del CU 28, que es donde se aplica el patrón State en nuestro caso de uso.
+| Clase | Diagrama | De dónde sale |
+|---|---|---|
+| Documentación | [maquina_estados_documentacion.png](../maquina_estados_documentacion.png) | **La de la Entrega 1**, que la profesora dio por correcta. No se modificó. |
+| Bolsín | [bolsin.png](bolsin.png) ([fuente](bolsin.puml)) | Armada con la ERS v1.2 (en la Entrega 1 no estaba) |
+| Remito | [remito.png](remito.png) ([fuente](remito.puml)) | Armada con la ERS v1.2 (en la Entrega 1 no estaba) |
 
-Los `.puml` son el código fuente de cada diagrama: se pueden editar y volver a generar en
+Las transiciones en **rojo** de Bolsín y Remito son las del CU 28. Los `.puml` son el código
+fuente de cada diagrama: se pueden editar y volver a generar en
 <https://www.plantuml.com/plantuml> o con la extensión PlantUML de VS Code o IntelliJ.
 
-| Diagrama | Imagen | Fuente |
-|---|---|---|
-| Bolsín | [bolsin.png](bolsin.png) | [bolsin.puml](bolsin.puml) |
-| Remito | [remito.png](remito.png) | [remito.puml](remito.puml) |
-| Documentación (corregida) | [documentacion.png](documentacion.png) | [documentacion.puml](documentacion.puml) |
+## Cómo las implementa el código (patrón State)
 
-## De dónde sale cada transición
+En las tres clases el código implementa **sólo las transiciones del CU 28**. Los eventos de
+los otros casos de uso no se programan, y los estados concretos que no tienen transiciones del
+CU 28 heredan el rechazo del estado abstracto.
+
+| Clase (contexto) | Estado abstracto | Estados concretos que redefinen el evento del CU 28 |
+|---|---|---|
+| `Documentacion` | `EstadoDocumentacion` | `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()` |
+| `Bolsin` | `EstadoBolsin` | `Enviado.recibir()` |
+| `Remito` | `EstadoRemito` | `EnBolsinEnviado.recibirYAceptar()` y `EnBolsinEnviado.recibirYAceptarParcial()` |
+
+### Documentación: el evento `recibir()` con guardas
+
+En la máquina de estados de la Entrega 1, todas las transiciones del CU 28 (y las del CU 31)
+usan el mismo evento **`recibir()`**, y la **guarda** decide a qué estado pasa. En el código,
+la guarda es la situación de la documentación (`SituacionDocumentacion`), que sale de la
+opción de recepción que elige el usuario:
+
+| Estado actual | Guarda en la máquina de estados | `SituacionDocumentacion` | Estado siguiente |
+|---|---|---|---|
+| EnBolsinEnviado | [todo remito y documentación igual a la registrada = True] | `IGUAL_A_LA_REGISTRADA` | Recibida&Aceptada |
+| EnBolsinEnviado | [todo remito y documentación igual a la registrada = False] | `NO_RECIBIDA` | NoRecibida |
+| EnBolsinEnviado | [Si la CMDestino no es la correcta] | `NO_CORRESPONDE_A_LA_CM_DESTINO` | Recibida&Rechazada |
+| EnBolsinEnviado | [CMDestino = CMC] | `PARA_REDIRIGIR` | ParaRedirigir |
+| ParaRedirigir | [documentación correcta = True] | `IGUAL_A_LA_REGISTRADA` | Recibida&Aceptada |
+| ParaRedirigir | [documentación correcta = False] | `NO_CORRESPONDE_A_LA_CM_DESTINO` | Recibida&Rechazada |
+
+Desde *ParaRedirigir* no hay transición si la documentación no llegó o se vuelve a
+redirigir: en ese caso el estado rechaza la recepción y no se guarda ningún cambio.
+
+**Para revisar con la profesora:** en la máquina de estados de la Entrega 1, las tres salidas
+de *EnBolsinEnviado* hacia *NoRecibida*, *Recibida&Rechazada* y *ParaRedirigir* tienen la
+etiqueta CU 31. En la ERS v1.2 esas situaciones son las opciones 2, 3 y 4 del paso 7 del
+**CU 28** (flujos A3, A4 y A5), y así las implementa el programa. Las transiciones son las
+mismas; lo único que cambiaría es el número de CU de la etiqueta.
+
+## De dónde sale cada transición de Bolsín y Remito
 
 ### Bolsín
 | Transición | Fuente en la ERS |
@@ -38,32 +72,19 @@ Los `.puml` son el código fuente de cada diagrama: se pueden editar y volver a 
 | En bolsín enviado → Recibido y aceptado | CU 28, paso 11 |
 | En bolsín enviado → Recibido y aceptado parcial | Regla "Recepción de un Bolsín": si no se recibe toda la documentación, "el remito queda como recibido y aceptado parcial" (CU 28, A3) |
 
-### Documentación: diferencias con la máquina de estados de la Entrega 1
-- **Las tres salidas de *En bolsín enviado* hacia *No recibida*, *Recibida y rechazada* y *Para
-  redirigir* son del CU 28**: son las opciones 2, 3 y 4 del paso 7, flujos alternativos A3, A4
-  y A5. En la Entrega 1 estaban como CU 31.
-- **De *No recibida* y *Recibida y rechazada* a *Registrada* o *De baja* es el CU 31**
-  (Registrar revisión de documentación: "permitir su reenvío a otra CM o su baja"). En la
-  Entrega 1 estaban como CU 7 y CU 9.
-- **De *Para redirigir* a *Recibida y aceptada* o *Recibida y rechazada*** lo hace el área de
-  la CMC al verificar la documentación (regla "Documentación para redirigir"). No es el CU 28
-  ni viaja en un bolsín, y la ERS no le asigna un número de caso de uso.
-- **Faltaba *Registrada → De baja*** (CU 9 Eliminar documentación: "validando que no se
-  encuentre en un remito ni incluida en un bolsín").
-- *En bolsín saliente → En remito* también ocurre con el **CU 21 Eliminar bolsín** (regla
-  "Movimiento de la Documentación"), no solo con el CU 20.
-
 ## Decisiones tomadas donde la ERS no es explícita (validar con el tutor)
 1. **Remito *Cancelado*:** la ERS dice que el remito "puede cancelarse" o "anularse", pero no
    nombra el estado. Se llamó *Cancelado*.
-2. **Remito en las opciones 3 y 4 del CU 28** (documentación que no corresponde, o para
-   redirigir): la ERS no dice en qué estado queda el remito. Solo define *Recibido y aceptado
-   parcial* para la opción 2.
+2. **Remito en las opciones 3 y 4 del CU 28:** la ERS sólo define *Recibido y aceptado
+   parcial* para la opción 2. Se decidió que con la opción 3 (documentación que no
+   corresponde) el remito también queda **parcial**, porque parte de su documentación se
+   rechaza; y que con la opción 4 (redirigir) queda **Recibido y aceptado**, porque la CMC
+   acepta la documentación y sólo la pasa a otra área. Está en `OpcionRecepcion`.
 3. **Modificar un bolsín cerrado:** el CU 20 dice "mientras no esté cerrado", pero la regla
    "Contenido de un Bolsín" dice que puede modificarse "ya sea que esté cerrado o no". Se
    resolvió con la regla del precinto: para modificar un bolsín cerrado primero se reabre
    (CU 40), y después se cierra con un precinto nuevo.
 4. **Estado inicial del remito:** la ERS usa "creado", salvo el CU 19 A1, que dice "generado".
    Se usó *Creado*.
-5. **Opción 2 del CU 28:** la documentación que llegó pasa a *Recibida y aceptada* y la que no
-   llegó, a *No recibida*. La ERS solo lo dice explícitamente para la que no llegó.
+5. **Opciones 2 a 4 del CU 28:** la documentación que el usuario no marca pasa a *Recibida y
+   aceptada*. La ERS sólo dice qué pasa con la documentación marcada.

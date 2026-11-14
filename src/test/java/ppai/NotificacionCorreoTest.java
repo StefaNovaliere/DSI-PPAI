@@ -35,6 +35,7 @@ import ppai.correo.ServicioCorreoSimulado;
 import ppai.correo.ServicioCorreoSmtp;
 import ppai.dto.DatosDocumentacion;
 import ppai.dto.DatosRecepcion;
+import ppai.dto.DatosRemito;
 import ppai.persistencia.RepositorioEnMemoria;
 
 /**
@@ -57,12 +58,13 @@ class NotificacionCorreoTest {
     }
 
     private DatosRecepcion recepcion() {
-        return new DatosRecepcion(101, "PR-0101", "CM Rosario", "CM Córdoba", LocalDateTime.of(2026, 11, 11, 10, 30),
-                "Pérez, Ana", List.of(
+        return new DatosRecepcion(101, "PR-0101", "CM Rosario", "Comisión Médica Central",
+                LocalDateTime.of(2026, 11, 11, 10, 30), "Pérez, Ana", "No se recibe toda la documentación",
+                List.of(new DatosRemito(5001, "Recibido y aceptado parcial", List.of(
                         new DatosDocumentacion(1001, "Expediente de incapacidad laboral", "Expediente",
                                 "Recibida&Aceptada", "Recibida y aceptada"),
-                        new DatosDocumentacion(1003, "Estudio mal derivado a Mendoza", "Estudio Complementario",
-                                "Recibida&Aceptada", "Recibida y aceptada")));
+                        new DatosDocumentacion(1002, "Dictamen de junta médica", "Dictamen Médico",
+                                "NoRecibida", "No recibida")))));
     }
 
     private static String textoPlano(MimeMessage mensaje) throws Exception {
@@ -80,19 +82,22 @@ class NotificacionCorreoTest {
     void seEnviaElCorreoConLosDatosDeLaRecepcion() throws Exception {
         GestorNotificacionCU29 gestor = new GestorNotificacionCU29(smtpDePrueba(""), Runnable::run, avisos::add);
 
-        gestor.notificarRecepcion("ana.perez@cmcordoba.example", recepcion());
+        gestor.notificarRecepcion("mesa.entradas@cmrosario.example", recepcion());
 
         MimeMessage[] recibidos = servidorSmtp.getReceivedMessages();
         assertEquals(1, recibidos.length);
         MimeMessage correo = recibidos[0];
-        assertEquals("ana.perez@cmcordoba.example", correo.getRecipients(Message.RecipientType.TO)[0].toString());
-        assertEquals("Recepción registrada del bolsín N° 101 (precinto PR-0101)", correo.getSubject());
+        assertEquals("mesa.entradas@cmrosario.example", correo.getRecipients(Message.RecipientType.TO)[0].toString());
+        assertEquals("Recepción del bolsín N° 101 (precinto PR-0101) en Comisión Médica Central", correo.getSubject());
         String texto = textoPlano(correo);
-        assertTrue(texto.contains("CM Rosario a CM Córdoba"));
+        assertTrue(texto.contains("Comisión Médica Central registró la recepción del bolsín N° 101 (precinto PR-0101) "
+                + "enviado por CM Rosario."));
         assertTrue(texto.contains("Registró: Pérez, Ana"));
-        assertTrue(texto.contains("N° 1003 · Estudio Complementario · Estudio mal derivado a Mendoza · Recibida y aceptada"));
+        assertTrue(texto.contains("Opción de recepción: No se recibe toda la documentación"));
+        assertTrue(texto.contains("Remito N° 5001 - Recibido y aceptado parcial"));
+        assertTrue(texto.contains("N° 1002 · Dictamen Médico · Dictamen de junta médica · No recibida"));
         assertTrue(avisos.get(0).startsWith(GestorNotificacionCU29.PREFIJO_ENVIANDO));
-        assertTrue(avisos.get(1).contains("se envió a ana.perez@cmcordoba.example"));
+        assertTrue(avisos.get(1).contains("se envió a mesa.entradas@cmrosario.example"));
     }
 
     @Test
@@ -100,11 +105,11 @@ class NotificacionCorreoTest {
         GestorNotificacionCU29 gestor = new GestorNotificacionCU29(smtpDePrueba("demo@grupo10.example"), Runnable::run,
                 avisos::add);
 
-        gestor.notificarRecepcion("ana.perez@cmcordoba.example", recepcion());
+        gestor.notificarRecepcion("mesa.entradas@cmrosario.example", recepcion());
 
         MimeMessage correo = servidorSmtp.getReceivedMessages()[0];
         assertEquals("demo@grupo10.example", correo.getRecipients(Message.RecipientType.TO)[0].toString());
-        assertTrue(textoPlano(correo).contains("Destinatario original: ana.perez@cmcordoba.example"));
+        assertTrue(textoPlano(correo).contains("Destinatario original: mesa.entradas@cmrosario.example"));
     }
 
     @Test
@@ -113,7 +118,7 @@ class NotificacionCorreoTest {
                 "bolsines@grupo10.example", "");
         GestorNotificacionCU29 gestor = new GestorNotificacionCU29(servidorCaido, Runnable::run, avisos::add);
 
-        gestor.notificarRecepcion("ana.perez@cmcordoba.example", recepcion());
+        gestor.notificarRecepcion("mesa.entradas@cmrosario.example", recepcion());
 
         assertTrue(avisos.get(1).startsWith(GestorNotificacionCU29.PREFIJO_ERROR));
         assertTrue(avisos.get(1).contains("La recepción quedó registrada igual"));
@@ -124,13 +129,13 @@ class NotificacionCorreoTest {
         GestorNotificacionCU29 gestor = new GestorNotificacionCU29(
                 new ServicioCorreoSimulado(carpeta, "no hay servidor"), Runnable::run, avisos::add);
 
-        gestor.notificarRecepcion("ana.perez@cmcordoba.example", recepcion());
+        gestor.notificarRecepcion("mesa.entradas@cmrosario.example", recepcion());
 
         try (var archivos = Files.list(carpeta)) {
             Path archivo = archivos.findFirst().orElseThrow();
             String contenido = Files.readString(archivo, StandardCharsets.UTF_8);
-            assertTrue(contenido.contains("Para: ana.perez@cmcordoba.example"));
-            assertTrue(contenido.contains("Estudio mal derivado a Mendoza"));
+            assertTrue(contenido.contains("Para: mesa.entradas@cmrosario.example"));
+            assertTrue(contenido.contains("Dictamen de junta médica"));
         }
         assertTrue(avisos.get(1).contains("no se envió porque no hay servidor"));
     }
@@ -158,7 +163,7 @@ class NotificacionCorreoTest {
     }
 
     @Test
-    void alRegistrarLaRecepcionSeEnviaElCorreoAlEmpleadoLogueado() throws Exception {
+    void alRegistrarLaRecepcionSeEnviaElCorreoALaCMOrigen() throws Exception {
         ByteArrayOutputStream salida = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(salida, true, StandardCharsets.UTF_8);
         PantallaConsolaRecepcionBolsin pantalla = new PantallaConsolaRecepcionBolsin(new Scanner("101\n1\nS\n"), out);
@@ -170,12 +175,15 @@ class NotificacionCorreoTest {
 
         MimeMessage[] recibidos = servidorSmtp.getReceivedMessages();
         assertEquals(1, recibidos.length);
-        assertEquals("ana.perez@cmcordoba.example", recibidos[0].getRecipients(Message.RecipientType.TO)[0].toString());
+        assertEquals("mesa.entradas@cmrosario.example",
+                recibidos[0].getRecipients(Message.RecipientType.TO)[0].toString());
         String texto = textoPlano(recibidos[0]);
-        assertTrue(texto.contains("bolsín N° 101 (precinto PR-0101), enviado desde CM Rosario a CM Córdoba"));
+        assertTrue(texto.contains("bolsín N° 101 (precinto PR-0101) enviado por CM Rosario"));
+        assertTrue(texto.contains("Opción de recepción: El contenido del bolsín es igual al registrado"));
+        assertTrue(texto.contains("Remito N° 5001 - Recibido y aceptado"));
         assertTrue(texto.contains("N° 1001"));
         assertTrue(texto.contains("N° 1002"));
         assertTrue(texto.contains("N° 1003"));
-        assertTrue(salida.toString(StandardCharsets.UTF_8).contains("se envió a ana.perez@cmcordoba.example"));
+        assertTrue(salida.toString(StandardCharsets.UTF_8).contains("se envió a mesa.entradas@cmrosario.example"));
     }
 }

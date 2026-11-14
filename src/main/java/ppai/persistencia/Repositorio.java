@@ -4,7 +4,6 @@ import java.util.List;
 
 import ppai.entidades.Bolsin;
 import ppai.entidades.Empleado;
-import ppai.entidades.Estado;
 import ppai.entidades.Sesion;
 
 /**
@@ -20,8 +19,6 @@ public interface Repositorio {
     List<Empleado> getEmpleados();
 
     List<Bolsin> getBolsines();
-
-    List<Estado> getEstados();
 
     void iniciarTransaccion();
 
