@@ -30,7 +30,7 @@ import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.Registrada;
 import ppai.entidades.estadoremito.EstadoRemito;
-import ppai.entidades.estadoremito.RecibidoYAceptado;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
 
 /**
  * Arma el conjunto de objetos de prueba del CU 28. Lo usan el repositorio JPA
@@ -121,7 +121,7 @@ public class DatosDePrueba {
         // Bolsín 104: CM Rosario -> CMC, ya recibido (no se lista)
         Documentacion doc7 = documentacionEnviada(1007, "Expediente cerrado", expediente, t0, empRosario);
         doc7.recibir(t0.plusDays(2), empCMC, SituacionDocumentacion.IGUAL_A_LA_REGISTRADA);
-        Remito r8001 = remito(8001, t0, cmRosario, cmc, new RecibidoYAceptado(), detalle(AREA_JURIDICA, doc7));
+        Remito r8001 = remito(8001, t0, cmRosario, cmc, new RemitoRecibidoYAceptado(), detalle(AREA_JURIDICA, doc7));
         Bolsin bolsin104 = bolsinEnviado(104, "PR-0104", 0.4, cmRosario, cmc, t0, empRosario, r8001);
         agregarCambioEstado(bolsin104, new RecibidoEnCMDestino(), t0.plusDays(2), empCMC);
         bolsines.add(bolsin104);
@@ -204,7 +204,7 @@ public class DatosDePrueba {
         return bolsin;
     }
 
-    /** Cierra el cambio de estado vigente del bolsín y agrega el nuevo. */
+    /** Cierra el cambio de estado vigente del bolsín, agrega el nuevo y lo deja como estado actual. */
     private void agregarCambioEstado(Bolsin bolsin, EstadoBolsin estado,
                                      LocalDateTime fechaHora, Empleado responsable) {
         for (CambioEstadoBolsin cambioEstado : bolsin.getCambiosEstado()) {
@@ -212,6 +212,7 @@ public class DatosDePrueba {
                 cambioEstado.setFechaHoraFin(fechaHora);
             }
         }
+        bolsin.setEstado(estado);
         bolsin.agregarCambioEstado(new CambioEstadoBolsin(fechaHora, estado, responsable));
     }
 

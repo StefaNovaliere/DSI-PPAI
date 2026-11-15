@@ -39,8 +39,8 @@ public abstract class EstadoDocumentacion {
     }
 
     /** CU 28: recibir() con la situación de la documentación como guarda. */
-    public void recibir(Documentacion documentacion, SituacionDocumentacion situacion, LocalDateTime fechaHora,
-                        Empleado responsable) {
+    public void recibir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable,
+                        SituacionDocumentacion situacion) {
         throw recepcionInvalida(documentacion, situacion);
     }
 
@@ -50,20 +50,9 @@ public abstract class EstadoDocumentacion {
                 + " como «" + situacion.getDescripcion() + "» porque está en estado «" + descripcion + "»");
     }
 
-    /**
-     * Pasos comunes de toda transición: cierra el cambio de estado actual,
-     * crea el nuevo cambio de estado y actualiza el estado del contexto.
-     */
-    protected void cambiarEstado(Documentacion documentacion, EstadoDocumentacion proximoEstado,
-                                 LocalDateTime fechaHora, Empleado responsable) {
-        CambioEstadoDocumentacion actual = buscarCambioEstadoActual(documentacion);
-        if (actual != null) {
-            actual.setFechaHoraFin(fechaHora);
-        }
-        documentacion.agregarCambioEstado(crearCambioEstado(proximoEstado, fechaHora, responsable));
-        documentacion.setEstado(proximoEstado);
-    }
+    // Pasos que usan los estados concretos al hacer la transición
 
+    /** Busca en el historial de la documentación el cambio de estado vigente (*sosActual()). */
     protected CambioEstadoDocumentacion buscarCambioEstadoActual(Documentacion documentacion) {
         for (CambioEstadoDocumentacion cambioEstado : documentacion.getCambiosEstado()) {
             if (cambioEstado.sosActual()) {
@@ -73,6 +62,7 @@ public abstract class EstadoDocumentacion {
         return null;
     }
 
+    /** Crea el cambio de estado del nuevo estado, con el empleado responsable. */
     protected CambioEstadoDocumentacion crearCambioEstado(EstadoDocumentacion estado, LocalDateTime fechaHora,
                                                           Empleado responsable) {
         return new CambioEstadoDocumentacion(fechaHora, estado, responsable);

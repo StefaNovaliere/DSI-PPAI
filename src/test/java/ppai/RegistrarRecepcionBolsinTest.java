@@ -35,8 +35,8 @@ import ppai.entidades.estadodocumentacion.NoRecibida;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
 import ppai.entidades.estadodocumentacion.RecibidaYRechazada;
-import ppai.entidades.estadoremito.RecibidoYAceptado;
-import ppai.entidades.estadoremito.RecibidoYAceptadoParcial;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptadoParcial;
 import ppai.persistencia.DatosDePrueba;
 import ppai.persistencia.Repositorio;
 import ppai.persistencia.RepositorioEnMemoria;
@@ -99,7 +99,7 @@ class RegistrarRecepcionBolsinTest {
         Bolsin recibido = bolsin(101);
         assertInstanceOf(RecibidoEnCMDestino.class, recibido.getEstadoActual());
         for (Remito remito : recibido.getRemitos()) {
-            assertInstanceOf(RecibidoYAceptado.class, remito.getEstado());
+            assertInstanceOf(RemitoRecibidoYAceptado.class, remito.getEstado());
             for (DetalleRemito detalle : remito.getDetallesRemito()) {
                 // EnBolsinEnviado y ParaRedirigir pasan a Recibida&Aceptada (máquina de estados de la Entrega 1)
                 assertInstanceOf(RecibidaYAceptada.class, detalle.getDocumentacion().getEstadoActual());
@@ -121,8 +121,8 @@ class RegistrarRecepcionBolsinTest {
         assertInstanceOf(RecibidaYAceptada.class, documentacion(105, 1008).getEstadoActual());
         assertInstanceOf(RecibidaYAceptada.class, documentacion(105, 1010).getEstadoActual());
         // El remito que tiene la documentación que no llegó queda parcial; el otro, aceptado
-        assertInstanceOf(RecibidoYAceptadoParcial.class, remito(105, 9001).getEstado());
-        assertInstanceOf(RecibidoYAceptado.class, remito(105, 9002).getEstado());
+        assertInstanceOf(RemitoRecibidoYAceptadoParcial.class, remito(105, 9001).getEstado());
+        assertInstanceOf(RemitoRecibidoYAceptado.class, remito(105, 9002).getEstado());
         assertTrue(texto.contains("Remito N° 9001 (Recibido y aceptado parcial)"));
         assertTrue(texto.contains("CM Córdoba (mesa.entradas@cmcordoba.example)"));
     }
@@ -133,7 +133,7 @@ class RegistrarRecepcionBolsinTest {
 
         assertInstanceOf(RecibidaYRechazada.class, documentacion(102, 1005).getEstadoActual());
         assertInstanceOf(RecibidaYAceptada.class, documentacion(102, 1004).getEstadoActual());
-        assertInstanceOf(RecibidoYAceptadoParcial.class, remito(102, 6001).getEstado());
+        assertInstanceOf(RemitoRecibidoYAceptadoParcial.class, remito(102, 6001).getEstado());
         assertInstanceOf(RecibidoEnCMDestino.class, bolsin(102).getEstadoActual());
     }
 
@@ -144,8 +144,8 @@ class RegistrarRecepcionBolsinTest {
         assertInstanceOf(ParaRedirigir.class, documentacion(105, 1008).getEstadoActual());
         assertInstanceOf(ParaRedirigir.class, documentacion(105, 1010).getEstadoActual());
         assertInstanceOf(RecibidaYAceptada.class, documentacion(105, 1009).getEstadoActual());
-        assertInstanceOf(RecibidoYAceptado.class, remito(105, 9001).getEstado());
-        assertInstanceOf(RecibidoYAceptado.class, remito(105, 9002).getEstado());
+        assertInstanceOf(RemitoRecibidoYAceptado.class, remito(105, 9001).getEstado());
+        assertInstanceOf(RemitoRecibidoYAceptado.class, remito(105, 9002).getEstado());
     }
 
     @Test

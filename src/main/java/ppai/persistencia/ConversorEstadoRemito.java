@@ -8,8 +8,8 @@ import ppai.entidades.estadoremito.Creado;
 import ppai.entidades.estadoremito.EnBolsinEnviado;
 import ppai.entidades.estadoremito.EnBolsinSaliente;
 import ppai.entidades.estadoremito.EstadoRemito;
-import ppai.entidades.estadoremito.RecibidoYAceptado;
-import ppai.entidades.estadoremito.RecibidoYAceptadoParcial;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptadoParcial;
 
 /**
  * Conversor de base de datos para los estados de Remito (patrón State). Igual
@@ -34,8 +34,8 @@ public class ConversorEstadoRemito implements AttributeConverter<EstadoRemito, S
             case "Cancelado" -> new Cancelado();
             case "EnBolsinSaliente" -> new EnBolsinSaliente();
             case "EnBolsinEnviado" -> new EnBolsinEnviado();
-            case "RecibidoYAceptado" -> new RecibidoYAceptado();
-            case "RecibidoYAceptadoParcial" -> new RecibidoYAceptadoParcial();
+            case "RecibidoYAceptado" -> new RemitoRecibidoYAceptado();
+            case "RecibidoYAceptadoParcial" -> new RemitoRecibidoYAceptadoParcial();
             default -> throw new IllegalArgumentException("Estado de remito desconocido: " + nombre);
         };
     }

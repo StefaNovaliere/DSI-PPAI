@@ -1,9 +1,9 @@
 package ppai.entidades.estadoremito;
 
 /** Patrón State - ESTADO CONCRETO: Recibido y aceptado, estado final. */
-public class RecibidoYAceptado extends EstadoRemito {
+public class RemitoRecibidoYAceptado extends EstadoRemito {
 
-    public RecibidoYAceptado() {
+    public RemitoRecibidoYAceptado() {
         super("RecibidoYAceptado", "Recibido y aceptado");
     }
 }

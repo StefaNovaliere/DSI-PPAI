@@ -60,8 +60,8 @@ public class DetalleRemito {
      * registrada. El detalle no sabe en qué estado está la documentación ni a
      * cuál pasa: eso lo resuelve su estado actual (patrón State).
      */
-    public void actualizarEstadoDoc(OpcionRecepcion opcion, List<Integer> documentacionIndicada,
-                                    LocalDateTime fechaHora, Empleado responsable) {
+    public void recibirYAceptarDoc(LocalDateTime fechaHora, Empleado responsable, OpcionRecepcion opcion,
+                                   List<Integer> documentacionIndicada) {
         SituacionDocumentacion situacion = esDocumentacionIndicada(documentacionIndicada)
                 ? opcion.getSituacionDocumentacionIndicada()
                 : SituacionDocumentacion.IGUAL_A_LA_REGISTRADA;

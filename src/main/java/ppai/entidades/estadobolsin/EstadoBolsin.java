@@ -49,20 +49,9 @@ public abstract class EstadoBolsin {
                 + " porque está en estado «" + descripcion + "»");
     }
 
-    /**
-     * Pasos comunes de toda transición: cierra el cambio de estado actual,
-     * crea el nuevo cambio de estado y actualiza el estado del contexto.
-     */
-    protected void cambiarEstado(Bolsin bolsin, EstadoBolsin proximoEstado, LocalDateTime fechaHora,
-                                 Empleado responsable) {
-        CambioEstadoBolsin actual = buscarCambioEstadoActual(bolsin);
-        if (actual != null) {
-            actual.setFechaHoraFin(fechaHora);
-        }
-        bolsin.agregarCambioEstado(crearCambioEstado(proximoEstado, fechaHora, responsable));
-        bolsin.setEstado(proximoEstado);
-    }
+    // Pasos que usan los estados concretos al hacer la transición
 
+    /** Busca en el historial del bolsín el cambio de estado vigente (*sosActual()). */
     protected CambioEstadoBolsin buscarCambioEstadoActual(Bolsin bolsin) {
         for (CambioEstadoBolsin cambioEstado : bolsin.getCambiosEstado()) {
             if (cambioEstado.sosActual()) {
@@ -72,6 +61,7 @@ public abstract class EstadoBolsin {
         return null;
     }
 
+    /** Crea el cambio de estado del nuevo estado, con el empleado responsable. */
     protected CambioEstadoBolsin crearCambioEstado(EstadoBolsin estado, LocalDateTime fechaHora,
                                                    Empleado responsable) {
         return new CambioEstadoBolsin(fechaHora, estado, responsable);

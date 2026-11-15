@@ -2,6 +2,7 @@ package ppai.entidades.estadodocumentacion;
 
 import java.time.LocalDateTime;
 
+import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.Documentacion;
 import ppai.entidades.Empleado;
 import ppai.entidades.SituacionDocumentacion;
@@ -20,18 +21,27 @@ public class EnBolsinEnviado extends EstadoDocumentacion {
     }
 
     @Override
-    public void recibir(Documentacion documentacion, SituacionDocumentacion situacion, LocalDateTime fechaHora,
-                        Empleado responsable) {
-        EstadoDocumentacion proximoEstado = switch (situacion) {
-            // [todo remito y documentación igual a la registrada = True] / recibir()
+    public void recibir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable,
+                        SituacionDocumentacion situacion) {
+        CambioEstadoDocumentacion actual = buscarCambioEstadoActual(documentacion);
+        actual.setFechaHoraFin(fechaHora);
+        EstadoDocumentacion proximoEstado = crearEstado(situacion);
+        CambioEstadoDocumentacion nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);
+        documentacion.setEstado(proximoEstado);
+        documentacion.agregarCambioEstado(nuevo);
+    }
+
+    /** Las guardas de las transiciones recibir() que salen de EnBolsinEnviado. */
+    private EstadoDocumentacion crearEstado(SituacionDocumentacion situacion) {
+        return switch (situacion) {
+            // [todo remito y documentación igual a la registrada = True]
             case IGUAL_A_LA_REGISTRADA -> new RecibidaYAceptada();
-            // [todo remito y documentación igual a la registrada = False] / recibir()
+            // [todo remito y documentación igual a la registrada = False]
             case NO_RECIBIDA -> new NoRecibida();
-            // [Si la CMDestino no es la correcta] / recibir()
+            // [Si la CMDestino no es la correcta]
             case NO_CORRESPONDE_A_LA_CM_DESTINO -> new RecibidaYRechazada();
-            // [CMDestino = CMC] / recibir()
+            // [CMDestino = CMC]
             case PARA_REDIRIGIR -> new ParaRedirigir();
         };
-        cambiarEstado(documentacion, proximoEstado, fechaHora, responsable);
     }
 }

@@ -268,9 +268,9 @@ public class GestorRecepcionBolsin {
         repositorio.iniciarTransaccion();
         try {
             // Cada objeto delega la transición en su estado actual: patrón State
-            bolsinSeleccionado.recibirBolsin(fechaYHora, empleadoLogueado);
-            bolsinSeleccionado.recibirYAceptarRemito(opcionSeleccionada, documentacionIndicada, fechaYHora,
-                    empleadoLogueado);
+            bolsinSeleccionado.recibir(fechaYHora, empleadoLogueado);
+            bolsinSeleccionado.recibirYAceptarRemito(fechaYHora, empleadoLogueado, opcionSeleccionada,
+                    documentacionIndicada);
             repositorio.actualizar(bolsinSeleccionado);
             repositorio.confirmarTransaccion();
         } catch (RuntimeException e) {

@@ -1,5 +1,11 @@
 package ppai.entidades.estadoremito;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import ppai.entidades.DetalleRemito;
+import ppai.entidades.Empleado;
+import ppai.entidades.OpcionRecepcion;
 import ppai.entidades.Remito;
 
 /** Patrón State - ESTADO CONCRETO: En bolsín enviado (CU 27 Registrar el retiro de bolsines). */
@@ -9,15 +15,37 @@ public class EnBolsinEnviado extends EstadoRemito {
         super("EnBolsinEnviado", "En bolsín enviado");
     }
 
-    /** CU 28, paso 11: En bolsín enviado -&gt; Recibido y aceptado. */
+    /**
+     * CU 28: el remito pasa a Recibido y aceptado (o parcial) y después se
+     * actualiza el estado de la documentación de cada detalle del remito.
+     */
     @Override
-    public void recibirYAceptar(Remito remito) {
-        cambiarEstado(remito, new RecibidoYAceptado());
+    public void recibirYAceptar(Remito remito, LocalDateTime fechaHora, Empleado responsable,
+                                OpcionRecepcion opcion, List<Integer> documentacionIndicada) {
+        EstadoRemito proximoEstado = crearEstado(remito, opcion, documentacionIndicada);
+        remito.setEstado(proximoEstado);
+        actualizarEstadoDocumentacion(remito.getDetallesRemito(), fechaHora, responsable, opcion,
+                documentacionIndicada);
     }
 
-    /** CU 28, flujos A3 y A4: En bolsín enviado -&gt; Recibido y aceptado parcial. */
-    @Override
-    public void recibirYAceptarParcial(Remito remito) {
-        cambiarEstado(remito, new RecibidoYAceptadoParcial());
+    /**
+     * Guardas de la máquina de estados: [toda la documentación del remito se
+     * recibió y corresponde] -&gt; Recibido y aceptado; [no se recibió o no
+     * corresponde parte de su documentación (opciones 2 y 3)] -&gt; Recibido y
+     * aceptado parcial.
+     */
+    private EstadoRemito crearEstado(Remito remito, OpcionRecepcion opcion, List<Integer> documentacionIndicada) {
+        if (opcion.dejaRemitoParcial() && remito.tenesDocumentacionIndicada(documentacionIndicada)) {
+            return new RemitoRecibidoYAceptadoParcial();
+        }
+        return new RemitoRecibidoYAceptado();
+    }
+
+    private void actualizarEstadoDocumentacion(List<DetalleRemito> detallesRemito, LocalDateTime fechaHora,
+                                               Empleado responsable, OpcionRecepcion opcion,
+                                               List<Integer> documentacionIndicada) {
+        for (DetalleRemito detalle : detallesRemito) {
+            detalle.recibirYAceptarDoc(fechaHora, responsable, opcion, documentacionIndicada);
+        }
     }
 }

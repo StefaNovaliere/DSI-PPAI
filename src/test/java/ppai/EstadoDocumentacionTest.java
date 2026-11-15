@@ -95,6 +95,8 @@ class EstadoDocumentacionTest {
         assertThrows(IllegalStateException.class, () -> doc.recibir(RECEPCION, responsable, PARA_REDIRIGIR));
         assertInstanceOf(ParaRedirigir.class, doc.getEstadoActual());
         assertEquals(2, doc.getCambiosEstado().size());
+        // El cambio de estado actual no se cerró
+        assertTrue(doc.getCambiosEstado().get(1).sosActual());
     }
 
     @Test

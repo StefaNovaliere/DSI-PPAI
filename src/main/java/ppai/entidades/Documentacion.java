@@ -93,7 +93,7 @@ public class Documentacion {
      * estado pasa, o rechaza la recepción si no tiene esa transición.
      */
     public void recibir(LocalDateTime fechaHora, Empleado responsable, SituacionDocumentacion situacion) {
-        estadoActual.recibir(this, situacion, fechaHora, responsable);
+        estadoActual.recibir(this, fechaHora, responsable, situacion);
     }
 
     // Métodos que usa el estado concreto para hacer la transición

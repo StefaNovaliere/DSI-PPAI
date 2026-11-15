@@ -79,8 +79,7 @@ public class Bolsin {
 
     /**
      * El estado actual (objeto del patrón State) es el del cambio de estado
-     * vigente. Se ejecuta al materializar el bolsín desde la base y cada vez que
-     * los datos de prueba le agregan un cambio de estado.
+     * vigente. Se ejecuta al materializar el bolsín desde la base.
      */
     @PostLoad
     void restaurarEstadoActual() {
@@ -88,10 +87,9 @@ public class Bolsin {
         estadoActual = actual == null ? null : actual.getEstado();
     }
 
-    /** Agrega un cambio de estado al historial; el último sin fecha de fin es el estado actual. */
+    /** Lo usa el estado concreto al hacer la transición. */
     public void agregarCambioEstado(CambioEstadoBolsin cambioEstado) {
         cambiosEstado.add(cambioEstado);
-        restaurarEstadoActual();
     }
 
     /** Lo usa el estado concreto al hacer la transición. */
@@ -159,7 +157,7 @@ public class Bolsin {
     }
 
     /** CU 28, paso 11: delega en el estado actual, que lo pasa a Recibido en CM destino. */
-    public void recibirBolsin(LocalDateTime fechaHora, Empleado responsable) {
+    public void recibir(LocalDateTime fechaHora, Empleado responsable) {
         estadoActual.recibir(this, fechaHora, responsable);
     }
 
@@ -167,10 +165,10 @@ public class Bolsin {
      * CU 28, paso 11 y flujos A3 a A5: recibe cada remito del bolsín según la
      * opción elegida y la documentación que indicó el usuario.
      */
-    public void recibirYAceptarRemito(OpcionRecepcion opcion, List<Integer> documentacionIndicada,
-                                      LocalDateTime fechaHora, Empleado responsable) {
+    public void recibirYAceptarRemito(LocalDateTime fechaHora, Empleado responsable, OpcionRecepcion opcion,
+                                      List<Integer> documentacionIndicada) {
         for (Remito remito : remitos) {
-            remito.recibirYAceptar(opcion, documentacionIndicada, fechaHora, responsable);
+            remito.recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada);
         }
     }
 

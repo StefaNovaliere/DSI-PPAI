@@ -96,25 +96,17 @@ public class Remito {
     }
 
     /**
-     * CU 28, paso 11 y flujos A3 a A5. El remito queda Recibido y aceptado
-     * parcial si el usuario indicó que parte de su documentación no llegó o no
-     * corresponde a la CM destino; si no, Recibido y aceptado. La transición la
-     * hace el estado actual (patrón State). Después le pide a cada detalle que
-     * actualice el estado de su documentación.
+     * CU 28, paso 11 y flujos A3 a A5: delega en el estado actual, que hace la
+     * transición (Recibido y aceptado, o parcial) y actualiza el estado de la
+     * documentación del remito (patrón State).
      */
-    public void recibirYAceptar(OpcionRecepcion opcion, List<Integer> documentacionIndicada,
-                                LocalDateTime fechaHora, Empleado responsable) {
-        if (opcion.dejaRemitoParcial() && tenesDocumentacionIndicada(documentacionIndicada)) {
-            estado.recibirYAceptarParcial(this);
-        } else {
-            estado.recibirYAceptar(this);
-        }
-        for (DetalleRemito detalle : detallesRemito) {
-            detalle.actualizarEstadoDoc(opcion, documentacionIndicada, fechaHora, responsable);
-        }
+    public void recibirYAceptar(LocalDateTime fechaHora, Empleado responsable, OpcionRecepcion opcion,
+                                List<Integer> documentacionIndicada) {
+        estado.recibirYAceptar(this, fechaHora, responsable, opcion, documentacionIndicada);
     }
 
-    private boolean tenesDocumentacionIndicada(List<Integer> documentacionIndicada) {
+    /** ¿El usuario indicó documentación de este remito (la que no llegó, no corresponde o se redirige)? */
+    public boolean tenesDocumentacionIndicada(List<Integer> documentacionIndicada) {
         for (DetalleRemito detalle : detallesRemito) {
             if (detalle.esDocumentacionIndicada(documentacionIndicada)) {
                 return true;

@@ -122,8 +122,8 @@ análisis (`opcRegistrarRecBolsin`, `registrarNuevoRecBolsin`, `buscarCMUsuarioL
 `buscarBolsinesEnviadosCM`, `buscarCMOrigenBolsines`, `solicitarSelBolsin`,
 `tomarSeleccionBolsin`, `buscarInformacionRemito`, `solicitarSelOpcionesRecBolsin`,
 `tomarSeleccionPrimeraOpcion`, `solicitarConfirmacion`, `tomarConfirmacion`,
-`getFechaYHoraActual`, `recibirBolsin`, `recibirYAceptarRemito`, `recibirYAceptar`,
-`actualizarEstadoDoc`, `recibir`, `buscarInformacionDocumentacion`, `buscarCorreoCM`,
+`getFechaYHoraActual`, `recibirYAceptarRemito`, `recibirYAceptar`, `recibir`,
+`buscarInformacionDocumentacion`, `buscarCorreoCM`,
 `llamarCU29`, `finCU`). Para los flujos alternativos se agregaron `tomarFiltroBolsines`,
 `tomarSeleccionSegundaOpcion`, `tomarSeleccionTerceraOpcion`, `tomarSeleccionCuartaOpcion`,
 `solicitarSelDocumentacion` y `tomarSeleccionDocumentacion`.
@@ -178,12 +178,18 @@ la cátedra):
 |---|---|---|---|
 | **Contexto** (conoce su estado actual y le delega el evento) | `Documentacion` | `Bolsin` | `Remito` |
 | **Estado abstracto** (declara el evento; por defecto lo rechaza) | `EstadoDocumentacion` | `EstadoBolsin` | `EstadoRemito` |
-| **Evento del CU 28** | `recibir(situación)` | `recibir()` | `recibirYAceptar()` / `recibirYAceptarParcial()` |
+| **Evento del CU 28** | `recibir()` (la guarda es la situación de la documentación) | `recibir()` | `recibirYAceptar()` (la guarda decide si queda parcial) |
 | **Estados concretos que lo redefinen** | `EnBolsinEnviado`, `ParaRedirigir` | `Enviado` | `EnBolsinEnviado` |
 | **Resto de los estados** (heredan el rechazo) | `Registrada`, `EnRemito`, `EnBolsinSaliente`, `NoRecibida`, `RecibidaYAceptada`, `RecibidaYRechazada`, `DeBaja` | `Creado`, `Cerrado`, `RecibidoEnCMDestino`, `DeBaja` | `Creado`, `Cancelado`, `EnBolsinSaliente`, `RecibidoYAceptado`, `RecibidoYAceptadoParcial` |
 
-Los estados abstractos tienen además los pasos comunes de toda transición: cerrar el cambio de
-estado actual, crear el nuevo y hacer `setEstado` en el contexto.
+El código sigue el **rediseño del diagrama de secuencia** que hizo el grupo: en cada
+transición, el estado concreto le pone `setFechaHoraFin()` al cambio de estado actual, crea el
+próximo estado con `crearEstado()`, crea el nuevo cambio de estado con `crearCambioEstado()`
+y le hace `setEstado()` y `agregarCambioEstado()` a la clase. El estado del **Remito**, además,
+actualiza la documentación de sus detalles (`actualizarEstadoDocumentacion()` →
+`DetalleRemito.recibirYAceptarDoc()` → `Documentacion.recibir()`). La correspondencia mensaje
+por mensaje está en
+[`docs/DIAGRAMA_SECUENCIA_REDISENO.md`](docs/DIAGRAMA_SECUENCIA_REDISENO.md).
 
 **Máquinas de estado:** la de Documentación es la de la Entrega 1, sin cambios
 ([`docs/maquina_estados_documentacion.png`](docs/maquina_estados_documentacion.png)). Las de
@@ -211,44 +217,53 @@ classDiagram
         -estadoActual: EstadoDocumentacion
         +recibir(fechaHora, responsable, situacion)
         +setEstado(estado)
-        +agregarCambioEstado(ce)
+        +agregarCambioEstado(cambioEstado)
     }
     class EstadoDocumentacion {
         <<abstract>>
-        +recibir(doc, situacion, fechaHora, responsable)
-        #cambiarEstado(doc, proximo, fechaHora, responsable)
+        +recibir(documentacion, fechaHora, responsable, situacion)
+        #buscarCambioEstadoActual(documentacion)
+        #crearCambioEstado(estado, fechaHora, responsable)
     }
     class EnBolsinEnviado {
-        +recibir(doc, situacion, fechaHora, responsable)
+        +recibir(documentacion, fechaHora, responsable, situacion)
+        -crearEstado(situacion)
     }
     class ParaRedirigir {
-        +recibir(doc, situacion, fechaHora, responsable)
+        +recibir(documentacion, fechaHora, responsable, situacion)
+        -crearEstado(situacion)
     }
     class Bolsin {
         -estadoActual: EstadoBolsin
-        +recibirBolsin(fechaHora, responsable)
+        +recibir(fechaHora, responsable)
+        +setEstado(estado)
+        +agregarCambioEstado(cambioEstado)
     }
     class EstadoBolsin {
         <<abstract>>
         +recibir(bolsin, fechaHora, responsable)
         +esEnviado()
+        #buscarCambioEstadoActual(bolsin)
+        #crearCambioEstado(estado, fechaHora, responsable)
     }
     class Enviado {
         +recibir(bolsin, fechaHora, responsable)
         +esEnviado()
+        -crearEstado()
     }
     class Remito {
         -estado: EstadoRemito
-        +recibirYAceptar(opcion, documentacionIndicada, fechaHora, responsable)
+        +recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada)
+        +setEstado(estado)
     }
     class EstadoRemito {
         <<abstract>>
-        +recibirYAceptar(remito)
-        +recibirYAceptarParcial(remito)
+        +recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)
     }
     class EnBolsinEnviadoRemito["estadoremito.EnBolsinEnviado"] {
-        +recibirYAceptar(remito)
-        +recibirYAceptarParcial(remito)
+        +recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)
+        -crearEstado(remito, opcion, documentacionIndicada)
+        -actualizarEstadoDocumentacion(detallesRemito, ...)
     }
     Documentacion --> EstadoDocumentacion : estadoActual
     EstadoDocumentacion <|-- EnBolsinEnviado
@@ -265,18 +280,25 @@ classDiagram
 
 ```
 GestorRecepcionBolsin.tomarConfirmacion()
- ├─ Bolsin.recibirBolsin()
- │   └─ estadoActual.recibir(this, ...)           ← Enviado: cierra CE, new RecibidoEnCMDestino
- └─ Bolsin.recibirYAceptarRemito(opción, documentación indicada)
-     └─ Remito.recibirYAceptar(...)
-         ├─ estado.recibirYAceptar(this)           ← o recibirYAceptarParcial() si la opción 2 o 3
-         │                                            marcó documentación de este remito
-         └─ DetalleRemito.actualizarEstadoDoc(...)  ← situación: la de la opción si el usuario la
-             └─ Documentacion.recibir(situación)       marcó; si no, IGUAL_A_LA_REGISTRADA
-                 └─ estadoActual.recibir(this, situación, ...)   ← polimorfismo
-                     EnBolsinEnviado: según la guarda → RecibidaYAceptada, NoRecibida,
-                                      RecibidaYRechazada o ParaRedirigir
-                     ParaRedirigir:   → RecibidaYAceptada o RecibidaYRechazada
+ ├─ getFechaYHoraActual()
+ ├─ Bolsin.recibir(fechaHora, responsable)
+ │   └─ Enviado.recibir(bolsin, ...)                  ← el estado actual del bolsín
+ │       buscarCambioEstadoActual() (*sosActual()) · setFechaHoraFin() · crearEstado(): new RecibidoEnCMDestino
+ │       crearCambioEstado(): new CambioEstadoBolsin · bolsin.setEstado() · bolsin.agregarCambioEstado()
+ └─ Bolsin.recibirYAceptarRemito(fechaHora, responsable, opción, documentación indicada)
+     └─ Remito.recibirYAceptar(...)                    (loop remitos)
+         └─ EnBolsinEnviado.recibirYAceptar(remito, ...) ← el estado del remito
+             crearEstado(): new RemitoRecibidoYAceptado (o RemitoRecibidoYAceptadoParcial si con
+                            la opción 2 o 3 se marcó documentación de este remito)
+             remito.setEstado()
+             actualizarEstadoDocumentacion(detalles)
+              └─ DetalleRemito.recibirYAceptarDoc(...)    (loop detalles)
+                  └─ Documentacion.recibir(fechaHora, responsable, situación)
+                      └─ EnBolsinEnviado.recibir(documentacion, ...)  ← o ParaRedirigir
+                          buscarCambioEstadoActual() (*sosActual()) · setFechaHoraFin()
+                          crearEstado(situación): según la guarda, RecibidaYAceptada, NoRecibida,
+                                                  RecibidaYRechazada o ParaRedirigir
+                          crearCambioEstado() · documentacion.setEstado() · agregarCambioEstado()
 ```
 
 ### Cambios respecto del análisis
@@ -310,7 +332,7 @@ comportamiento y en el código.
    `recibir()` sin preguntar en qué estado está, y las dos quedan `Recibida y aceptada`, cada
    una resuelta por su propio objeto estado. Si en cambio se marca la 1003 como "no llegó", su
    estado (`Para redirigir`) no tiene esa transición: la rechaza y no se guarda nada.
-2. **Código:** `Documentacion.recibir()`, `Bolsin.recibirBolsin()` y los eventos de `Remito`
+2. **Código:** `Documentacion.recibir()`, `Bolsin.recibir()` y `Remito.recibirYAceptar()`
    sólo delegan en el estado. En todo el sistema no hay ningún `if` o `switch` que pregunte
    en qué estado está un objeto: los únicos `switch` están dentro de los estados concretos y
    evalúan la **guarda** de la transición, como en la máquina de estados.

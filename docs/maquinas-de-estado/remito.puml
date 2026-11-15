@@ -23,8 +23,8 @@ Creado --> Cancelado : CU 17 Cancelar remito /\ncancelar()
 Creado --> EnBolsinSaliente : CU 19 Generar bolsín,\nCU 20 Modificar bolsín (agregar) /\nagregarABolsin()
 EnBolsinSaliente --> Creado : CU 20 Modificar bolsín (quitar),\nCU 21 Eliminar bolsín /\nquitarDeBolsin()
 EnBolsinSaliente --> EnBolsinEnviado : CU 27 Registrar el retiro\nde bolsines / enviar()
-EnBolsinEnviado -[#C0392B,bold]-> RecibidoYAceptado : <color:#C0392B><b>CU 28 [contenido igual\n<color:#C0392B><b>al registrado] / recibirYAceptar()
-EnBolsinEnviado -[#C0392B,bold]-> RecibidoYAceptadoParcial : <color:#C0392B><b>CU 28 [no se recibe toda\n<color:#C0392B><b>la documentación] /\n<color:#C0392B><b>recibirYAceptarParcial()
+EnBolsinEnviado -[#C0392B,bold]-> RecibidoYAceptado : <color:#C0392B><b>CU 28 [toda su documentación se recibió\n<color:#C0392B><b>y corresponde] / recibirYAceptar()
+EnBolsinEnviado -[#C0392B,bold]-> RecibidoYAceptadoParcial : <color:#C0392B><b>CU 28 [parte de su documentación\n<color:#C0392B><b>no llegó o no corresponde] /\n<color:#C0392B><b>recibirYAceptar()
 Cancelado --> [*]
 RecibidoYAceptado --> [*]
 RecibidoYAceptadoParcial --> [*]

@@ -32,8 +32,8 @@ import ppai.entidades.estadodocumentacion.EnBolsinEnviado;
 import ppai.entidades.estadodocumentacion.NoRecibida;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
-import ppai.entidades.estadoremito.RecibidoYAceptado;
-import ppai.entidades.estadoremito.RecibidoYAceptadoParcial;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptadoParcial;
 import ppai.persistencia.RepositorioJPA;
 
 /** Prueba de la persistencia en SQLite con JPA/Hibernate. */
@@ -95,7 +95,7 @@ class RepositorioJPATest {
             assertEquals(4, recibido.getCambiosEstado().size());
             assertEquals("Pérez, Ana", recibido.getCambiosEstado().get(3).getResponsableCE().getNombreCompleto());
             for (Remito remito : recibido.getRemitos()) {
-                assertInstanceOf(RecibidoYAceptado.class, remito.getEstado());
+                assertInstanceOf(RemitoRecibidoYAceptado.class, remito.getEstado());
                 for (DetalleRemito detalle : remito.getDetallesRemito()) {
                     Documentacion doc = detalle.getDocumentacion();
                     assertInstanceOf(RecibidaYAceptada.class, doc.getEstadoActual());
@@ -119,8 +119,8 @@ class RepositorioJPATest {
         try (RepositorioJPA repositorio = new RepositorioJPA(archivo, false)) {
             Bolsin recibido = bolsin(repositorio, 105);
             assertInstanceOf(RecibidoEnCMDestino.class, recibido.getEstadoActual());
-            assertInstanceOf(RecibidoYAceptadoParcial.class, recibido.getRemitos().get(0).getEstado());
-            assertInstanceOf(RecibidoYAceptado.class, recibido.getRemitos().get(1).getEstado());
+            assertInstanceOf(RemitoRecibidoYAceptadoParcial.class, recibido.getRemitos().get(0).getEstado());
+            assertInstanceOf(RemitoRecibidoYAceptado.class, recibido.getRemitos().get(1).getEstado());
             assertInstanceOf(NoRecibida.class, documentacion(recibido, 9001, 1).getEstadoActual());
             assertInstanceOf(RecibidaYAceptada.class, documentacion(recibido, 9001, 0).getEstadoActual());
         }

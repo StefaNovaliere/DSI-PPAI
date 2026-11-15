@@ -20,7 +20,7 @@ CU 28 heredan el rechazo del estado abstracto.
 |---|---|---|
 | `Documentacion` | `EstadoDocumentacion` | `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()` |
 | `Bolsin` | `EstadoBolsin` | `Enviado.recibir()` |
-| `Remito` | `EstadoRemito` | `EnBolsinEnviado.recibirYAceptar()` y `EnBolsinEnviado.recibirYAceptarParcial()` |
+| `Remito` | `EstadoRemito` | `EnBolsinEnviado.recibirYAceptar()` (la guarda decide si queda Recibido y aceptado o parcial) |
 
 ### Documentación: el evento `recibir()` con guardas
 
@@ -79,7 +79,8 @@ mismas; lo único que cambiaría es el número de CU de la etiqueta.
    parcial* para la opción 2. Se decidió que con la opción 3 (documentación que no
    corresponde) el remito también queda **parcial**, porque parte de su documentación se
    rechaza; y que con la opción 4 (redirigir) queda **Recibido y aceptado**, porque la CMC
-   acepta la documentación y sólo la pasa a otra área. Está en `OpcionRecepcion`.
+   acepta la documentación y sólo la pasa a otra área. Es la guarda de
+   `EnBolsinEnviado.crearEstado()` del remito (usa `OpcionRecepcion.dejaRemitoParcial()`).
 3. **Modificar un bolsín cerrado:** el CU 20 dice "mientras no esté cerrado", pero la regla
    "Contenido de un Bolsín" dice que puede modificarse "ya sea que esté cerrado o no". Se
    resolvió con la regla del precinto: para modificar un bolsín cerrado primero se reabre

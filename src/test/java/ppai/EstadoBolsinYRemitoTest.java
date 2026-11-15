@@ -22,7 +22,12 @@ import ppai.entidades.Bolsin;
 import ppai.entidades.CambioEstadoBolsin;
 import ppai.entidades.ComisionMedica;
 import ppai.entidades.Empleado;
+import ppai.entidades.CambioEstadoDocumentacion;
+import ppai.entidades.DetalleRemito;
+import ppai.entidades.Documentacion;
+import ppai.entidades.OpcionRecepcion;
 import ppai.entidades.Remito;
+import ppai.entidades.TipoDocumento;
 import ppai.entidades.Usuario;
 import ppai.entidades.estadobolsin.Cerrado;
 import ppai.entidades.estadobolsin.Creado;
@@ -34,10 +39,18 @@ import ppai.entidades.estadoremito.Cancelado;
 import ppai.entidades.estadoremito.EnBolsinEnviado;
 import ppai.entidades.estadoremito.EnBolsinSaliente;
 import ppai.entidades.estadoremito.EstadoRemito;
-import ppai.entidades.estadoremito.RecibidoYAceptado;
-import ppai.entidades.estadoremito.RecibidoYAceptadoParcial;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
+import ppai.entidades.estadoremito.RemitoRecibidoYAceptadoParcial;
+import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
+import ppai.entidades.estadodocumentacion.NoRecibida;
+import ppai.entidades.estadodocumentacion.ParaRedirigir;
+import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
+import ppai.entidades.estadodocumentacion.Registrada;
 
-/** Pruebas del patrón State en Bolsín y Remito (máquinas de estado armadas con la ERS). */
+/**
+ * Pruebas del patrón State en Bolsín y Remito (máquinas de estado armadas con la
+ * ERS). El estado del remito, además, actualiza la documentación de sus detalles.
+ */
 class EstadoBolsinYRemitoTest {
 
     private static final LocalDateTime T0 = LocalDateTime.of(2026, 9, 1, 8, 0);
@@ -53,11 +66,29 @@ class EstadoBolsinYRemitoTest {
         creado.setFechaHoraFin(T0.plusDays(1));
         bolsin.agregarCambioEstado(creado);
         bolsin.agregarCambioEstado(new CambioEstadoBolsin(T0.plusDays(1), estadoActual, responsable));
+        bolsin.setEstado(estadoActual);
         return bolsin;
     }
 
+    /** Remito con dos documentos (1 y 2) en estado EnBolsinEnviado. */
     private Remito remitoEn(EstadoRemito estado) {
-        return new Remito(LocalDate.of(2026, 9, 1), 5001, rosario, cmc, estado);
+        Remito remito = new Remito(LocalDate.of(2026, 9, 1), 5001, rosario, cmc, estado);
+        remito.agregarDetalle(new DetalleRemito("Área Jurídica", documentacionEnviada(1)));
+        remito.agregarDetalle(new DetalleRemito("Área de Dictámenes", documentacionEnviada(2)));
+        return remito;
+    }
+
+    private Documentacion documentacionEnviada(int numero) {
+        CambioEstadoDocumentacion registrada = new CambioEstadoDocumentacion(T0, new Registrada(), responsable);
+        registrada.setFechaHoraFin(T0.plusDays(1));
+        CambioEstadoDocumentacion enviada = new CambioEstadoDocumentacion(T0.plusDays(1),
+                new ppai.entidades.estadodocumentacion.EnBolsinEnviado(), responsable);
+        return new Documentacion(numero, "Expediente " + numero, LocalDate.of(2026, 9, 1),
+                new TipoDocumento("Expediente", ""), List.of(registrada, enviada));
+    }
+
+    private static EstadoDocumentacion estadoDoc(Remito remito, int indice) {
+        return remito.getDetallesRemito().get(indice).getDocumentacion().getEstadoActual();
     }
 
     @Test
@@ -65,7 +96,7 @@ class EstadoBolsinYRemitoTest {
         Bolsin bolsin = bolsinEn(new Enviado());
         assertTrue(bolsin.sosEnviado());
 
-        bolsin.recibirBolsin(RECEPCION, responsable);
+        bolsin.recibir(RECEPCION, responsable);
 
         assertInstanceOf(RecibidoEnCMDestino.class, bolsin.getEstadoActual());
         assertFalse(bolsin.sosEnviado());
@@ -89,26 +120,49 @@ class EstadoBolsinYRemitoTest {
         Bolsin bolsin = bolsinEn(estado);
         assertFalse(bolsin.sosEnviado());
         IllegalStateException error = assertThrows(IllegalStateException.class,
-                () -> bolsin.recibirBolsin(RECEPCION, responsable));
+                () -> bolsin.recibir(RECEPCION, responsable));
         assertTrue(error.getMessage().contains("bolsín N° 101"));
         assertSame(estado, bolsin.getEstadoActual());
         assertEquals(2, bolsin.getCambiosEstado().size());
     }
 
     @Test
-    void remitoEnBolsinEnviadoSeRecibeYAceptaCompletoOParcial() {
-        Remito completo = remitoEn(new EnBolsinEnviado());
-        completo.getEstado().recibirYAceptar(completo);
-        assertInstanceOf(RecibidoYAceptado.class, completo.getEstado());
+    void remitoConTodoIgualQuedaRecibidoYAceptadoYSuDocumentacionTambien() {
+        Remito remito = remitoEn(new EnBolsinEnviado());
+        remito.recibirYAceptar(RECEPCION, responsable, OpcionRecepcion.CONTENIDO_IGUAL, List.of());
+        assertInstanceOf(RemitoRecibidoYAceptado.class, remito.getEstado());
+        // El estado del remito actualiza la documentación de cada detalle
+        assertInstanceOf(RecibidaYAceptada.class, estadoDoc(remito, 0));
+        assertInstanceOf(RecibidaYAceptada.class, estadoDoc(remito, 1));
+    }
 
-        Remito parcial = remitoEn(new EnBolsinEnviado());
-        parcial.getEstado().recibirYAceptarParcial(parcial);
-        assertInstanceOf(RecibidoYAceptadoParcial.class, parcial.getEstado());
+    @Test
+    void remitoConDocumentacionQueNoLlegoQuedaParcial() {
+        Remito remito = remitoEn(new EnBolsinEnviado());
+        remito.recibirYAceptar(RECEPCION, responsable, OpcionRecepcion.NO_SE_RECIBE_TODA, List.of(2));
+        assertInstanceOf(RemitoRecibidoYAceptadoParcial.class, remito.getEstado());
+        assertInstanceOf(RecibidaYAceptada.class, estadoDoc(remito, 0));
+        assertInstanceOf(NoRecibida.class, estadoDoc(remito, 1));
+    }
+
+    @Test
+    void remitoConDocumentacionParaRedirigirQuedaRecibidoYAceptado() {
+        Remito remito = remitoEn(new EnBolsinEnviado());
+        remito.recibirYAceptar(RECEPCION, responsable, OpcionRecepcion.REDIRIGIR, List.of(1));
+        assertInstanceOf(RemitoRecibidoYAceptado.class, remito.getEstado());
+        assertInstanceOf(ParaRedirigir.class, estadoDoc(remito, 0));
+    }
+
+    @Test
+    void siLaDocumentacionIndicadaEsDeOtroRemitoEsteQuedaRecibidoYAceptado() {
+        Remito remito = remitoEn(new EnBolsinEnviado());
+        remito.recibirYAceptar(RECEPCION, responsable, OpcionRecepcion.NO_SE_RECIBE_TODA, List.of(99));
+        assertInstanceOf(RemitoRecibidoYAceptado.class, remito.getEstado());
     }
 
     static Stream<Arguments> estadosDeRemitoQueNoPuedenRecibirse() {
         return Stream.<Supplier<EstadoRemito>>of(ppai.entidades.estadoremito.Creado::new, Cancelado::new,
-                        EnBolsinSaliente::new, RecibidoYAceptado::new, RecibidoYAceptadoParcial::new)
+                        EnBolsinSaliente::new, RemitoRecibidoYAceptado::new, RemitoRecibidoYAceptadoParcial::new)
                 .map(estado -> Arguments.of(estado.get()));
     }
 
@@ -116,9 +170,11 @@ class EstadoBolsinYRemitoTest {
     @MethodSource("estadosDeRemitoQueNoPuedenRecibirse")
     void losDemasEstadosDelRemitoRechazanLaRecepcion(EstadoRemito estado) {
         Remito remito = remitoEn(estado);
-        assertThrows(IllegalStateException.class, () -> estado.recibirYAceptar(remito));
-        assertThrows(IllegalStateException.class, () -> estado.recibirYAceptarParcial(remito));
+        assertThrows(IllegalStateException.class,
+                () -> remito.recibirYAceptar(RECEPCION, responsable, OpcionRecepcion.CONTENIDO_IGUAL, List.of()));
         assertSame(estado, remito.getEstado());
+        // La documentación no cambia
+        assertInstanceOf(ppai.entidades.estadodocumentacion.EnBolsinEnviado.class, estadoDoc(remito, 0));
     }
 
     @Test
