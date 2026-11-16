@@ -1,37 +1,27 @@
 @startuml
-skinparam defaultFontName Arial
-skinparam defaultFontSize 11
-skinparam classAttributeIconSize 0
+skinparam style strictuml
 skinparam shadowing false
-skinparam nodesep 40
-skinparam ranksep 55
+skinparam roundcorner 0
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 60
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam defaultFontColor #000000
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classStereotypeFontStyle normal
 skinparam class {
   BackgroundColor #FFFFFF
-  BorderColor #1F3A5F
-  ArrowColor #333333
-  HeaderBackgroundColor #E8F0FB
+  BorderColor #000000
+  ArrowColor #000000
+  FontColor #000000
+  AttributeFontColor #000000
+  StereotypeFontColor #000000
 }
-skinparam class<<State>> {
-  BackgroundColor #FFF8E6
-  BorderColor #B7791F
-  HeaderBackgroundColor #FFECB8
-}
-skinparam package {
-  BorderColor #B7791F
-  FontColor #7A4E0F
-}
-skinparam note {
-  BackgroundColor #FFFDE7
-  BorderColor #9E9E9E
-}
-hide empty members
 hide circle
-skinparam linetype ortho
 
-title CU 28 Registrar Recepción de Bolsín · Diagrama de clases de diseño con patrón State
-
-' ---------------- Interfaz ----------------
-interface PantallaRecepcionBolsin <<interface>> <<boundary>> {
+interface PantallaRecepcionBolsin <<interface>> {
   +opcRegistrarRecBolsin(): void
   +mostrarCM(nombreCM: String): void
   +solicitarSelBolsin(bolsines: List<DatosBolsin>): void
@@ -54,7 +44,6 @@ class PantallaGraficaRecepcionBolsin <<boundary>> {
   -tomarConfirmacion(confirma: boolean): void
 }
 
-' ---------------- Control ----------------
 class GestorRecepcionBolsin <<control>> {
   -nombreCMUsuario: String
   -fechaYHora: LocalDateTime
@@ -101,7 +90,6 @@ interface Repositorio <<interface>> {
   +deshacerTransaccion(): void
 }
 
-' ---------------- Entidades ----------------
 class Sesion <<entity>> {
   -fechaHoraInicio: LocalDateTime
   -fechaHoraFin: LocalDateTime
@@ -221,7 +209,7 @@ class TipoDocumento <<entity>> {
   +getNombre(): String
 }
 
-enum OpcionRecepcion {
+enum OpcionRecepcion <<enumeration>> {
   CONTENIDO_IGUAL
   NO_SE_RECIBE_TODA
   NO_CORRESPONDE
@@ -234,7 +222,7 @@ enum OpcionRecepcion {
   +dejaRemitoParcial(): boolean
 }
 
-enum SituacionDocumentacion {
+enum SituacionDocumentacion <<enumeration>> {
   IGUAL_A_LA_REGISTRADA
   NO_RECIBIDA
   NO_CORRESPONDE_A_LA_CM_DESTINO
@@ -244,83 +232,79 @@ enum SituacionDocumentacion {
   +getDescripcion(): String
 }
 
-' ---------------- Patrón State: Bolsín ----------------
-package "Estados de Bolsín" {
-  abstract class EstadoBolsin <<State>> {
-    -nombre: String
-    -descripcion: String
-    #EstadoBolsin(nombre: String, descripcion: String)
-    +getNombre(): String
-    +getDescripcion(): String
-    +esEnviado(): boolean
-    +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado): void
-    #buscarCambioEstadoActual(bolsin: Bolsin): CambioEstadoBolsin
-    #crearCambioEstado(estado: EstadoBolsin, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoBolsin
-  }
-  class "Creado" as BCreado <<State>>
-  class "Cerrado" as BCerrado <<State>>
-  class "Enviado" as BEnviado <<State>> {
-    +esEnviado(): boolean
-    +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado): void
-    -crearEstado(): EstadoBolsin
-  }
-  class "RecibidoEnCMDestino" as BRecibido <<State>>
-  class "DeBaja" as BDeBaja <<State>>
+together {
+abstract class EstadoBolsin {
+  -nombre: String
+  -descripcion: String
+  #EstadoBolsin(nombre: String, descripcion: String)
+  +getNombre(): String
+  +getDescripcion(): String
+  +esEnviado(): boolean
+  +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado): void
+  #buscarCambioEstadoActual(bolsin: Bolsin): CambioEstadoBolsin
+  #crearCambioEstado(estado: EstadoBolsin, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoBolsin
+}
+class "Creado" as BCreado
+class "Cerrado" as BCerrado
+class "Enviado" as BEnviado {
+  +esEnviado(): boolean
+  +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado): void
+  -crearEstado(): EstadoBolsin
+}
+class "RecibidoEnCMDestino" as BRecibido
+class "DeBaja" as BDeBaja
 }
 
-' ---------------- Patrón State: Remito ----------------
-package "Estados de Remito" {
-  abstract class EstadoRemito <<State>> {
-    -nombre: String
-    -descripcion: String
-    #EstadoRemito(nombre: String, descripcion: String)
-    +getNombre(): String
-    +getDescripcion(): String
-    +recibirYAceptar(remito: Remito, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
-  }
-  class "Creado" as RCreado <<State>>
-  class "Cancelado" as RCancelado <<State>>
-  class "EnBolsinSaliente" as REnBolsinSaliente <<State>>
-  class "EnBolsinEnviado" as REnBolsinEnviado <<State>> {
-    +recibirYAceptar(remito: Remito, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
-    -crearEstado(remito: Remito, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): EstadoRemito
-    -actualizarEstadoDocumentacion(detallesRemito: List<DetalleRemito>, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
-  }
-  class "RemitoRecibidoYAceptado" as RRecibido <<State>>
-  class "RemitoRecibidoYAceptadoParcial" as RParcial <<State>>
+together {
+abstract class EstadoRemito {
+  -nombre: String
+  -descripcion: String
+  #EstadoRemito(nombre: String, descripcion: String)
+  +getNombre(): String
+  +getDescripcion(): String
+  +recibirYAceptar(remito: Remito, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+}
+class "Creado" as RCreado
+class "Cancelado" as RCancelado
+class "EnBolsinSaliente" as REnBolsinSaliente
+class "EnBolsinEnviado" as REnBolsinEnviado {
+  +recibirYAceptar(remito: Remito, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+  -crearEstado(remito: Remito, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): EstadoRemito
+  -actualizarEstadoDocumentacion(detallesRemito: List<DetalleRemito>, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+}
+class "RemitoRecibidoYAceptado" as RRecibido
+class "RemitoRecibidoYAceptadoParcial" as RParcial
 }
 
-' ---------------- Patrón State: Documentación ----------------
-package "Estados de Documentación" {
-  abstract class EstadoDocumentacion <<State>> {
-    -nombre: String
-    -descripcion: String
-    #EstadoDocumentacion(nombre: String, descripcion: String)
-    +getNombre(): String
-    +getDescripcion(): String
-    +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
-    #recepcionInvalida(documentacion: Documentacion, situacion: SituacionDocumentacion): IllegalStateException
-    #buscarCambioEstadoActual(documentacion: Documentacion): CambioEstadoDocumentacion
-    #crearCambioEstado(estado: EstadoDocumentacion, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoDocumentacion
-  }
-  class "Registrada" as DRegistrada <<State>>
-  class "EnRemito" as DEnRemito <<State>>
-  class "EnBolsinSaliente" as DEnBolsinSaliente <<State>>
-  class "EnBolsinEnviado" as DEnBolsinEnviado <<State>> {
-    +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
-    -crearEstado(situacion: SituacionDocumentacion): EstadoDocumentacion
-  }
-  class "ParaRedirigir" as DParaRedirigir <<State>> {
-    +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
-    -crearEstado(situacion: SituacionDocumentacion): EstadoDocumentacion
-  }
-  class "NoRecibida" as DNoRecibida <<State>>
-  class "RecibidaYAceptada" as DRecibidaYAceptada <<State>>
-  class "RecibidaYRechazada" as DRecibidaYRechazada <<State>>
-  class "DeBaja" as DDeBaja <<State>>
+together {
+abstract class EstadoDocumentacion {
+  -nombre: String
+  -descripcion: String
+  #EstadoDocumentacion(nombre: String, descripcion: String)
+  +getNombre(): String
+  +getDescripcion(): String
+  +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
+  #recepcionInvalida(documentacion: Documentacion, situacion: SituacionDocumentacion): IllegalStateException
+  #buscarCambioEstadoActual(documentacion: Documentacion): CambioEstadoDocumentacion
+  #crearCambioEstado(estado: EstadoDocumentacion, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoDocumentacion
+}
+class "Registrada" as DRegistrada
+class "EnRemito" as DEnRemito
+class "EnBolsinSaliente" as DEnBolsinSaliente
+class "EnBolsinEnviado" as DEnBolsinEnviado {
+  +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
+  -crearEstado(situacion: SituacionDocumentacion): EstadoDocumentacion
+}
+class "ParaRedirigir" as DParaRedirigir {
+  +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
+  -crearEstado(situacion: SituacionDocumentacion): EstadoDocumentacion
+}
+class "NoRecibida" as DNoRecibida
+class "RecibidaYAceptada" as DRecibidaYAceptada
+class "RecibidaYRechazada" as DRecibidaYRechazada
+class "DeBaja" as DDeBaja
 }
 
-' ---------------- Relaciones ----------------
 PantallaGraficaRecepcionBolsin ..|> PantallaRecepcionBolsin
 PantallaGraficaRecepcionBolsin --> "1" GestorRecepcionBolsin : -gestor
 GestorRecepcionBolsin --> "1" PantallaRecepcionBolsin : -pantalla
@@ -379,14 +363,4 @@ EstadoDocumentacion <|-- DRecibidaYAceptada
 EstadoDocumentacion <|-- DRecibidaYRechazada
 EstadoDocumentacion <|-- DDeBaja
 
-note bottom of EstadoDocumentacion
-  Patrón State. Contexto: Documentacion · Estado: EstadoDocumentacion.
-  Los estados sin métodos heredan el rechazo de recibir().
-end note
-note bottom of EstadoBolsin
-  Patrón State. Contexto: Bolsin · Estado: EstadoBolsin.
-end note
-note bottom of EstadoRemito
-  Patrón State. Contexto: Remito · Estado: EstadoRemito.
-end note
 @enduml

@@ -1,53 +1,80 @@
 @startuml
 skinparam style strictuml
+skinparam shadowing false
+skinparam roundcorner 0
 skinparam defaultFontName Arial
-skinparam defaultFontSize 12
+skinparam defaultFontSize 13
+skinparam defaultFontColor #000000
 skinparam sequenceMessageAlign left
-skinparam sequenceReferenceBackgroundColor white
-skinparam ParticipantPadding 6
-skinparam BoxPadding 4
+skinparam ParticipantPadding 4
 skinparam sequence {
-  ArrowColor #1F1F1F
-  LifeLineBorderColor #7A7A7A
-  LifeLineBackgroundColor #E8F0FB
-  ParticipantBorderColor #1F3A5F
+  ArrowColor #000000
+  ArrowThickness 1
+  LifeLineBorderColor #000000
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBorderColor #000000
   ParticipantBackgroundColor #FFFFFF
-  ActorBorderColor #1F3A5F
+  ParticipantFontSize 13
+  ActorBorderColor #000000
   ActorBackgroundColor #FFFFFF
-  GroupBorderColor #555555
-  GroupBackgroundColor #F4F4F4
+  BoundaryBorderColor #000000
+  BoundaryBackgroundColor #FFFFFF
+  ControlBorderColor #000000
+  ControlBackgroundColor #FFFFFF
+  EntityBorderColor #000000
+  EntityBackgroundColor #FFFFFF
+  GroupBorderColor #000000
+  GroupBackgroundColor #FFFFFF
+  GroupHeaderFontStyle plain
+  GroupFontStyle plain
 }
-skinparam participant<<State>> {
-  BackgroundColor #FFF4D6
-  BorderColor #B7791F
+skinparam actor {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+skinparam boundary {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+skinparam control {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+}
+skinparam participant {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
 }
 skinparam note {
-  BackgroundColor #FFFDE7
-  BorderColor #9E9E9E
+  BackgroundColor #FFFFFF
+  BorderColor #000000
 }
 hide footbox
+autonumber "0 :"
+mainframe sd CU28 RegistrarRecepcionBolsin
 
-title CU 28 Registrar Recepción de Bolsín · Diagrama de secuencia con patrón State
-
-actor "<u>:EB</u>" as EB
-boundary "<u>:PantallaRecepcionBolsin</u>" as P
-control "<u>:GestorRecepcionBolsin</u>" as G
-entity "<u>seleccionado:Bolsin</u>" as B
-participant "<u>estadoActual:Enviado</u>" as EN <<State>>
-entity "<u>:CambioEstadoBolsin</u>" as CEB
-entity "<u>actual:CambioEstadoBolsin</u>" as ACEB
-participant "<u>:RecibidoEnCMDestino</u>" as REC <<State>>
-entity "<u>nuevo:CambioEstadoBolsin</u>" as NCEB
-entity "<u>:Remito</u>" as R
-participant "<u>estado:EnBolsinEnviado</u>" as ER <<State>>
-participant "<u>:RemitoRecibidoYAceptado</u>" as RRA <<State>>
-entity "<u>:DetalleRemito</u>" as DR
-entity "<u>:Documentacion</u>" as D
-participant "<u>estadoActual:EnBolsinEnviado</u>" as ED <<State>>
-entity "<u>:CambioEstadoDocumentacion</u>" as CED
-entity "<u>actual:CambioEstadoDocumentacion</u>" as ACED
-participant "<u>:RecibidaYAceptada</u>" as RYA <<State>>
-entity "<u>nuevo:CambioEstadoDocumentacion</u>" as NCED
+actor ":EB" as EB
+boundary ":PantallaRecepcionBolsin" as P
+control ":GestorRecepcionBolsin" as G
+entity "seleccionado: Bolsin" as B
+participant "estadoActual: Enviado" as EN
+entity ":CambioEstadoBolsin" as CEB
+entity "actual: CambioEstadoBolsin" as ACEB
+participant ":RecibidoEnCMDestino" as REC
+entity "nuevo: CambioEstadoBolsin" as NCEB
+entity ":Remito" as R
+participant "estado: EnBolsinEnviado" as ER
+participant ":RemitoRecibidoYAceptado" as RRA
+entity ":DetalleRemito" as DR
+entity ":Documentacion" as D
+participant "estadoActual: EnBolsinEnviado" as ED
+entity ":CambioEstadoDocumentacion" as CED
+entity "actual: CambioEstadoDocumentacion" as ACED
+participant ":RecibidaYAceptada" as RYA
+entity "nuevo: CambioEstadoDocumentacion" as NCED
 
 note over EB, G
   Los métodos anteriores se mantienen
