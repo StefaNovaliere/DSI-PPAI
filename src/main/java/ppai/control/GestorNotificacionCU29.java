@@ -63,20 +63,20 @@ public class GestorNotificacionCU29 {
     }
 
     /** El correo le informa a la CM origen la situación de cada remito y de su documentación (Obs. 2). */
-    private Correo armarCorreo(String destinatario, DatosRecepcion r) {
-        String asunto = "Recepción del bolsín N° " + r.numeroBolsin() + " (precinto " + r.numeroPrecinto()
-                + ") en " + r.cmDestino();
-        String fecha = r.fechaHora().format(FORMATO_FECHA);
+    private Correo armarCorreo(String destinatario, DatosRecepcion recepcion) {
+        String asunto = "Recepción del bolsín N° " + recepcion.numeroBolsin()
+                + " (precinto " + recepcion.numeroPrecinto() + ") en " + recepcion.cmDestino();
+        String fecha = recepcion.fechaHora().format(FORMATO_FECHA);
 
         StringBuilder texto = new StringBuilder();
-        texto.append(r.cmDestino()).append(" registró la recepción del bolsín N° ").append(r.numeroBolsin())
-                .append(" (precinto ").append(r.numeroPrecinto()).append(") enviado por ").append(r.cmOrigen())
-                .append(".\n\n");
+        texto.append(recepcion.cmDestino()).append(" registró la recepción del bolsín N° ")
+                .append(recepcion.numeroBolsin()).append(" (precinto ").append(recepcion.numeroPrecinto())
+                .append(") enviado por ").append(recepcion.cmOrigen()).append(".\n\n");
         texto.append("Fecha y hora: ").append(fecha).append('\n');
-        texto.append("Registró: ").append(r.responsable()).append('\n');
-        texto.append("Opción de recepción: ").append(r.opcionRecepcion()).append("\n\n");
+        texto.append("Registró: ").append(recepcion.responsable()).append('\n');
+        texto.append("Opción de recepción: ").append(recepcion.opcionRecepcion()).append("\n\n");
         texto.append("Situación de la documentación:\n");
-        for (DatosRemito remito : r.remitos()) {
+        for (DatosRemito remito : recepcion.remitos()) {
             texto.append("Remito N° ").append(remito.numero()).append(" - ").append(remito.descripcionEstado())
                     .append('\n');
             for (DatosDocumentacion doc : remito.documentacion()) {
@@ -90,16 +90,17 @@ public class GestorNotificacionCU29 {
         StringBuilder html = new StringBuilder();
         html.append("<div style=\"font-family:Arial,sans-serif;font-size:14px;color:#222\">");
         html.append("<h2 style=\"color:#1F3A5F;margin:0 0 12px\">Recepción de bolsín registrada</h2>");
-        html.append("<p><b>").append(Html.escapar(r.cmDestino())).append("</b> registró la recepción del <b>bolsín N° ")
-                .append(r.numeroBolsin()).append("</b> (precinto ").append(Html.escapar(r.numeroPrecinto()))
-                .append(") enviado por <b>").append(Html.escapar(r.cmOrigen())).append("</b>.</p>");
+        html.append("<p><b>").append(Html.escapar(recepcion.cmDestino()))
+                .append("</b> registró la recepción del <b>bolsín N° ").append(recepcion.numeroBolsin())
+                .append("</b> (precinto ").append(Html.escapar(recepcion.numeroPrecinto()))
+                .append(") enviado por <b>").append(Html.escapar(recepcion.cmOrigen())).append("</b>.</p>");
         html.append("<p>Fecha y hora: ").append(fecha).append("<br>Registró: ")
-                .append(Html.escapar(r.responsable())).append("<br>Opción de recepción: ")
-                .append(Html.escapar(r.opcionRecepcion())).append("</p>");
+                .append(Html.escapar(recepcion.responsable())).append("<br>Opción de recepción: ")
+                .append(Html.escapar(recepcion.opcionRecepcion())).append("</p>");
         html.append("<table style=\"border-collapse:collapse\" cellpadding=\"6\">");
         html.append("<tr style=\"background:#1F3A5F;color:#fff\"><th align=\"left\">N° Doc</th>"
                 + "<th align=\"left\">Tipo</th><th align=\"left\">Asunto</th><th align=\"left\">Estado</th></tr>");
-        for (DatosRemito remito : r.remitos()) {
+        for (DatosRemito remito : recepcion.remitos()) {
             html.append("<tr style=\"background:#EEF2F7\"><td colspan=\"4\"><b>Remito N° ").append(remito.numero())
                     .append("</b> · ").append(Html.escapar(remito.descripcionEstado())).append("</td></tr>");
             for (DatosDocumentacion doc : remito.documentacion()) {
