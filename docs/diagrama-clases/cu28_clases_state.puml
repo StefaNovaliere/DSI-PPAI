@@ -232,13 +232,17 @@ enum SituacionDocumentacion <<enumeration>> {
   +getDescripcion(): String
 }
 
-together {
-abstract class EstadoBolsin {
+abstract class Estado {
   -nombre: String
   -descripcion: String
-  #EstadoBolsin(nombre: String, descripcion: String)
+  #Estado(nombre: String, descripcion: String)
   +getNombre(): String
   +getDescripcion(): String
+}
+
+together {
+abstract class EstadoBolsin {
+  #EstadoBolsin(nombre: String, descripcion: String)
   +esEnviado(): boolean
   +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado): void
   #buscarCambioEstadoActual(bolsin: Bolsin): CambioEstadoBolsin
@@ -257,11 +261,7 @@ class "DeBaja" as BDeBaja
 
 together {
 abstract class EstadoRemito {
-  -nombre: String
-  -descripcion: String
   #EstadoRemito(nombre: String, descripcion: String)
-  +getNombre(): String
-  +getDescripcion(): String
   +recibirYAceptar(remito: Remito, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
 }
 class "Creado" as RCreado
@@ -278,11 +278,7 @@ class "RemitoRecibidoYAceptadoParcial" as RParcial
 
 together {
 abstract class EstadoDocumentacion {
-  -nombre: String
-  -descripcion: String
   #EstadoDocumentacion(nombre: String, descripcion: String)
-  +getNombre(): String
-  +getDescripcion(): String
   +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
   #recepcionInvalida(documentacion: Documentacion, situacion: SituacionDocumentacion): IllegalStateException
   #buscarCambioEstadoActual(documentacion: Documentacion): CambioEstadoDocumentacion
@@ -339,6 +335,10 @@ CambioEstadoDocumentacion --> "1" EstadoDocumentacion : -estado
 CambioEstadoDocumentacion --> "1" Empleado : -responsableCE
 
 OpcionRecepcion --> "1" SituacionDocumentacion : -situacionDocumentacionIndicada
+
+Estado <|-- EstadoBolsin
+Estado <|-- EstadoRemito
+Estado <|-- EstadoDocumentacion
 
 EstadoBolsin <|-- BCreado
 EstadoBolsin <|-- BCerrado

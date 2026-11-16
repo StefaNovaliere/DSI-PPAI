@@ -117,7 +117,7 @@ sistema:
 |------|---------|--------|
 | Interfaz (boundary) | `ppai.boundary` | `PantallaRecepcionBolsin` (interfaz), `PantallaGraficaRecepcionBolsin` (Swing), `PantallaConsolaRecepcionBolsin`, `PantallaPrincipal` (menú) |
 | Control | `ppai.control` | `GestorRecepcionBolsin`, `GestorNotificacionCU29` (CU incluido: arma y envía el correo) |
-| Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Empleado`, `Usuario`, `Sesion`, `ComisionMedica`, `TipoDocumento`, `OpcionRecepcion` (las 4 opciones del paso 7), `SituacionDocumentacion` (guarda de `recibir()`) |
+| Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Empleado`, `Usuario`, `Sesion`, `ComisionMedica`, `TipoDocumento`, `OpcionRecepcion` (las 4 opciones del paso 7), `SituacionDocumentacion` (guarda de `recibir()`), `Estado` (clase abstracta general de los estados: nombre y descripción) |
 | Patrón State | `ppai.entidades.estadodocumentacion` | `EstadoDocumentacion` + 9 estados concretos |
 | Patrón State | `ppai.entidades.estadobolsin` | `EstadoBolsin` + 5 estados concretos |
 | Patrón State | `ppai.entidades.estadoremito` | `EstadoRemito` + 6 estados concretos |
@@ -186,9 +186,10 @@ la cátedra):
 |---|---|---|---|
 | **Contexto** (conoce su estado actual y le delega el evento) | `Documentacion` | `Bolsin` | `Remito` |
 | **Estado abstracto** (declara el evento; por defecto lo rechaza) | `EstadoDocumentacion` | `EstadoBolsin` | `EstadoRemito` |
+| **Clase general de los estados** (nombre y descripción; de ella heredan los tres estados abstractos) | `Estado` | `Estado` | `Estado` |
 | **Evento del CU 28** | `recibir()` (la guarda es la situación de la documentación) | `recibir()` | `recibirYAceptar()` (la guarda decide si queda parcial) |
 | **Estados concretos que lo redefinen** | `EnBolsinEnviado`, `ParaRedirigir` | `Enviado` | `EnBolsinEnviado` |
-| **Resto de los estados** (heredan el rechazo) | `Registrada`, `EnRemito`, `EnBolsinSaliente`, `NoRecibida`, `RecibidaYAceptada`, `RecibidaYRechazada`, `DeBaja` | `Creado`, `Cerrado`, `RecibidoEnCMDestino`, `DeBaja` | `Creado`, `Cancelado`, `EnBolsinSaliente`, `RecibidoYAceptado`, `RecibidoYAceptadoParcial` |
+| **Resto de los estados** (heredan el rechazo) | `Registrada`, `EnRemito`, `EnBolsinSaliente`, `NoRecibida`, `RecibidaYAceptada`, `RecibidaYRechazada`, `DeBaja` | `Creado`, `Cerrado`, `RecibidoEnCMDestino`, `DeBaja` | `Creado`, `Cancelado`, `EnBolsinSaliente`, `RemitoRecibidoYAceptado`, `RemitoRecibidoYAceptadoParcial` |
 
 El código sigue el **rediseño del diagrama de secuencia** que hizo el grupo: en cada
 transición, el estado concreto le pone `setFechaHoraFin()` al cambio de estado actual, crea el

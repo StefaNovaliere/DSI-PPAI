@@ -5,9 +5,11 @@ import java.time.LocalDateTime;
 import ppai.entidades.Bolsin;
 import ppai.entidades.CambioEstadoBolsin;
 import ppai.entidades.Empleado;
+import ppai.entidades.Estado;
 
 /**
  * Patrón State - rol ESTADO ABSTRACTO de la máquina de estados de Bolsín.
+ * Hereda de {@link Estado} el nombre y la descripción.
  *
  * <p>Declara el evento que usa el CU 28, {@link #recibir}, y la consulta
  * {@link #esEnviado()} del paso 3. Por defecto un bolsín NO puede recibirse:
@@ -16,26 +18,10 @@ import ppai.entidades.Empleado;
  * otros casos de uso (cerrar, reabrir, enviar, dar de baja) no se implementan
  * porque no son parte del CU 28.
  */
-public abstract class EstadoBolsin {
+public abstract class EstadoBolsin extends Estado {
 
-    private final String nombre;
-    private final String descripcion;
-
-    /**
-     * @param nombre      nombre del estado en la máquina de estados (se guarda en la base)
-     * @param descripcion texto para mostrarle al usuario
-     */
     protected EstadoBolsin(String nombre, String descripcion) {
-        this.nombre = nombre;
-        this.descripcion = descripcion;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
+        super(nombre, descripcion);
     }
 
     /** CU 28, paso 3: ¿el bolsín está en estado Enviado? */
@@ -46,7 +32,7 @@ public abstract class EstadoBolsin {
     /** CU 28, paso 11: el bolsín pasa a Recibido en CM destino. */
     public void recibir(Bolsin bolsin, LocalDateTime fechaHora, Empleado responsable) {
         throw new IllegalStateException("No se puede recibir el bolsín N° " + bolsin.getNumeroBolsin()
-                + " porque está en estado «" + descripcion + "»");
+                + " porque está en estado «" + getDescripcion() + "»");
     }
 
     // Pasos que usan los estados concretos al hacer la transición
@@ -65,10 +51,5 @@ public abstract class EstadoBolsin {
     protected CambioEstadoBolsin crearCambioEstado(EstadoBolsin estado, LocalDateTime fechaHora,
                                                    Empleado responsable) {
         return new CambioEstadoBolsin(fechaHora, estado, responsable);
-    }
-
-    @Override
-    public String toString() {
-        return nombre;
     }
 }

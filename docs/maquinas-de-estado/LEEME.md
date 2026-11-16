@@ -22,6 +22,9 @@ CU 28 heredan el rechazo del estado abstracto.
 | `Bolsin` | `EstadoBolsin` | `Enviado.recibir()` |
 | `Remito` | `EstadoRemito` | `EnBolsinEnviado.recibirYAceptar()` (la guarda decide si queda Recibido y aceptado o parcial) |
 
+Los tres estados abstractos heredan de `Estado` (paquete `ppai.entidades`), que tiene lo que
+comparten todos los estados: el nombre y la descripción.
+
 ### Documentación: el evento `recibir()` con guardas
 
 En la máquina de estados de la Entrega 1, todas las transiciones del CU 28 (y las del CU 31)
