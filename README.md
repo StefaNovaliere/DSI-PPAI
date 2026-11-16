@@ -10,6 +10,12 @@ Objetos**.
 > La guía incluye un guion para probar el flujo principal y los alternativos, y una tabla de
 > problemas frecuentes.
 
+**Diseño (Entrega 2):** [`docs/Entrega2_Diseno_CU28.pdf`](docs/Entrega2_Diseno_CU28.pdf) tiene
+la identificación del patrón, el diagrama de clases y el diagrama de secuencia. Los diagramas
+se editan en sus fuentes PlantUML:
+[`diagrama-clases/cu28_clases_state.puml`](docs/diagrama-clases/cu28_clases_state.puml) y
+[`diagrama-secuencia/cu28_state_corregido.puml`](docs/diagrama-secuencia/cu28_state_corregido.puml).
+
 ## 1. Detalles de implementación
 
 | Ítem | Elección |

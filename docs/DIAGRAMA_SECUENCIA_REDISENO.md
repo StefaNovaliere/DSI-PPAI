@@ -123,7 +123,7 @@ Gestor → seleccionado:Bolsin: recibirYAceptarRemito(fechaHora, responsable, op
       EnBolsinEnviado → EnBolsinEnviado: crearEstado(remito, opcion, documentacionIndicada): EstadoRemito
         EnBolsinEnviado → :RemitoRecibidoYAceptado: new()
       EnBolsinEnviado → :Remito: setEstado(estado)
-      EnBolsinEnviado → :Remito: getDetallesRemito(): DetalleRemito[]
+      EnBolsinEnviado → :Remito: getDetallesRemito(): List<DetalleRemito>
       EnBolsinEnviado → EnBolsinEnviado: actualizarEstadoDocumentacion(detallesRemito, fechaHora, responsable, opcion, documentacionIndicada)
         loop Detalles: EnBolsinEnviado → :DetalleRemito: recibirYAceptarDoc(fechaHora, responsable, opcion, documentacionIndicada)
           DetalleRemito → :Documentacion: recibir(fechaHora, responsable, situacion)
