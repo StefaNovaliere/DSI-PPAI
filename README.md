@@ -14,7 +14,9 @@ Objetos**.
 la identificación del patrón, el diagrama de clases y el diagrama de secuencia. Los diagramas
 se editan en sus fuentes PlantUML:
 [`diagrama-clases/cu28_clases_state.puml`](docs/diagrama-clases/cu28_clases_state.puml) y
-[`diagrama-secuencia/cu28_state_corregido.puml`](docs/diagrama-secuencia/cu28_state_corregido.puml).
+[`diagrama-secuencia/cu28_state_corregido.puml`](docs/diagrama-secuencia/cu28_state_corregido.puml). Para verlos y
+editarlos en diagrams.net (draw.io), con formas UML editables, está
+[`docs/CU28_diagramas.drawio`](docs/CU28_diagramas.drawio).
 
 ## 1. Detalles de implementación
 
