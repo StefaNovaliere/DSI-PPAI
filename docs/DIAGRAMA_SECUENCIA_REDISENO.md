@@ -8,6 +8,9 @@ en [`traza_ejecucion_cu28.txt`](traza_ejecucion_cu28.txt).
 Para que diagrama y código queden **iguales**, al diagrama le faltan algunos mensajes y
 parámetros que el código necesita (columna "Corregir en el diagrama" y lista al final).
 
+**Diagrama corregido:** [`diagrama-secuencia/cu28_state_corregido.pdf`](diagrama-secuencia/cu28_state_corregido.pdf)
+(fuente editable en PlantUML: [`cu28_state_corregido.puml`](diagrama-secuencia/cu28_state_corregido.puml)).
+
 Referencias: ✅ igual en el diagrama y en el código · ✏️ corregir en el diagrama.
 
 ## Mensaje por mensaje

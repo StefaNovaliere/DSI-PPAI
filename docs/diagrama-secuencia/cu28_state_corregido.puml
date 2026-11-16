@@ -1,0 +1,149 @@
+@startuml
+skinparam style strictuml
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign left
+skinparam sequenceReferenceBackgroundColor white
+skinparam ParticipantPadding 6
+skinparam BoxPadding 4
+skinparam sequence {
+  ArrowColor #1F1F1F
+  LifeLineBorderColor #7A7A7A
+  LifeLineBackgroundColor #E8F0FB
+  ParticipantBorderColor #1F3A5F
+  ParticipantBackgroundColor #FFFFFF
+  ActorBorderColor #1F3A5F
+  ActorBackgroundColor #FFFFFF
+  GroupBorderColor #555555
+  GroupBackgroundColor #F4F4F4
+}
+skinparam participant<<State>> {
+  BackgroundColor #FFF4D6
+  BorderColor #B7791F
+}
+skinparam note {
+  BackgroundColor #FFFDE7
+  BorderColor #9E9E9E
+}
+hide footbox
+
+title CU 28 Registrar Recepción de Bolsín · Diagrama de secuencia con patrón State
+
+actor "<u>:EB</u>" as EB
+boundary "<u>:PantallaRecepcionBolsin</u>" as P
+control "<u>:GestorRecepcionBolsin</u>" as G
+entity "<u>seleccionado:Bolsin</u>" as B
+participant "<u>estadoActual:Enviado</u>" as EN <<State>>
+entity "<u>:CambioEstadoBolsin</u>" as CEB
+entity "<u>actual:CambioEstadoBolsin</u>" as ACEB
+participant "<u>:RecibidoEnCMDestino</u>" as REC <<State>>
+entity "<u>nuevo:CambioEstadoBolsin</u>" as NCEB
+entity "<u>:Remito</u>" as R
+participant "<u>estado:EnBolsinEnviado</u>" as ER <<State>>
+participant "<u>:RemitoRecibidoYAceptado</u>" as RRA <<State>>
+entity "<u>:DetalleRemito</u>" as DR
+entity "<u>:Documentacion</u>" as D
+participant "<u>estadoActual:EnBolsinEnviado</u>" as ED <<State>>
+entity "<u>:CambioEstadoDocumentacion</u>" as CED
+entity "<u>actual:CambioEstadoDocumentacion</u>" as ACED
+participant "<u>:RecibidaYAceptada</u>" as RYA <<State>>
+entity "<u>nuevo:CambioEstadoDocumentacion</u>" as NCED
+
+note over EB, G
+  Los métodos anteriores se mantienen
+  como en el análisis
+end note
+
+EB -> P : tomarConfirmacion(): void
+activate P
+P -> G : tomarConfirmacion(confirma: boolean): void
+activate G
+G -> G : getFechaYHoraActual(): DateTime
+
+G -> B : recibir(fechaHora: DateTime,\nresponsable: Empleado): void
+activate B
+B -> EN : recibir(bolsin: Bolsin, fechaHora: DateTime,\nresponsable: Empleado): void
+activate EN
+EN -> EN : buscarCambioEstadoActual(bolsin: Bolsin):\nCambioEstadoBolsin
+activate EN
+loop mientras haya cambios de estado
+  EN -> CEB : ~*sosActual(): boolean
+end
+deactivate EN
+EN -> ACEB : setFechaHoraFin(fechaHora: DateTime): void
+EN -> EN : crearEstado(): EstadoBolsin
+activate EN
+create REC
+EN -->> REC : new()
+deactivate EN
+EN -> EN : crearCambioEstado(estado: EstadoBolsin,\nfechaHora: DateTime, responsable: Empleado):\nCambioEstadoBolsin
+activate EN
+create NCEB
+EN -->> NCEB : new(fechaHoraInicio: DateTime,\nestado: EstadoBolsin, responsable: Empleado)
+deactivate EN
+EN -> B : setEstado(estado: EstadoBolsin): void
+EN -> B : agregarCambioEstado(cambioEstado:\nCambioEstadoBolsin): void
+deactivate EN
+deactivate B
+
+G -> B : recibirYAceptarRemito(fechaHora: DateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: int[]): void
+activate B
+loop mientras haya remitos
+  B -> R : recibirYAceptar(fechaHora: DateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: int[]): void
+  activate R
+  R -> ER : recibirYAceptar(remito: Remito, fechaHora: DateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: int[]): void
+  activate ER
+  ER -> ER : crearEstado(remito: Remito, opcion: OpcionRecepcion,\ndocumentacionIndicada: int[]): EstadoRemito
+  activate ER
+  create RRA
+  ER -->> RRA : new()
+  deactivate ER
+  ER -> R : setEstado(estado: EstadoRemito): void
+  ER -> R : getDetallesRemito(): DetalleRemito[]
+  ER -> ER : actualizarEstadoDocumentacion(detallesRemito: DetalleRemito[],\nfechaHora: DateTime, responsable: Empleado,\nopcion: OpcionRecepcion, documentacionIndicada: int[]): void
+  activate ER
+  loop mientras haya detalles de remito
+    ER -> DR : recibirYAceptarDoc(fechaHora: DateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: int[]): void
+    activate DR
+    DR -> DR : esDocumentacionIndicada(\ndocumentacionIndicada: int[]): boolean
+    DR -> D : recibir(fechaHora: DateTime, responsable: Empleado,\nsituacion: SituacionDocumentacion): void
+    activate D
+    D -> ED : recibir(documentacion: Documentacion,\nfechaHora: DateTime, responsable: Empleado,\nsituacion: SituacionDocumentacion): void
+    activate ED
+    ED -> ED : buscarCambioEstadoActual(documentacion:\nDocumentacion): CambioEstadoDocumentacion
+    activate ED
+    loop mientras haya cambios de estado
+      ED -> CED : ~*sosActual(): boolean
+    end
+    deactivate ED
+    ED -> ACED : setFechaHoraFin(fechaHora: DateTime): void
+    ED -> ED : crearEstado(situacion: SituacionDocumentacion):\nEstadoDocumentacion
+    activate ED
+    create RYA
+    ED -->> RYA : new()
+    deactivate ED
+    ED -> ED : crearCambioEstado(estado: EstadoDocumentacion,\nfechaHora: DateTime, responsable: Empleado):\nCambioEstadoDocumentacion
+    activate ED
+    create NCED
+    ED -->> NCED : new(fechaHoraInicio: DateTime,\nestado: EstadoDocumentacion,\nresponsableCE: Empleado)
+    deactivate ED
+    ED -> D : setEstado(estado: EstadoDocumentacion): void
+    ED -> D : agregarCambioEstado(cambioEstado:\nCambioEstadoDocumentacion): void
+    deactivate ED
+    deactivate D
+    deactivate DR
+  end
+  deactivate ER
+  deactivate ER
+  deactivate R
+end
+deactivate B
+
+note over G, R
+  Los métodos posteriores se mantienen como en el análisis,
+  salvo buscarCorreoCM(), que toma el correo de la CM origen
+  del bolsín: seleccionado:Bolsin → obtenerCorreoCMOrigen().
+end note
+deactivate G
+deactivate P
+@enduml
