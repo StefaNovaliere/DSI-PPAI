@@ -20,35 +20,35 @@ Referencias: ✅ igual en el diagrama y en el código · ✏️ corregir en el d
 | 1 | EB → Pantalla | `tomarConfirmacion()` | [`PantallaGraficaRecepcionBolsin.tomarConfirmacion()`](../src/main/java/ppai/boundary/PantallaGraficaRecepcionBolsin.java#L428) (diálogo de confirmación) | ✅ |
 | 2 | Pantalla → Gestor | `tomarConfirmacion()` | [`GestorRecepcionBolsin.tomarConfirmacion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L248), con `confirma: boolean` (si es falso, flujo A6) | ✏️ parámetro |
 | — | Gestor → Gestor | *(falta)* | [`GestorRecepcionBolsin.getFechaYHoraActual()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L311) | ✏️ agregar |
-| 3 | Gestor → seleccionado:Bolsin | `recibir()` | [`Bolsin.recibir(fechaHora, responsable)`](../src/main/java/ppai/entidades/Bolsin.java#L160) | ✏️ parámetros |
-| 4 | Bolsin → Enviado | `recibir(bolsin)` | [`Enviado.recibir(bolsin, fechaHora, responsable)`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L26) | ✏️ parámetros |
-| — | Enviado → :CambioEstadoBolsin | *(falta)* | `*sosActual()` a cada cambio de estado, dentro de [`Enviado.recibir()`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L26): [`CambioEstadoBolsin.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L48) | ✏️ agregar |
-| 5 | Enviado → actual:CambioEstadoBolsin | `setFechaHoraFin(fechaHora)` | [`CambioEstadoBolsin.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L56) | ✅ |
-| 6 | Enviado → Enviado | `crearEstado(): Recibido en CM destino` | [`Enviado.crearEstado(): EstadoBolsin`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L41) | ✏️ tipo de retorno |
-| 7 | Enviado → Recibido en CM destino | `new()` | [`new RecibidoEnCMDestino()`](../src/main/java/ppai/entidades/estadobolsin/RecibidoEnCMDestino.java#L10) | ✅ (nombre de la clase: `RecibidoEnCMDestino`) |
-| 8 | Enviado → Enviado | `crearCambioEstado(): void` | [`EstadoBolsin.crearCambioEstado(estado, fechaHora, responsable): CambioEstadoBolsin`](../src/main/java/ppai/entidades/estadobolsin/EstadoBolsin.java#L41) | ✏️ parámetros y retorno |
-| 9 | Enviado → nuevo:CambioEstadoBolsin | `new(fechaHoraInicio, estado, responsable)` | [`new CambioEstadoBolsin(fechaHoraInicio, estado, responsableCE)`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L41) | ✅ |
-| 10 | Enviado → seleccionado:Bolsin | `setEstado(estado: EstadoBolsin)` | [`Bolsin.setEstado()`](../src/main/java/ppai/entidades/Bolsin.java#L96) | ✅ |
-| 11 | Enviado → seleccionado:Bolsin | `agregarCambioEstado(cambioEstado: CambioEstado)` | [`Bolsin.agregarCambioEstado(cambioEstado: CambioEstadoBolsin)`](../src/main/java/ppai/entidades/Bolsin.java#L91) | ✏️ tipo |
-| 12 | Gestor → seleccionado:Bolsin | `recibirYAceptarRemito(fechaHora)` | [`Bolsin.recibirYAceptarRemito(fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/Bolsin.java#L168) | ✏️ parámetros |
-| 13 | Bolsin → :Remito (loop Remitos) | `recibirYAceptar(fechaHora)` | [`Remito.recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/Remito.java#L103) | ✏️ parámetros |
-| 14 | Remito → EnBolsinEnviado | `recibirYAceptar(remito)` | [`EnBolsinEnviado.recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L23) | ✏️ parámetros |
-| 15 | EnBolsinEnviado → EnBolsinEnviado | `crearEstado(): EstadoRemito` | [`EnBolsinEnviado.crearEstado(remito, opcion, documentacionIndicada): EstadoRemito`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L37) | ✏️ parámetros (la guarda: parcial o no) |
-| 16 | EnBolsinEnviado → RemitoRecibidoYAceptado | `new()` | [`new RemitoRecibidoYAceptado()`](../src/main/java/ppai/entidades/estadoremito/RemitoRecibidoYAceptado.java#L6) (o `RemitoRecibidoYAceptadoParcial` en las opciones 2 y 3) | ✅ |
-| 17 | EnBolsinEnviado → :Remito | `setEstado(estado: EstadoRemito)` | [`Remito.setEstado()`](../src/main/java/ppai/entidades/Remito.java#L119) | ✅ |
-| — | EnBolsinEnviado → :Remito | *(falta)* | [`Remito.getDetallesRemito()`](../src/main/java/ppai/entidades/Remito.java#L139): de ahí salen los detalles que recorre el estado | ✏️ agregar |
-| 18 | EnBolsinEnviado → EnBolsinEnviado | `actualizarEstadoDocumentacion(detalleRemito[])` | [`EnBolsinEnviado.actualizarEstadoDocumentacion(detallesRemito, fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L44) | ✏️ parámetros |
+| 3 | Gestor → seleccionado:Bolsin | `recibir()` | [`Bolsin.recibir(fechaHora, responsable)`](../src/main/java/ppai/entidades/Bolsin.java#L162) | ✏️ parámetros |
+| 4 | Bolsin → Enviado | `recibir(bolsin)` | [`Enviado.recibir(bolsin, fechaHora, responsable)`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L27) | ✏️ parámetros |
+| — | Enviado → :CambioEstadoBolsin | *(falta)* | `*sosActual()` a cada cambio de estado, dentro de [`Enviado.recibir()`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L27): [`CambioEstadoBolsin.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L51) | ✏️ agregar |
+| 5 | Enviado → actual:CambioEstadoBolsin | `setFechaHoraFin(fechaHora)` | [`CambioEstadoBolsin.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L59) | ✅ |
+| 6 | Enviado → Enviado | `crearEstado(): Recibido en CM destino` | [`Enviado.crearEstado(): Estado`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L42) | ✏️ tipo de retorno |
+| 7 | Enviado → Recibido en CM destino | `new()` | [`new RecibidoEnCMDestino()`](../src/main/java/ppai/entidades/estadobolsin/RecibidoEnCMDestino.java#L12) | ✅ (nombre de la clase: `RecibidoEnCMDestino`) |
+| 8 | Enviado → Enviado | `crearCambioEstado(): void` | [`Enviado.crearCambioEstado(estado, fechaHora, responsable): CambioEstadoBolsin`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L46) | ✏️ parámetros y retorno |
+| 9 | Enviado → nuevo:CambioEstadoBolsin | `new(fechaHoraInicio, estado, responsable)` | [`new CambioEstadoBolsin(fechaHoraInicio, estado, responsableCE)`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L44) | ✅ |
+| 10 | Enviado → seleccionado:Bolsin | `setEstado(estado: Estado)` | [`Bolsin.setEstado()`](../src/main/java/ppai/entidades/Bolsin.java#L95) | ✅ |
+| 11 | Enviado → seleccionado:Bolsin | `agregarCambioEstado(cambioEstado: CambioEstado)` | [`Bolsin.agregarCambioEstado(cambioEstado: CambioEstadoBolsin)`](../src/main/java/ppai/entidades/Bolsin.java#L90) | ✏️ tipo |
+| 12 | Gestor → seleccionado:Bolsin | `recibirYAceptarRemito(fechaHora)` | [`Bolsin.recibirYAceptarRemito(fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/Bolsin.java#L170) | ✏️ parámetros |
+| 13 | Bolsin → :Remito (loop Remitos) | `recibirYAceptar(fechaHora)` | [`Remito.recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/Remito.java#L105) | ✏️ parámetros |
+| 14 | Remito → EnBolsinEnviado | `recibirYAceptar(remito)` | [`EnBolsinEnviado.recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L24) | ✏️ parámetros |
+| 15 | EnBolsinEnviado → EnBolsinEnviado | `crearEstado(): Estado` | [`EnBolsinEnviado.crearEstado(remito, opcion, documentacionIndicada): Estado`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L38) | ✏️ parámetros (la guarda: parcial o no) |
+| 16 | EnBolsinEnviado → RemitoRecibidoYAceptado | `new()` | [`new RemitoRecibidoYAceptado()`](../src/main/java/ppai/entidades/estadoremito/RemitoRecibidoYAceptado.java#L8) (o `RecibidoYAceptadoParcial` en las opciones 2 y 3) | ✅ |
+| 17 | EnBolsinEnviado → :Remito | `setEstado(estado: Estado)` | [`Remito.setEstado()`](../src/main/java/ppai/entidades/Remito.java#L121) | ✅ |
+| — | EnBolsinEnviado → :Remito | *(falta)* | [`Remito.getDetallesRemito()`](../src/main/java/ppai/entidades/Remito.java#L144): de ahí salen los detalles que recorre el estado | ✏️ agregar |
+| 18 | EnBolsinEnviado → EnBolsinEnviado | `actualizarEstadoDocumentacion(detalleRemito[])` | [`EnBolsinEnviado.actualizarEstadoDocumentacion(detallesRemito, fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L45) | ✏️ parámetros |
 | 19 | EnBolsinEnviado → :DetalleRemito (loop Detalle Remito) | `recibirYAceptarDoc()` | [`DetalleRemito.recibirYAceptarDoc(fechaHora, responsable, opcion, documentacionIndicada)`](../src/main/java/ppai/entidades/DetalleRemito.java#L63) | ✏️ parámetros y línea de vida |
-| 20 | DetalleRemito → :Documentación | `recibir()` | [`Documentacion.recibir(fechaHora, responsable, situacion)`](../src/main/java/ppai/entidades/Documentacion.java#L95) | ✏️ parámetros |
-| 21 | Documentación → En bolsín enviado | `recibir(this)` | [`EnBolsinEnviado.recibir(documentacion, fechaHora, responsable, situacion)`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L24) | ✏️ parámetros |
-| — | En bolsín enviado → :CambioEstadoDocumentacion | *(falta)* | `*sosActual()` a cada cambio de estado, dentro de [`EnBolsinEnviado.recibir()`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L24): [`CambioEstadoDocumentacion.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L49) | ✏️ agregar |
-| 22 | En bolsín enviado → actual:CambioEstadoDocumentacion | `setFechaHoraFin(fechaHora)` | [`CambioEstadoDocumentacion.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L53) | ✅ |
-| 23 | En bolsín enviado → En bolsín enviado | `crearEstado(): RecibidaYAceptada` | [`EnBolsinEnviado.crearEstado(situacion): EstadoDocumentacion`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L41) | ✏️ parámetro (la guarda) y tipo de retorno |
-| 24 | En bolsín enviado → RecibidaYAceptada | `new()` | [`new RecibidaYAceptada()`](../src/main/java/ppai/entidades/estadodocumentacion/RecibidaYAceptada.java#L9) | ✅ |
-| 25 | En bolsín enviado → En bolsín enviado | `crearCambioEstado(): void` | [`EstadoDocumentacion.crearCambioEstado(estado, fechaHora, responsable): CambioEstadoDocumentacion`](../src/main/java/ppai/entidades/estadodocumentacion/EstadoDocumentacion.java#L42) | ✏️ parámetros y retorno |
-| 26 | En bolsín enviado → nuevo:CambioEstadoDocumentacion | `new(fechaHoraInicio, estado, responsableCE)` | [`new CambioEstadoDocumentacion(fechaHoraInicio, estado, responsableCE)`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L41) | ✅ |
-| 27 | En bolsín enviado → :Documentación | `setEstado(estado: EstadoDoc)` | [`Documentacion.setEstado(estado: EstadoDocumentacion)`](../src/main/java/ppai/entidades/Documentacion.java#L101) | ✏️ tipo |
-| 28 | En bolsín enviado → :Documentación | `agregarCambioEstado(cambioEstado)` | [`Documentacion.agregarCambioEstado()`](../src/main/java/ppai/entidades/Documentacion.java#L105) | ✅ |
+| 20 | DetalleRemito → :Documentación | `recibir()` | [`Documentacion.recibir(fechaHora, responsable, situacion)`](../src/main/java/ppai/entidades/Documentacion.java#L94) | ✏️ parámetros |
+| 21 | Documentación → En bolsín enviado | `recibir(this)` | [`EnBolsinEnviado.recibir(documentacion, fechaHora, responsable, situacion)`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L25) | ✏️ parámetros |
+| — | En bolsín enviado → :CambioEstadoDocumentacion | *(falta)* | `*sosActual()` a cada cambio de estado, dentro de [`EnBolsinEnviado.recibir()`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L25): [`CambioEstadoDocumentacion.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L52) | ✏️ agregar |
+| 22 | En bolsín enviado → actual:CambioEstadoDocumentacion | `setFechaHoraFin(fechaHora)` | [`CambioEstadoDocumentacion.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L56) | ✅ |
+| 23 | En bolsín enviado → En bolsín enviado | `crearEstado(): RecibidaYAceptada` | [`EnBolsinEnviado.crearEstado(situacion): Estado`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L42) | ✏️ parámetro (la guarda) y tipo de retorno |
+| 24 | En bolsín enviado → RecibidaYAceptada | `new()` | [`new RecibidaYAceptada()`](../src/main/java/ppai/entidades/estadodocumentacion/RecibidaYAceptada.java#L11) | ✅ |
+| 25 | En bolsín enviado → En bolsín enviado | `crearCambioEstado(): void` | [`EnBolsinEnviado.crearCambioEstado(estado, fechaHora, responsable): CambioEstadoDocumentacion`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L55) | ✏️ parámetros y retorno |
+| 26 | En bolsín enviado → nuevo:CambioEstadoDocumentacion | `new(fechaHoraInicio, estado, responsableCE)` | [`new CambioEstadoDocumentacion(fechaHoraInicio, estado, responsableCE)`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L44) | ✅ |
+| 27 | En bolsín enviado → :Documentación | `setEstado(estado: Estado)` | [`Documentacion.setEstado(estado: Estado)`](../src/main/java/ppai/entidades/Documentacion.java#L100) | ✏️ tipo |
+| 28 | En bolsín enviado → :Documentación | `agregarCambioEstado(cambioEstado)` | [`Documentacion.agregarCambioEstado()`](../src/main/java/ppai/entidades/Documentacion.java#L107) | ✅ |
 
 ## Correcciones al diagrama
 
@@ -81,10 +81,9 @@ no se puede implementar.
    `documentacionIndicada`, y `Documentacion.recibir` lleva la `situacion` (la guarda de la
    máquina de estados). En el flujo principal valen `opcion = CONTENIDO_IGUAL`, una lista
    vacía y `situacion = IGUAL_A_LA_REGISTRADA`.
-5. **Tipos:** `crearEstado()` devuelve `EstadoBolsin`, `EstadoRemito` o
-   `EstadoDocumentacion` (no "Recibido en CM destino"); `crearCambioEstado()` devuelve el
+5. **Tipos:** `crearEstado()` devuelve `Estado` (no "Recibido en CM destino"); `crearCambioEstado()` devuelve el
    cambio de estado que después se agrega, no `void`; `agregarCambioEstado(cambioEstado:
-   CambioEstadoBolsin)`; `setEstado(estado: EstadoDocumentacion)`.
+   CambioEstadoBolsin)`; `setEstado(estado: Estado)`.
 6. **Nombres de clase:** "Recibido en CM destino" es la clase `RecibidoEnCMDestino` y "En
    bolsín enviado" (la de Documentación) es `EnBolsinEnviado`. Hay dos `EnBolsinEnviado`: el
    del remito (paquete `estadoremito`) y el de la documentación (paquete
@@ -111,7 +110,7 @@ Gestor → seleccionado:Bolsin: recibir(fechaHora, responsable)
   Bolsin → estadoActual:Enviado: recibir(bolsin, fechaHora, responsable)
     Enviado → :CambioEstadoBolsin: *sosActual(): boolean
     Enviado → actual:CambioEstadoBolsin: setFechaHoraFin(fechaHora)
-    Enviado → Enviado: crearEstado(): EstadoBolsin
+    Enviado → Enviado: crearEstado(): Estado
       Enviado → :RecibidoEnCMDestino: new()
     Enviado → Enviado: crearCambioEstado(estado, fechaHora, responsable): CambioEstadoBolsin
       Enviado → nuevo:CambioEstadoBolsin: new(fechaHoraInicio, estado, responsable)
@@ -120,7 +119,7 @@ Gestor → seleccionado:Bolsin: recibir(fechaHora, responsable)
 Gestor → seleccionado:Bolsin: recibirYAceptarRemito(fechaHora, responsable, opcion, documentacionIndicada)
   loop Remitos: Bolsin → :Remito: recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada)
     Remito → estado:EnBolsinEnviado: recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)
-      EnBolsinEnviado → EnBolsinEnviado: crearEstado(remito, opcion, documentacionIndicada): EstadoRemito
+      EnBolsinEnviado → EnBolsinEnviado: crearEstado(remito, opcion, documentacionIndicada): Estado
         EnBolsinEnviado → :RemitoRecibidoYAceptado: new()
       EnBolsinEnviado → :Remito: setEstado(estado)
       EnBolsinEnviado → :Remito: getDetallesRemito(): List<DetalleRemito>
@@ -130,7 +129,7 @@ Gestor → seleccionado:Bolsin: recibirYAceptarRemito(fechaHora, responsable, op
             Documentacion → estadoActual:EnBolsinEnviado: recibir(documentacion, fechaHora, responsable, situacion)
               EnBolsinEnviado → :CambioEstadoDocumentacion: *sosActual(): boolean
               EnBolsinEnviado → actual:CambioEstadoDocumentacion: setFechaHoraFin(fechaHora)
-              EnBolsinEnviado → EnBolsinEnviado: crearEstado(situacion): EstadoDocumentacion
+              EnBolsinEnviado → EnBolsinEnviado: crearEstado(situacion): Estado
                 EnBolsinEnviado → :RecibidaYAceptada: new()
               EnBolsinEnviado → EnBolsinEnviado: crearCambioEstado(estado, fechaHora, responsable): CambioEstadoDocumentacion
                 EnBolsinEnviado → nuevo:CambioEstadoDocumentacion: new(fechaHoraInicio, estado, responsableCE)
