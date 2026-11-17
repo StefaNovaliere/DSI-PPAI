@@ -10,7 +10,7 @@ Objetos**.
 > La guía incluye un guion para probar el flujo principal y los alternativos, y una tabla de
 > problemas frecuentes.
 
-**Diseño (Entrega 2):** [`docs/Entrega2_Diseno_CU28.pdf`](docs/Entrega2_Diseno_CU28.pdf) tiene
+**Diseño (Entrega 2):** [`docs/PPAI2026_3K2_G10_E2_Diseño.pdf`](docs/PPAI2026_3K2_G10_E2_Dise%C3%B1o.pdf) tiene la carátula,
 la identificación del patrón, los detalles de implementación, el diagrama de clases (sólo las
 clases y los métodos que intervienen en el patrón State) y el diagrama de secuencia. Los
 diagramas se editan en sus fuentes PlantUML:
