@@ -24,7 +24,13 @@ public class Enviado extends EstadoBolsin {
      */
     @Override
     public void recibir(Bolsin bolsin, LocalDateTime fechaHora, Empleado responsable) {
-        CambioEstadoBolsin actual = buscarCambioEstadoActual(bolsin);
+        // *sosActual(): se le pregunta a cada cambio de estado si es el actual
+        CambioEstadoBolsin actual = null;
+        for (CambioEstadoBolsin cambioEstado : bolsin.getCambiosEstado()) {
+            if (cambioEstado.sosActual()) {
+                actual = cambioEstado;
+            }
+        }
         actual.setFechaHoraFin(fechaHora);
         EstadoBolsin proximoEstado = crearEstado();
         CambioEstadoBolsin nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);

@@ -245,7 +245,6 @@ abstract class EstadoBolsin {
   #EstadoBolsin(nombre: String, descripcion: String)
   +esEnviado(): boolean
   +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado): void
-  #buscarCambioEstadoActual(bolsin: Bolsin): CambioEstadoBolsin
   #crearCambioEstado(estado: EstadoBolsin, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoBolsin
 }
 class "Creado" as BCreado
@@ -281,7 +280,6 @@ abstract class EstadoDocumentacion {
   #EstadoDocumentacion(nombre: String, descripcion: String)
   +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
   #recepcionInvalida(documentacion: Documentacion, situacion: SituacionDocumentacion): IllegalStateException
-  #buscarCambioEstadoActual(documentacion: Documentacion): CambioEstadoDocumentacion
   #crearCambioEstado(estado: EstadoDocumentacion, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoDocumentacion
 }
 class "Registrada" as DRegistrada

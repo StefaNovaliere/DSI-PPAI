@@ -35,17 +35,7 @@ public abstract class EstadoBolsin extends Estado {
                 + " porque está en estado «" + getDescripcion() + "»");
     }
 
-    // Pasos que usan los estados concretos al hacer la transición
-
-    /** Busca en el historial del bolsín el cambio de estado vigente (*sosActual()). */
-    protected CambioEstadoBolsin buscarCambioEstadoActual(Bolsin bolsin) {
-        for (CambioEstadoBolsin cambioEstado : bolsin.getCambiosEstado()) {
-            if (cambioEstado.sosActual()) {
-                return cambioEstado;
-            }
-        }
-        return null;
-    }
+    // Paso que usan los estados concretos al hacer la transición
 
     /** Crea el cambio de estado del nuevo estado, con el empleado responsable. */
     protected CambioEstadoBolsin crearCambioEstado(EstadoBolsin estado, LocalDateTime fechaHora,

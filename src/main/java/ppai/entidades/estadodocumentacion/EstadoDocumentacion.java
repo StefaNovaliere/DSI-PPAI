@@ -36,17 +36,7 @@ public abstract class EstadoDocumentacion extends Estado {
                 + " como «" + situacion.getDescripcion() + "» porque está en estado «" + getDescripcion() + "»");
     }
 
-    // Pasos que usan los estados concretos al hacer la transición
-
-    /** Busca en el historial de la documentación el cambio de estado vigente (*sosActual()). */
-    protected CambioEstadoDocumentacion buscarCambioEstadoActual(Documentacion documentacion) {
-        for (CambioEstadoDocumentacion cambioEstado : documentacion.getCambiosEstado()) {
-            if (cambioEstado.sosActual()) {
-                return cambioEstado;
-            }
-        }
-        return null;
-    }
+    // Paso que usan los estados concretos al hacer la transición
 
     /** Crea el cambio de estado del nuevo estado, con el empleado responsable. */
     protected CambioEstadoDocumentacion crearCambioEstado(EstadoDocumentacion estado, LocalDateTime fechaHora,

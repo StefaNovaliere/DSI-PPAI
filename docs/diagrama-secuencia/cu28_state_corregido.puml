@@ -91,12 +91,7 @@ G -> B : recibir(fechaHora: LocalDateTime,\nresponsable: Empleado): void
 activate B
 B -> EN : recibir(bolsin: Bolsin, fechaHora: LocalDateTime,\nresponsable: Empleado): void
 activate EN
-EN -> EN : buscarCambioEstadoActual(bolsin: Bolsin):\nCambioEstadoBolsin
-activate EN
-loop mientras haya cambios de estado
-  EN -> CEB : ~*sosActual(): boolean
-end
-deactivate EN
+EN -> CEB : ~*sosActual(): boolean
 EN -> ACEB : setFechaHoraFin(fechaHora: LocalDateTime): void
 EN -> EN : crearEstado(): EstadoBolsin
 activate EN
@@ -137,12 +132,7 @@ loop mientras haya remitos
     activate D
     D -> ED : recibir(documentacion: Documentacion,\nfechaHora: LocalDateTime, responsable: Empleado,\nsituacion: SituacionDocumentacion): void
     activate ED
-    ED -> ED : buscarCambioEstadoActual(documentacion:\nDocumentacion): CambioEstadoDocumentacion
-    activate ED
-    loop mientras haya cambios de estado
-      ED -> CED : ~*sosActual(): boolean
-    end
-    deactivate ED
+    ED -> CED : ~*sosActual(): boolean
     ED -> ACED : setFechaHoraFin(fechaHora: LocalDateTime): void
     ED -> ED : crearEstado(situacion: SituacionDocumentacion):\nEstadoDocumentacion
     activate ED

@@ -23,7 +23,13 @@ public class EnBolsinEnviado extends EstadoDocumentacion {
     @Override
     public void recibir(Documentacion documentacion, LocalDateTime fechaHora, Empleado responsable,
                         SituacionDocumentacion situacion) {
-        CambioEstadoDocumentacion actual = buscarCambioEstadoActual(documentacion);
+        // *sosActual(): se le pregunta a cada cambio de estado si es el actual
+        CambioEstadoDocumentacion actual = null;
+        for (CambioEstadoDocumentacion cambioEstado : documentacion.getCambiosEstado()) {
+            if (cambioEstado.sosActual()) {
+                actual = cambioEstado;
+            }
+        }
         actual.setFechaHoraFin(fechaHora);
         EstadoDocumentacion proximoEstado = crearEstado(situacion);
         CambioEstadoDocumentacion nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);

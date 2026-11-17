@@ -11,12 +11,15 @@ Objetos**.
 > problemas frecuentes.
 
 **Diseño (Entrega 2):** [`docs/Entrega2_Diseno_CU28.pdf`](docs/Entrega2_Diseno_CU28.pdf) tiene
-la identificación del patrón, el diagrama de clases y el diagrama de secuencia. Los diagramas
-se editan en sus fuentes PlantUML:
-[`diagrama-clases/cu28_clases_state.puml`](docs/diagrama-clases/cu28_clases_state.puml) y
+la identificación del patrón, los detalles de implementación, el diagrama de clases (sólo las
+clases y los métodos que intervienen en el patrón State) y el diagrama de secuencia. Los
+diagramas se editan en sus fuentes PlantUML:
+[`diagrama-clases/cu28_clases_reducido.puml`](docs/diagrama-clases/cu28_clases_reducido.puml) y
 [`diagrama-secuencia/cu28_state_corregido.puml`](docs/diagrama-secuencia/cu28_state_corregido.puml). Para verlos y
 editarlos en diagrams.net (draw.io), con formas UML editables, está
-[`docs/CU28_diagramas.drawio`](docs/CU28_diagramas.drawio).
+[`docs/CU28_diagramas.drawio`](docs/CU28_diagramas.drawio). El diagrama de clases completo, con
+todas las clases del CU, está en
+[`diagrama-clases/cu28_clases_state.puml`](docs/diagrama-clases/cu28_clases_state.puml).
 
 ## 1. Detalles de implementación
 
@@ -231,7 +234,6 @@ classDiagram
     class EstadoDocumentacion {
         <<abstract>>
         +recibir(documentacion, fechaHora, responsable, situacion)
-        #buscarCambioEstadoActual(documentacion)
         #crearCambioEstado(estado, fechaHora, responsable)
     }
     class EnBolsinEnviado {
@@ -252,7 +254,6 @@ classDiagram
         <<abstract>>
         +recibir(bolsin, fechaHora, responsable)
         +esEnviado()
-        #buscarCambioEstadoActual(bolsin)
         #crearCambioEstado(estado, fechaHora, responsable)
     }
     class Enviado {
@@ -292,7 +293,7 @@ GestorRecepcionBolsin.tomarConfirmacion()
  ├─ getFechaYHoraActual()
  ├─ Bolsin.recibir(fechaHora, responsable)
  │   └─ Enviado.recibir(bolsin, ...)                  ← el estado actual del bolsín
- │       buscarCambioEstadoActual() (*sosActual()) · setFechaHoraFin() · crearEstado(): new RecibidoEnCMDestino
+ │       *sosActual() sobre los cambios de estado · setFechaHoraFin() · crearEstado(): new RecibidoEnCMDestino
  │       crearCambioEstado(): new CambioEstadoBolsin · bolsin.setEstado() · bolsin.agregarCambioEstado()
  └─ Bolsin.recibirYAceptarRemito(fechaHora, responsable, opción, documentación indicada)
      └─ Remito.recibirYAceptar(...)                    (loop remitos)
@@ -304,7 +305,7 @@ GestorRecepcionBolsin.tomarConfirmacion()
               └─ DetalleRemito.recibirYAceptarDoc(...)    (loop detalles)
                   └─ Documentacion.recibir(fechaHora, responsable, situación)
                       └─ EnBolsinEnviado.recibir(documentacion, ...)  ← o ParaRedirigir
-                          buscarCambioEstadoActual() (*sosActual()) · setFechaHoraFin()
+                          *sosActual() sobre los cambios de estado · setFechaHoraFin()
                           crearEstado(situación): según la guarda, RecibidaYAceptada, NoRecibida,
                                                   RecibidaYRechazada o ParaRedirigir
                           crearCambioEstado() · documentacion.setEstado() · agregarCambioEstado()

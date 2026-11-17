@@ -63,8 +63,8 @@ esta revisión para que siga al diagrama · 🔄 cambia por el rediseño con el 
 | 42 | Gestor → :Estado (loop) | `esRecibidoEnCMDestino()` | — (se eliminó) | 🔄 patrón State |
 | 43 | Gestor → seleccionado:Bolsin | `recibirBolsin()` | [`Bolsin.recibir()`](../src/main/java/ppai/entidades/Bolsin.java#L160) → delega en [`Enviado.recibir()`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L26) | 🔄 patrón State (renombrado como en el rediseño) |
 | 44 | Bolsin → actual:CambioEstadoBolsin | `setFechaHoraFin()` | [`CambioEstadoBolsin.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L56) (desde [`Enviado.recibir()`](../src/main/java/ppai/entidades/estadobolsin/Enviado.java#L26)) | 🔄 lo hace el estado |
-| 45 | Bolsin → Bolsin | `crearCEBolsin()` | [`EstadoBolsin.crearCambioEstado()`](../src/main/java/ppai/entidades/estadobolsin/EstadoBolsin.java#L51) | 🔄 lo hace el estado |
-| 46 | Bolsin → nuevo:CambioEstadoBolsin | `new()` | [`new CambioEstadoBolsin()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L41) (desde [`EstadoBolsin.crearCambioEstado()`](../src/main/java/ppai/entidades/estadobolsin/EstadoBolsin.java#L51)) | 🔄 lo hace el estado |
+| 45 | Bolsin → Bolsin | `crearCEBolsin()` | [`EstadoBolsin.crearCambioEstado()`](../src/main/java/ppai/entidades/estadobolsin/EstadoBolsin.java#L41) | 🔄 lo hace el estado |
+| 46 | Bolsin → nuevo:CambioEstadoBolsin | `new()` | [`new CambioEstadoBolsin()`](../src/main/java/ppai/entidades/CambioEstadoBolsin.java#L41) (desde [`EstadoBolsin.crearCambioEstado()`](../src/main/java/ppai/entidades/estadobolsin/EstadoBolsin.java#L41)) | 🔄 lo hace el estado |
 | 47 | Gestor → Gestor | `buscarEstadoRecibidoYAceptado()` | — (se eliminó) | 🔄 patrón State |
 | 48 | Gestor → :Estado (loop) | `esAmbitoRemito()` | — (se eliminó) | 🔄 patrón State |
 | 49 | Gestor → :Estado (loop) | `esRecibidoYAceptado()` | — (se eliminó) | 🔄 patrón State |
@@ -75,9 +75,9 @@ esta revisión para que siga al diagrama · 🔄 cambia por el rediseño con el 
 | 54 | Bolsin → :Remito (loop) | `recibirYAceptar()` | [`Remito.recibirYAceptar()`](../src/main/java/ppai/entidades/Remito.java#L103) → delega en [`EnBolsinEnviado.recibirYAceptar()`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L23) | 🔄 patrón State |
 | 55 | Remito → :DetalleRemito (loop) | `actualizarEstadoDoc()` | [`DetalleRemito.recibirYAceptarDoc()`](../src/main/java/ppai/entidades/DetalleRemito.java#L63) (desde [`EnBolsinEnviado.actualizarEstadoDocumentacion()`](../src/main/java/ppai/entidades/estadoremito/EnBolsinEnviado.java#L44): el loop lo hace el estado del remito) | 🔄 patrón State (renombrado como en el rediseño) |
 | 56 | DetalleRemito → :Documentación | `recibir()` | [`Documentacion.recibir()`](../src/main/java/ppai/entidades/Documentacion.java#L95) → delega en [`EnBolsinEnviado.recibir()`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L24) / [`ParaRedirigir.recibir()`](../src/main/java/ppai/entidades/estadodocumentacion/ParaRedirigir.java#L25) | 🔄 patrón State |
-| 57 | Documentación → :CambioEstadoDocumentacion | `*sosActual()` | [`CambioEstadoDocumentacion.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L49) (desde [`EstadoDocumentacion.buscarCambioEstadoActual()`](../src/main/java/ppai/entidades/estadodocumentacion/EstadoDocumentacion.java#L42)) | 🔄 lo hace el estado |
+| 57 | Documentación → :CambioEstadoDocumentacion | `*sosActual()` | [`CambioEstadoDocumentacion.sosActual()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L49) (desde [`EnBolsinEnviado.recibir()`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L24)) | 🔄 lo hace el estado |
 | 58 | Documentación → actual:CambioEstadoDocumentacion | `setFechaHoraFin()` | [`CambioEstadoDocumentacion.setFechaHoraFin()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L53) (desde [`EnBolsinEnviado.recibir()`](../src/main/java/ppai/entidades/estadodocumentacion/EnBolsinEnviado.java#L24)) | 🔄 lo hace el estado |
-| 59 | Documentación → RecibidaYAceptada:CambioEstadoDocumentacion | `new()` | [`new CambioEstadoDocumentacion()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L41) (desde [`EstadoDocumentacion.crearCambioEstado()`](../src/main/java/ppai/entidades/estadodocumentacion/EstadoDocumentacion.java#L52)) | 🔄 lo hace el estado |
+| 59 | Documentación → RecibidaYAceptada:CambioEstadoDocumentacion | `new()` | [`new CambioEstadoDocumentacion()`](../src/main/java/ppai/entidades/CambioEstadoDocumentacion.java#L41) (desde [`EstadoDocumentacion.crearCambioEstado()`](../src/main/java/ppai/entidades/estadodocumentacion/EstadoDocumentacion.java#L42)) | 🔄 lo hace el estado |
 | 60 | Gestor → Gestor | `buscarInformacionDocumentacion()` | [`GestorRecepcionBolsin.buscarInformacionDocumentacion()`](../src/main/java/ppai/control/GestorRecepcionBolsin.java#L316) | ✅ |
 | 61 | Gestor → seleccionado:Bolsin | `obtenerInformacionDocumentacion()` | [`Bolsin.obtenerInformacionRemito()`](../src/main/java/ppai/entidades/Bolsin.java#L150) (el mismo del mensaje 25: devuelve también el estado de cada remito) | ✅ ajustado |
 | 62 | Bolsin → :Remito (loop) | `obtenerDatosRemito()` | [`Remito.obtenerDatosRemito()`](../src/main/java/ppai/entidades/Remito.java#L76) | ✅ ajustado |
@@ -138,9 +138,8 @@ documentación, tomada de la traza de ejecución, es:
 DetalleRemito.recibirYAceptarDoc()
   Documentacion.recibir()
     EnBolsinEnviado.recibir()                  ← o ParaRedirigir.recibir(), según el estado actual
-      EstadoDocumentacion.buscarCambioEstadoActual()
-        Documentacion.getCambiosEstado()
-        CambioEstadoDocumentacion.sosActual()   (loop)
+      Documentacion.getCambiosEstado()
+      CambioEstadoDocumentacion.sosActual()     (*: a cada cambio de estado)
       CambioEstadoDocumentacion.setFechaHoraFin()
       EnBolsinEnviado.crearEstado()
         new RecibidaYAceptada()                 ← según la guarda: NoRecibida, RecibidaYRechazada, ParaRedirigir

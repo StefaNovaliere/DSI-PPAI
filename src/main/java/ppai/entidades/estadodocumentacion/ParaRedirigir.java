@@ -28,7 +28,13 @@ public class ParaRedirigir extends EstadoDocumentacion {
                 && situacion != SituacionDocumentacion.NO_CORRESPONDE_A_LA_CM_DESTINO) {
             throw recepcionInvalida(documentacion, situacion);
         }
-        CambioEstadoDocumentacion actual = buscarCambioEstadoActual(documentacion);
+        // *sosActual(): se le pregunta a cada cambio de estado si es el actual
+        CambioEstadoDocumentacion actual = null;
+        for (CambioEstadoDocumentacion cambioEstado : documentacion.getCambiosEstado()) {
+            if (cambioEstado.sosActual()) {
+                actual = cambioEstado;
+            }
+        }
         actual.setFechaHoraFin(fechaHora);
         EstadoDocumentacion proximoEstado = crearEstado(situacion);
         CambioEstadoDocumentacion nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);
