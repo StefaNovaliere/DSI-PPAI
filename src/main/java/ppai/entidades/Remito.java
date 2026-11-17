@@ -2,6 +2,7 @@ package ppai.entidades;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ppai.dto.DatosDocumentacion;
-import ppai.entidades.estadoremito.EstadoRemito;
+import ppai.persistencia.ConversorEstadoRemito;
 
 /**
  * Remito de documentación entre Comisiones Médicas.
@@ -46,7 +47,8 @@ public class Remito {
     private ComisionMedica destino;
     /** Se guarda el nombre del estado; lo convierte ConversorEstadoRemito. */
     @Column(name = "estado", nullable = false)
-    private EstadoRemito estado;
+    @Convert(converter = ConversorEstadoRemito.class)
+    private Estado estado;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "remito_id")
     @OrderBy("id")
@@ -56,7 +58,7 @@ public class Remito {
         // Requerido por JPA
     }
 
-    public Remito(LocalDate fecha, int numero, ComisionMedica origen, ComisionMedica destino, EstadoRemito estado) {
+    public Remito(LocalDate fecha, int numero, ComisionMedica origen, ComisionMedica destino, Estado estado) {
         this.fecha = fecha;
         this.numero = numero;
         this.origen = origen;
@@ -116,11 +118,14 @@ public class Remito {
     }
 
     /** Lo usa el estado concreto al hacer la transición. */
-    public void setEstado(EstadoRemito estado) {
+    public void setEstado(Estado estado) {
+        if (!estado.esAmbitoRemito()) {
+            throw new IllegalArgumentException("El estado «" + estado + "» no es un estado de remito");
+        }
         this.estado = estado;
     }
 
-    public EstadoRemito getEstado() {
+    public Estado getEstado() {
         return estado;
     }
 

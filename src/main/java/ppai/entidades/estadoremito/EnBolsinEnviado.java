@@ -5,14 +5,15 @@ import java.util.List;
 
 import ppai.entidades.DetalleRemito;
 import ppai.entidades.Empleado;
+import ppai.entidades.Estado;
 import ppai.entidades.OpcionRecepcion;
 import ppai.entidades.Remito;
 
 /** Patrón State - ESTADO CONCRETO: En bolsín enviado (CU 27 Registrar el retiro de bolsines). */
-public class EnBolsinEnviado extends EstadoRemito {
+public class EnBolsinEnviado extends Estado {
 
     public EnBolsinEnviado() {
-        super("EnBolsinEnviado", "En bolsín enviado");
+        super(AMBITO_REMITO, "EnBolsinEnviado", "En bolsín enviado");
     }
 
     /**
@@ -22,7 +23,7 @@ public class EnBolsinEnviado extends EstadoRemito {
     @Override
     public void recibirYAceptar(Remito remito, LocalDateTime fechaHora, Empleado responsable,
                                 OpcionRecepcion opcion, List<Integer> documentacionIndicada) {
-        EstadoRemito proximoEstado = crearEstado(remito, opcion, documentacionIndicada);
+        Estado proximoEstado = crearEstado(remito, opcion, documentacionIndicada);
         remito.setEstado(proximoEstado);
         actualizarEstadoDocumentacion(remito.getDetallesRemito(), fechaHora, responsable, opcion,
                 documentacionIndicada);
@@ -34,9 +35,9 @@ public class EnBolsinEnviado extends EstadoRemito {
      * corresponde parte de su documentación (opciones 2 y 3)] -&gt; Recibido y
      * aceptado parcial.
      */
-    private EstadoRemito crearEstado(Remito remito, OpcionRecepcion opcion, List<Integer> documentacionIndicada) {
+    private Estado crearEstado(Remito remito, OpcionRecepcion opcion, List<Integer> documentacionIndicada) {
         if (opcion.dejaRemitoParcial() && remito.tenesDocumentacionIndicada(documentacionIndicada)) {
-            return new RemitoRecibidoYAceptadoParcial();
+            return new RecibidoYAceptadoParcial();
         }
         return new RemitoRecibidoYAceptado();
     }

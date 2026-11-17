@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 
 import ppai.dto.DatosRemito;
-import ppai.entidades.estadobolsin.EstadoBolsin;
 
 /**
  * Bolsín: envío físico precintado de remitos entre Comisiones Médicas.
@@ -57,7 +56,7 @@ public class Bolsin {
     private List<CambioEstadoBolsin> cambiosEstado = new ArrayList<>();
     /** No se guarda como columna: se obtiene del cambio de estado actual (ver restaurarEstadoActual). */
     @Transient
-    private EstadoBolsin estadoActual;
+    private Estado estadoActual;
 
     protected Bolsin() {
         // Requerido por JPA
@@ -93,7 +92,10 @@ public class Bolsin {
     }
 
     /** Lo usa el estado concreto al hacer la transición. */
-    public void setEstado(EstadoBolsin estado) {
+    public void setEstado(Estado estado) {
+        if (!estado.esAmbitoBolsin()) {
+            throw new IllegalArgumentException("El estado «" + estado + "» no es un estado de bolsín");
+        }
         this.estadoActual = estado;
     }
 
@@ -177,7 +179,7 @@ public class Bolsin {
         return origen.getEmail();
     }
 
-    public EstadoBolsin getEstadoActual() {
+    public Estado getEstadoActual() {
         return estadoActual;
     }
 

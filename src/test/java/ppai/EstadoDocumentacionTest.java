@@ -26,6 +26,7 @@ import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.ComisionMedica;
 import ppai.entidades.Documentacion;
 import ppai.entidades.Empleado;
+import ppai.entidades.Estado;
 import ppai.entidades.SituacionDocumentacion;
 import ppai.entidades.TipoDocumento;
 import ppai.entidades.Usuario;
@@ -33,7 +34,6 @@ import ppai.entidades.estadodocumentacion.DeBaja;
 import ppai.entidades.estadodocumentacion.EnBolsinEnviado;
 import ppai.entidades.estadodocumentacion.EnBolsinSaliente;
 import ppai.entidades.estadodocumentacion.EnRemito;
-import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 import ppai.entidades.estadodocumentacion.NoRecibida;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
@@ -53,7 +53,7 @@ class EstadoDocumentacionTest {
             new ComisionMedica(0, "Comisión Médica Central", "", "", "", true));
 
     /** Documentación cuyo historial termina en el estado indicado (el actual). */
-    private Documentacion documentacionEn(EstadoDocumentacion estadoActual) {
+    private Documentacion documentacionEn(Estado estadoActual) {
         List<CambioEstadoDocumentacion> historial = new ArrayList<>();
         CambioEstadoDocumentacion anterior = new CambioEstadoDocumentacion(T0, new Registrada(), responsable);
         anterior.setFechaHoraFin(T0.plusDays(1));
@@ -77,8 +77,8 @@ class EstadoDocumentacionTest {
 
     @ParameterizedTest(name = "{0} + recibir() [{1}] -> {2}")
     @MethodSource("transicionesDelCU28")
-    void recibirPasaAlEstadoQueIndicaLaMaquinaDeEstados(EstadoDocumentacion estado, SituacionDocumentacion situacion,
-                                                        Class<? extends EstadoDocumentacion> estadoEsperado) {
+    void recibirPasaAlEstadoQueIndicaLaMaquinaDeEstados(Estado estado, SituacionDocumentacion situacion,
+                                                        Class<? extends Estado> estadoEsperado) {
         Documentacion doc = documentacionEn(estado);
         doc.recibir(RECEPCION, responsable, situacion);
         assertInstanceOf(estadoEsperado, doc.getEstadoActual());
@@ -118,14 +118,14 @@ class EstadoDocumentacionTest {
     }
 
     static Stream<Arguments> estadosQueNoPuedenRecibirse() {
-        return Stream.<Supplier<EstadoDocumentacion>>of(Registrada::new, EnRemito::new, EnBolsinSaliente::new,
+        return Stream.<Supplier<Estado>>of(Registrada::new, EnRemito::new, EnBolsinSaliente::new,
                         NoRecibida::new, RecibidaYAceptada::new, RecibidaYRechazada::new, DeBaja::new)
                 .map(estado -> Arguments.of(estado.get()));
     }
 
     @ParameterizedTest(name = "{0} no puede recibirse")
     @MethodSource("estadosQueNoPuedenRecibirse")
-    void losDemasEstadosRechazanLaRecepcion(EstadoDocumentacion estado) {
+    void losDemasEstadosRechazanLaRecepcion(Estado estado) {
         Documentacion doc = documentacionEn(estado);
         for (SituacionDocumentacion situacion : SituacionDocumentacion.values()) {
             assertThrows(IllegalStateException.class, () -> doc.recibir(RECEPCION, responsable, situacion));

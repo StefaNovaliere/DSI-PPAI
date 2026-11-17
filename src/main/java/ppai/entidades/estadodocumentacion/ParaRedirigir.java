@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.Documentacion;
 import ppai.entidades.Empleado;
+import ppai.entidades.Estado;
 import ppai.entidades.SituacionDocumentacion;
 
 /**
@@ -15,10 +16,10 @@ import ppai.entidades.SituacionDocumentacion;
  * ejemplo, que no llegó) no hay transición y la recepción se rechaza sin
  * cambiar nada.
  */
-public class ParaRedirigir extends EstadoDocumentacion {
+public class ParaRedirigir extends Estado {
 
     public ParaRedirigir() {
-        super("ParaRedirigir", "Para redirigir");
+        super(AMBITO_DOCUMENTACION, "ParaRedirigir", "Para redirigir");
     }
 
     @Override
@@ -26,7 +27,9 @@ public class ParaRedirigir extends EstadoDocumentacion {
                         SituacionDocumentacion situacion) {
         if (situacion != SituacionDocumentacion.IGUAL_A_LA_REGISTRADA
                 && situacion != SituacionDocumentacion.NO_CORRESPONDE_A_LA_CM_DESTINO) {
-            throw recepcionInvalida(documentacion, situacion);
+            // Con otra situación no hay transición: se rechaza como en Estado
+            super.recibir(documentacion, fechaHora, responsable, situacion);
+            return;
         }
         // *sosActual(): se le pregunta a cada cambio de estado si es el actual
         CambioEstadoDocumentacion actual = null;
@@ -36,17 +39,22 @@ public class ParaRedirigir extends EstadoDocumentacion {
             }
         }
         actual.setFechaHoraFin(fechaHora);
-        EstadoDocumentacion proximoEstado = crearEstado(situacion);
+        Estado proximoEstado = crearEstado(situacion);
         CambioEstadoDocumentacion nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);
         documentacion.setEstado(proximoEstado);
         documentacion.agregarCambioEstado(nuevo);
     }
 
     /** [documentación correcta = True] -&gt; Recibida&amp;Aceptada; [= False] -&gt; Recibida&amp;Rechazada. */
-    private EstadoDocumentacion crearEstado(SituacionDocumentacion situacion) {
+    private Estado crearEstado(SituacionDocumentacion situacion) {
         if (situacion == SituacionDocumentacion.IGUAL_A_LA_REGISTRADA) {
             return new RecibidaYAceptada();
         }
         return new RecibidaYRechazada();
+    }
+
+    private CambioEstadoDocumentacion crearCambioEstado(Estado estado, LocalDateTime fechaHora,
+                                                        Empleado responsable) {
+        return new CambioEstadoDocumentacion(fechaHora, estado, responsable);
     }
 }

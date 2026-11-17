@@ -3,11 +3,11 @@ package ppai.persistencia;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+import ppai.entidades.Estado;
 import ppai.entidades.estadobolsin.Cerrado;
 import ppai.entidades.estadobolsin.Creado;
 import ppai.entidades.estadobolsin.DeBaja;
 import ppai.entidades.estadobolsin.Enviado;
-import ppai.entidades.estadobolsin.EstadoBolsin;
 import ppai.entidades.estadobolsin.RecibidoEnCMDestino;
 
 /**
@@ -15,16 +15,16 @@ import ppai.entidades.estadobolsin.RecibidoEnCMDestino;
  * que {@link ConversorEstadoDocumentacion}: guarda el nombre del estado y, al
  * materializar, crea el objeto del estado concreto.
  */
-@Converter(autoApply = true)
-public class ConversorEstadoBolsin implements AttributeConverter<EstadoBolsin, String> {
+@Converter
+public class ConversorEstadoBolsin implements AttributeConverter<Estado, String> {
 
     @Override
-    public String convertToDatabaseColumn(EstadoBolsin estado) {
+    public String convertToDatabaseColumn(Estado estado) {
         return estado == null ? null : estado.getNombre();
     }
 
     @Override
-    public EstadoBolsin convertToEntityAttribute(String nombre) {
+    public Estado convertToEntityAttribute(String nombre) {
         if (nombre == null) {
             return null;
         }

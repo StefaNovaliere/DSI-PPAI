@@ -3,11 +3,11 @@ package ppai.persistencia;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+import ppai.entidades.Estado;
 import ppai.entidades.estadodocumentacion.DeBaja;
 import ppai.entidades.estadodocumentacion.EnBolsinEnviado;
 import ppai.entidades.estadodocumentacion.EnBolsinSaliente;
 import ppai.entidades.estadodocumentacion.EnRemito;
-import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 import ppai.entidades.estadodocumentacion.NoRecibida;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
@@ -23,16 +23,16 @@ import ppai.entidades.estadodocumentacion.Registrada;
  * único lugar del sistema que conoce la lista de estados; el dominio sigue sin
  * tener sentencias CASE sobre el estado.
  */
-@Converter(autoApply = true)
-public class ConversorEstadoDocumentacion implements AttributeConverter<EstadoDocumentacion, String> {
+@Converter
+public class ConversorEstadoDocumentacion implements AttributeConverter<Estado, String> {
 
     @Override
-    public String convertToDatabaseColumn(EstadoDocumentacion estado) {
+    public String convertToDatabaseColumn(Estado estado) {
         return estado == null ? null : estado.getNombre();
     }
 
     @Override
-    public EstadoDocumentacion convertToEntityAttribute(String nombre) {
+    public Estado convertToEntityAttribute(String nombre) {
         if (nombre == null) {
             return null;
         }

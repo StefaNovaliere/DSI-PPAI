@@ -5,12 +5,13 @@ import java.time.LocalDateTime;
 import ppai.entidades.Bolsin;
 import ppai.entidades.CambioEstadoBolsin;
 import ppai.entidades.Empleado;
+import ppai.entidades.Estado;
 
 /** Patrón State - ESTADO CONCRETO: Enviado (CU 27 Registrar el retiro de bolsines). */
-public class Enviado extends EstadoBolsin {
+public class Enviado extends Estado {
 
     public Enviado() {
-        super("Enviado", "Enviado");
+        super(AMBITO_BOLSIN, "Enviado", "Enviado");
     }
 
     @Override
@@ -32,13 +33,17 @@ public class Enviado extends EstadoBolsin {
             }
         }
         actual.setFechaHoraFin(fechaHora);
-        EstadoBolsin proximoEstado = crearEstado();
+        Estado proximoEstado = crearEstado();
         CambioEstadoBolsin nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);
         bolsin.setEstado(proximoEstado);
         bolsin.agregarCambioEstado(nuevo);
     }
 
-    private EstadoBolsin crearEstado() {
+    private Estado crearEstado() {
         return new RecibidoEnCMDestino();
+    }
+
+    private CambioEstadoBolsin crearCambioEstado(Estado estado, LocalDateTime fechaHora, Empleado responsable) {
+        return new CambioEstadoBolsin(fechaHora, estado, responsable);
     }
 }

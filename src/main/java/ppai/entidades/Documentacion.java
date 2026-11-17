@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 
 import ppai.dto.DatosDocumentacion;
-import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 
 /**
  * Patrón State - rol CONTEXTO.
@@ -45,7 +44,7 @@ public class Documentacion {
     private TipoDocumento tipoDocumento;
     /** No se guarda como columna: se obtiene del cambio de estado actual (ver restaurarEstadoActual). */
     @Transient
-    private EstadoDocumentacion estadoActual;
+    private Estado estadoActual;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "documentacion_id")
     @OrderBy("id")
@@ -98,7 +97,10 @@ public class Documentacion {
 
     // Métodos que usa el estado concreto para hacer la transición
 
-    public void setEstado(EstadoDocumentacion estado) {
+    public void setEstado(Estado estado) {
+        if (!estado.esAmbitoDocumentacion()) {
+            throw new IllegalArgumentException("El estado «" + estado + "» no es un estado de documentación");
+        }
         this.estadoActual = estado;
     }
 
@@ -128,7 +130,7 @@ public class Documentacion {
         return tipoDocumento.getNombre();
     }
 
-    public EstadoDocumentacion getEstadoActual() {
+    public Estado getEstadoActual() {
         return estadoActual;
     }
 

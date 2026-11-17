@@ -1,6 +1,7 @@
 package ppai.entidades;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +12,8 @@ import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
 
-import ppai.entidades.estadobolsin.EstadoBolsin;
+import ppai.persistencia.ConversorEstadoBolsin;
+
 
 /**
  * Historial de estados del Bolsín. Referencia al estado concreto (patrón
@@ -29,7 +31,8 @@ public class CambioEstadoBolsin {
     private LocalDateTime fechaHoraFin;
     /** Se guarda el nombre del estado; lo convierte ConversorEstadoBolsin. */
     @Column(name = "estado", nullable = false)
-    private EstadoBolsin estado;
+    @Convert(converter = ConversorEstadoBolsin.class)
+    private Estado estado;
     @ManyToOne
     @JoinColumn(name = "responsable_id")
     private Empleado responsableCE;
@@ -38,10 +41,10 @@ public class CambioEstadoBolsin {
         // Requerido por JPA
     }
 
-    public CambioEstadoBolsin(LocalDateTime fechaHoraInicio, EstadoBolsin estado, Empleado responsableCE) {
+    public CambioEstadoBolsin(LocalDateTime fechaHoraInicio, Estado estado, Empleado responsable) {
         this.fechaHoraInicio = fechaHoraInicio;
         this.estado = estado;
-        this.responsableCE = responsableCE;
+        this.responsableCE = responsable;
     }
 
     /** Es el cambio de estado actual si todavía no tiene fecha de fin. */
@@ -53,8 +56,8 @@ public class CambioEstadoBolsin {
         return estado.esEnviado();
     }
 
-    public void setFechaHoraFin(LocalDateTime fechaHoraFin) {
-        this.fechaHoraFin = fechaHoraFin;
+    public void setFechaHoraFin(LocalDateTime fechaHora) {
+        this.fechaHoraFin = fechaHora;
     }
 
     public LocalDateTime getFechaHoraInicio() {
@@ -65,7 +68,7 @@ public class CambioEstadoBolsin {
         return fechaHoraFin;
     }
 
-    public EstadoBolsin getEstado() {
+    public Estado getEstado() {
         return estado;
     }
 
