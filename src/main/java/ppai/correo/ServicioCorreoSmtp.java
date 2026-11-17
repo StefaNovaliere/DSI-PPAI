@@ -104,6 +104,9 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
         propiedades.put("mail.smtp.connectiontimeout", TIEMPO_ESPERA_MS);
         propiedades.put("mail.smtp.timeout", TIEMPO_ESPERA_MS);
         propiedades.put("mail.smtp.writetimeout", TIEMPO_ESPERA_MS);
+        // Nombre con el que nos presentamos al servidor (EHLO). Por defecto Jakarta Mail usa el nombre del
+        // equipo, y en algunas redes sale mal formado y el servidor corta la conexión sin responder ([EOF]).
+        propiedades.put("mail.smtp.localhost", "localhost");
         boolean conAutenticacion = usuario != null && !usuario.isBlank();
         propiedades.put("mail.smtp.auth", String.valueOf(conAutenticacion));
         Session sesion;
