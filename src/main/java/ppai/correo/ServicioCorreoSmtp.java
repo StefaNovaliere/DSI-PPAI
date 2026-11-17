@@ -133,6 +133,11 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
         if (tipo.contains("ConnectException") || tipo.contains("SocketTimeout")) {
             return "no se pudo conectar con " + host + ":" + puerto + " (¿la red bloquea el puerto?)";
         }
+        if (detalle.contains("[EOF]") || tipo.contains("EOFException")) {
+            return "el servidor " + host + ":" + puerto + " cortó la conexión sin responder. Revise en "
+                    + "correo.properties que el puerto coincida con el cifrado (587 con starttls=true y ssl=false, "
+                    + "o 465 con ssl=true y starttls=false); si coinciden, la red o el antivirus bloquean el envío";
+        }
         return detalle;
     }
 }
