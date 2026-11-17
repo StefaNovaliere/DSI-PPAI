@@ -50,13 +50,17 @@ public final class ConfiguracionCorreo {
             // Gmail muestra la contraseña de aplicación con espacios, pero se usa sin ellos
             contrasenia = contrasenia.replace(" ", "");
         }
-        return new ServicioCorreoSmtp(host, numeroPuerto,
+        ServicioCorreoSmtp servicio = new ServicioCorreoSmtp(host, numeroPuerto,
                 Boolean.parseBoolean(valor(propiedades, "correo.smtp.starttls")),
                 Boolean.parseBoolean(valor(propiedades, "correo.smtp.ssl")),
                 valor(propiedades, "correo.usuario"),
                 contrasenia,
                 remitente,
                 valor(propiedades, "correo.redirigirA"));
+        if (Boolean.parseBoolean(valor(propiedades, "correo.depurar"))) {
+            servicio.activarDepuracion();
+        }
+        return servicio;
     }
 
     private static String valor(Properties propiedades, String clave) {

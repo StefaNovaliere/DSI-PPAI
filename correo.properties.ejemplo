@@ -38,3 +38,8 @@ correo.remitente=tu.cuenta@gmail.com
 # los correos te van a llegar a vos (el correo aclara a quién iba
 # dirigido). Dejalo vacío para enviar al correo real de la CM origen.
 correo.redirigirA=tu.cuenta@gmail.com
+
+# ---------- Si el envío falla ----------
+# Con true, la ventana de comandos muestra la conversación con el servidor de
+# correo y el error completo (la contraseña no se muestra).
+#correo.depurar=true
