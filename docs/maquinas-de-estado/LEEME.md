@@ -16,15 +16,11 @@ En las tres clases el código implementa **sólo las transiciones del CU 28**. L
 los otros casos de uso no se programan, y los estados concretos que no tienen transiciones del
 CU 28 heredan el rechazo del estado abstracto.
 
-Todos los estados heredan de una sola clase abstracta, `Estado` (paquete `ppai.entidades`). El
-ámbito de cada estado dice de qué máquina de estados es, y cada clase sólo acepta estados de su
-ámbito.
-
-| Clase (contexto) | Ámbito | Estados concretos que redefinen el evento del CU 28 |
+| Clase (contexto) | Estado abstracto | Estados concretos que redefinen el evento del CU 28 |
 |---|---|---|
-| `Documentacion` | Documentación | `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()` |
-| `Bolsin` | Bolsín | `Enviado.recibir()` |
-| `Remito` | Remito | `EnBolsinEnviado.recibirYAceptar()` (la guarda decide si queda Recibido y aceptado o parcial) |
+| `Documentacion` | `EstadoDocumentacion` | `EnBolsinEnviado.recibir()` y `ParaRedirigir.recibir()` |
+| `Bolsin` | `EstadoBolsin` | `Enviado.recibir()` |
+| `Remito` | `EstadoRemito` | `EnBolsinEnviado.recibirYAceptar()` (la guarda decide si queda Recibido y aceptado o parcial) |
 
 ### Documentación: el evento `recibir()` con guardas
 

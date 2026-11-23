@@ -1,0 +1,366 @@
+@startuml
+skinparam style strictuml
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam linetype ortho
+skinparam nodesep 45
+skinparam ranksep 60
+skinparam defaultFontName Arial
+skinparam defaultFontSize 13
+skinparam defaultFontColor #000000
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam classStereotypeFontStyle normal
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #000000
+  ArrowColor #000000
+  FontColor #000000
+  AttributeFontColor #000000
+  StereotypeFontColor #000000
+}
+hide circle
+
+interface PantallaRecepcionBolsin <<interface>> {
+  +opcRegistrarRecBolsin(): void
+  +mostrarCM(nombreCM: String): void
+  +solicitarSelBolsin(bolsines: List<DatosBolsin>): void
+  +mostrarNroRemito(numerosRemito: List<Integer>): void
+  +mostrarDatosDocumentacion(remitos: List<DatosRemito>): void
+  +solicitarSelOpcionesRecBolsin(): void
+  +solicitarSelDocumentacion(indicacion: String): void
+  +solicitarConfirmacion(): void
+  +mostrarRecepcionRegistrada(numeroBolsin: int, remitos: List<DatosRemito>): void
+  +mostrarMensaje(mensaje: String): void
+  +finCU(): void
+}
+
+class PantallaGraficaRecepcionBolsin <<boundary>> {
+  -habilitarPantalla(): void
+  -tomarFiltroBolsines(): void
+  -tomarSeleccionBolsin(bolsin: DatosBolsin): void
+  -tomarSeleccionOpcion(): void
+  -tomarSeleccionDocumentacion(numerosDocumentacion: List<Integer>): void
+  -tomarConfirmacion(confirma: boolean): void
+}
+
+class GestorRecepcionBolsin <<control>> {
+  -nombreCMUsuario: String
+  -fechaYHora: LocalDateTime
+  -opcionSeleccionada: OpcionRecepcion
+  -documentacionIndicada: List<Integer>
+  -correoCMOrigen: String
+  -remitosRecibidos: List<DatosRemito>
+  +registrarNuevoRecBolsin(): void
+  -buscarCMUsuarioLogged(): void
+  -buscarBolsinesEnviadosCM(): void
+  -buscarCMOrigenBolsines(bolsines: List<Bolsin>): List<DatosBolsin>
+  +tomarFiltroBolsines(precinto: String, cmOrigen: String): void
+  -armarMensajeSinBolsines(precinto: String, cmOrigen: String): String
+  +tomarSeleccionBolsin(numeroBolsin: int): void
+  -buscarInformacionRemito(): List<DatosRemito>
+  +tomarSeleccionPrimeraOpcion(): void
+  +tomarSeleccionSegundaOpcion(): void
+  +tomarSeleccionTerceraOpcion(): void
+  +tomarSeleccionCuartaOpcion(): void
+  -tomarOpcionConDocumentacion(opcion: OpcionRecepcion, indicacion: String): void
+  +tomarSeleccionDocumentacion(numerosDocumentacion: List<Integer>): void
+  +tomarConfirmacion(confirma: boolean): void
+  +cancelarCU(): void
+  -getFechaYHoraActual(): LocalDateTime
+  -buscarInformacionDocumentacion(): void
+  -buscarCorreoCM(): void
+  -llamarCU29(): void
+  -finCU(): void
+}
+
+class GestorNotificacionCU29 <<control>> {
+  +notificarRecepcion(correoDestino: String, recepcion: DatosRecepcion): void
+  -armarCorreo(destinatario: String, recepcion: DatosRecepcion): Correo
+  -enviar(correo: Correo, numeroBolsin: int): void
+}
+
+interface Repositorio <<interface>> {
+  +getSesionActual(): Sesion
+  +getEmpleados(): List<Empleado>
+  +getBolsines(): List<Bolsin>
+  +iniciarTransaccion(): void
+  +actualizar(bolsin: Bolsin): void
+  +confirmarTransaccion(): void
+  +deshacerTransaccion(): void
+}
+
+class Sesion <<entity>> {
+  -fechaHoraInicio: LocalDateTime
+  -fechaHoraFin: LocalDateTime
+  +getUsuario(): Usuario
+}
+
+class Usuario <<entity>> {
+  -nombre: String
+  +getNombre(): String
+}
+
+class Empleado <<entity>> {
+  -apellido: String
+  -nombre: String
+  -mail: String
+  +esTuUsuario(usuario: Usuario): boolean
+  +getCM(): String
+  +esTuCM(nombreCM: String): boolean
+  +getEmail(): String
+  +getNombreCompleto(): String
+}
+
+class ComisionMedica <<entity>> {
+  -codigo: int
+  -nombre: String
+  -direccion: String
+  -email: String
+  -telefono: String
+  -central: boolean
+  +getNombre(): String
+  +getEmail(): String
+  +esCentral(): boolean
+  +coincideNombre(texto: String): boolean
+}
+
+class Bolsin <<entity>> {
+  -fecha: LocalDate
+  -numeroBolsin: int
+  -numeroPrecinto: String
+  -peso: double
+  +sosEnviado(): boolean
+  -buscarCambioEstadoActual(): CambioEstadoBolsin
+  +obtenerCMDestino(): String
+  +obtenerCMOrigen(): String
+  +getNumeroBolsin(): int
+  +getNumeroPrecinto(): String
+  +tenesPrecinto(precinto: String): boolean
+  +sosDeCMOrigen(textoCMOrigen: String): boolean
+  +esDestinoCMC(): boolean
+  +contenesDocumentacion(numeroDocumentacion: int): boolean
+  +obtenerInformacionRemito(): List<DatosRemito>
+  +recibir(fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+  +obtenerCorreoCMOrigen(): String
+  +setEstado(estado: EstadoBolsin): void
+  +agregarCambioEstado(cambioEstado: CambioEstadoBolsin): void
+  +getCambiosEstado(): List<CambioEstadoBolsin>
+}
+
+class CambioEstadoBolsin <<entity>> {
+  -fechaHoraInicio: LocalDateTime
+  -fechaHoraFin: LocalDateTime
+  +CambioEstadoBolsin(fechaHoraInicio: LocalDateTime, estado: EstadoBolsin, responsableCE: Empleado)
+  +sosActual(): boolean
+  +sosEnviado(): boolean
+  +setFechaHoraFin(fechaHoraFin: LocalDateTime): void
+  +getEstado(): EstadoBolsin
+}
+
+class Remito <<entity>> {
+  -fecha: LocalDate
+  -numero: int
+  +obtenerNumero(): int
+  +obtenerDescripcionEstado(): String
+  +obtenerDatosRemito(): List<DatosDocumentacion>
+  +contenesDocumentacion(numeroDocumentacion: int): boolean
+  +recibirYAceptar(fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+  +tenesDocumentacionIndicada(documentacionIndicada: List<Integer>): boolean
+  +setEstado(estado: EstadoRemito): void
+  +getDetallesRemito(): List<DetalleRemito>
+}
+
+class DetalleRemito <<entity>> {
+  -areaCMCDestino: String
+  +obtenerDocumentacion(): DatosDocumentacion
+  +esDocumentacion(numeroDocumentacion: int): boolean
+  +esDocumentacionIndicada(documentacionIndicada: List<Integer>): boolean
+  +recibirYAceptarDoc(fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+}
+
+class Documentacion <<entity>> {
+  -numero: int
+  -asunto: String
+  -fechaPase: LocalDate
+  +recibir(fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
+  +setEstado(estado: EstadoDocumentacion): void
+  +agregarCambioEstado(cambioEstado: CambioEstadoDocumentacion): void
+  +getCambiosEstado(): List<CambioEstadoDocumentacion>
+  +getNumero(): int
+  +getAsunto(): String
+  +mostrarTipoDocumentacion(): String
+  +getDatosDocumentacion(): DatosDocumentacion
+}
+
+class CambioEstadoDocumentacion <<entity>> {
+  -fechaHoraInicio: LocalDateTime
+  -fechaHoraFin: LocalDateTime
+  +CambioEstadoDocumentacion(fechaHoraInicio: LocalDateTime, estado: EstadoDocumentacion, responsableCE: Empleado)
+  +sosActual(): boolean
+  +setFechaHoraFin(fechaHoraFin: LocalDateTime): void
+  +getEstado(): EstadoDocumentacion
+}
+
+class TipoDocumento <<entity>> {
+  -nombre: String
+  -descripcion: String
+  +getNombre(): String
+}
+
+enum OpcionRecepcion <<enumeration>> {
+  CONTENIDO_IGUAL
+  NO_SE_RECIBE_TODA
+  NO_CORRESPONDE
+  REDIRIGIR
+  --
+  -descripcion: String
+  -dejaRemitoParcial: boolean
+  +getDescripcion(): String
+  +getSituacionDocumentacionIndicada(): SituacionDocumentacion
+  +dejaRemitoParcial(): boolean
+}
+
+enum SituacionDocumentacion <<enumeration>> {
+  IGUAL_A_LA_REGISTRADA
+  NO_RECIBIDA
+  NO_CORRESPONDE_A_LA_CM_DESTINO
+  PARA_REDIRIGIR
+  --
+  -descripcion: String
+  +getDescripcion(): String
+}
+
+together {
+abstract class EstadoBolsin {
+  -nombre: String
+  -descripcion: String
+  #EstadoBolsin(nombre: String, descripcion: String)
+  +getNombre(): String
+  +getDescripcion(): String
+  +esEnviado(): boolean
+  +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+  #buscarCambioEstadoActual(bolsin: Bolsin): CambioEstadoBolsin
+  #crearCambioEstado(estado: EstadoBolsin, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoBolsin
+}
+class "Creado" as BCreado
+class "Cerrado" as BCerrado
+class "Enviado" as BEnviado {
+  +esEnviado(): boolean
+  +recibir(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+  -actualizarEstadoRemito(bolsin: Bolsin, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+  -crearEstado(): EstadoBolsin
+}
+class "RecibidoEnCMDestino" as BRecibido
+class "DeBaja" as BDeBaja
+}
+
+together {
+abstract class EstadoRemito {
+  -nombre: String
+  -descripcion: String
+  #EstadoRemito(nombre: String, descripcion: String)
+  +getNombre(): String
+  +getDescripcion(): String
+  +recibirYAceptar(remito: Remito, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+}
+class "Creado" as RCreado
+class "Cancelado" as RCancelado
+class "EnBolsinSaliente" as REnBolsinSaliente
+class "EnBolsinEnviado" as REnBolsinEnviado {
+  +recibirYAceptar(remito: Remito, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+  -crearEstado(remito: Remito, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): EstadoRemito
+  -actualizarEstadoDocumentacion(detallesRemito: List<DetalleRemito>, fechaHora: LocalDateTime, responsable: Empleado, opcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
+}
+class "RemitoRecibidoYAceptado" as RRecibido
+class "RemitoRecibidoYAceptadoParcial" as RParcial
+}
+
+together {
+abstract class EstadoDocumentacion {
+  -nombre: String
+  -descripcion: String
+  #EstadoDocumentacion(nombre: String, descripcion: String)
+  +getNombre(): String
+  +getDescripcion(): String
+  +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
+  #recepcionInvalida(documentacion: Documentacion, situacion: SituacionDocumentacion): IllegalStateException
+  #buscarCambioEstadoActual(documentacion: Documentacion): CambioEstadoDocumentacion
+  #crearCambioEstado(estado: EstadoDocumentacion, fechaHora: LocalDateTime, responsable: Empleado): CambioEstadoDocumentacion
+}
+class "Registrada" as DRegistrada
+class "EnRemito" as DEnRemito
+class "EnBolsinSaliente" as DEnBolsinSaliente
+class "EnBolsinEnviado" as DEnBolsinEnviado {
+  +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
+  -crearEstado(situacion: SituacionDocumentacion): EstadoDocumentacion
+}
+class "ParaRedirigir" as DParaRedirigir {
+  +recibir(documentacion: Documentacion, fechaHora: LocalDateTime, responsable: Empleado, situacion: SituacionDocumentacion): void
+  -crearEstado(situacion: SituacionDocumentacion): EstadoDocumentacion
+}
+class "NoRecibida" as DNoRecibida
+class "RecibidaYAceptada" as DRecibidaYAceptada
+class "RecibidaYRechazada" as DRecibidaYRechazada
+class "DeBaja" as DDeBaja
+}
+
+PantallaGraficaRecepcionBolsin ..|> PantallaRecepcionBolsin
+PantallaGraficaRecepcionBolsin --> "1" GestorRecepcionBolsin : -gestor
+GestorRecepcionBolsin --> "1" PantallaRecepcionBolsin : -pantalla
+GestorRecepcionBolsin --> "1" Repositorio : -repositorio
+GestorRecepcionBolsin --> "1" GestorNotificacionCU29 : -gestorCU29
+GestorRecepcionBolsin --> "0..1" Empleado : -empleadoLogueado
+GestorRecepcionBolsin --> "0..*" Bolsin : -bolsinesEnviados
+GestorRecepcionBolsin --> "0..1" Bolsin : -bolsinSeleccionado
+
+Sesion --> "1" Usuario : -usuario
+Empleado --> "1" Usuario : -usuario
+Empleado --> "1" ComisionMedica : -comisionMedica
+
+Bolsin --> "1" ComisionMedica : -origen
+Bolsin --> "1" ComisionMedica : -destino
+Bolsin *-- "1..*" Remito : -remitos
+Bolsin *-- "1..*" CambioEstadoBolsin : -cambiosEstado
+Bolsin --> "1" EstadoBolsin : -estadoActual
+CambioEstadoBolsin --> "1" EstadoBolsin : -estado
+CambioEstadoBolsin --> "1" Empleado : -responsableCE
+
+Remito --> "1" ComisionMedica : -origen
+Remito --> "1" ComisionMedica : -destino
+Remito *-- "1..*" DetalleRemito : -detallesRemito
+Remito --> "1" EstadoRemito : -estado
+DetalleRemito --> "1" Documentacion : -documentacion
+
+Documentacion --> "1" TipoDocumento : -tipoDocumento
+Documentacion *-- "1..*" CambioEstadoDocumentacion : -cambiosEstado
+Documentacion --> "1" EstadoDocumentacion : -estadoActual
+CambioEstadoDocumentacion --> "1" EstadoDocumentacion : -estado
+CambioEstadoDocumentacion --> "1" Empleado : -responsableCE
+
+OpcionRecepcion --> "1" SituacionDocumentacion : -situacionDocumentacionIndicada
+
+EstadoBolsin <|-- BCreado
+EstadoBolsin <|-- BCerrado
+EstadoBolsin <|-- BEnviado
+EstadoBolsin <|-- BRecibido
+EstadoBolsin <|-- BDeBaja
+
+EstadoRemito <|-- RCreado
+EstadoRemito <|-- RCancelado
+EstadoRemito <|-- REnBolsinSaliente
+EstadoRemito <|-- REnBolsinEnviado
+EstadoRemito <|-- RRecibido
+EstadoRemito <|-- RParcial
+
+EstadoDocumentacion <|-- DRegistrada
+EstadoDocumentacion <|-- DEnRemito
+EstadoDocumentacion <|-- DEnBolsinSaliente
+EstadoDocumentacion <|-- DEnBolsinEnviado
+EstadoDocumentacion <|-- DParaRedirigir
+EstadoDocumentacion <|-- DNoRecibida
+EstadoDocumentacion <|-- DRecibidaYAceptada
+EstadoDocumentacion <|-- DRecibidaYRechazada
+EstadoDocumentacion <|-- DDeBaja
+
+@enduml

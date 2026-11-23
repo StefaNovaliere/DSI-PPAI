@@ -13,7 +13,6 @@ import ppai.entidades.ComisionMedica;
 import ppai.entidades.DetalleRemito;
 import ppai.entidades.Documentacion;
 import ppai.entidades.Empleado;
-import ppai.entidades.Estado;
 import ppai.entidades.Remito;
 import ppai.entidades.Sesion;
 import ppai.entidades.SituacionDocumentacion;
@@ -22,12 +21,15 @@ import ppai.entidades.Usuario;
 import ppai.entidades.estadobolsin.Cerrado;
 import ppai.entidades.estadobolsin.Creado;
 import ppai.entidades.estadobolsin.Enviado;
+import ppai.entidades.estadobolsin.EstadoBolsin;
 import ppai.entidades.estadobolsin.RecibidoEnCMDestino;
 import ppai.entidades.estadodocumentacion.EnBolsinEnviado;
 import ppai.entidades.estadodocumentacion.EnBolsinSaliente;
 import ppai.entidades.estadodocumentacion.EnRemito;
+import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.Registrada;
+import ppai.entidades.estadoremito.EstadoRemito;
 import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
 
 /**
@@ -157,7 +159,7 @@ public class DatosDePrueba {
      * los casos de uso anteriores: cada estado dura un día y el último es el actual.
      */
     private Documentacion documentacion(int numero, String asunto, TipoDocumento tipo, LocalDateTime inicio,
-                                        Empleado responsable, Estado... estados) {
+                                        Empleado responsable, EstadoDocumentacion... estados) {
         List<CambioEstadoDocumentacion> historial = new ArrayList<>();
         LocalDateTime desde = inicio;
         for (int i = 0; i < estados.length; i++) {
@@ -172,7 +174,7 @@ public class DatosDePrueba {
     }
 
     /** Remito que viaja en un bolsín enviado (CU 27). */
-    private static Estado remitoEnviado() {
+    private static EstadoRemito remitoEnviado() {
         return new ppai.entidades.estadoremito.EnBolsinEnviado();
     }
 
@@ -181,7 +183,7 @@ public class DatosDePrueba {
     }
 
     private Remito remito(int numero, LocalDateTime t0, ComisionMedica origen, ComisionMedica destino,
-                          Estado estado, DetalleRemito... detalles) {
+                          EstadoRemito estado, DetalleRemito... detalles) {
         Remito remito = new Remito(t0.toLocalDate(), numero, origen, destino, estado);
         for (DetalleRemito detalle : detalles) {
             remito.agregarDetalle(detalle);
@@ -203,7 +205,7 @@ public class DatosDePrueba {
     }
 
     /** Cierra el cambio de estado vigente del bolsín, agrega el nuevo y lo deja como estado actual. */
-    private void agregarCambioEstado(Bolsin bolsin, Estado estado,
+    private void agregarCambioEstado(Bolsin bolsin, EstadoBolsin estado,
                                      LocalDateTime fechaHora, Empleado responsable) {
         for (CambioEstadoBolsin cambioEstado : bolsin.getCambiosEstado()) {
             if (cambioEstado.sosActual()) {

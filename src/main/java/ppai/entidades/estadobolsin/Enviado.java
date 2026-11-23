@@ -1,17 +1,19 @@
 package ppai.entidades.estadobolsin;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import ppai.entidades.Bolsin;
 import ppai.entidades.CambioEstadoBolsin;
 import ppai.entidades.Empleado;
-import ppai.entidades.Estado;
+import ppai.entidades.OpcionRecepcion;
+import ppai.entidades.Remito;
 
 /** Patrón State - ESTADO CONCRETO: Enviado (CU 27 Registrar el retiro de bolsines). */
-public class Enviado extends Estado {
+public class Enviado extends EstadoBolsin {
 
     public Enviado() {
-        super(AMBITO_BOLSIN, "Enviado", "Enviado");
+        super("Enviado", "Enviado");
     }
 
     @Override
@@ -24,26 +26,27 @@ public class Enviado extends Estado {
      * Enviado -&gt; Recibido en CM destino, registrando el empleado responsable.
      */
     @Override
-    public void recibir(Bolsin bolsin, LocalDateTime fechaHora, Empleado responsable) {
-        // *sosActual(): se le pregunta a cada cambio de estado si es el actual
-        CambioEstadoBolsin actual = null;
-        for (CambioEstadoBolsin cambioEstado : bolsin.getCambiosEstado()) {
-            if (cambioEstado.sosActual()) {
-                actual = cambioEstado;
-            }
-        }
+    public void recibir(Bolsin bolsin, LocalDateTime fechaHora, Empleado responsable, OpcionRecepcion opcion,
+                        List<Integer> documentacionIndicada) {
+        CambioEstadoBolsin actual = buscarCambioEstadoActual(bolsin);
         actual.setFechaHoraFin(fechaHora);
-        Estado proximoEstado = crearEstado();
+        EstadoBolsin proximoEstado = crearEstado();
         CambioEstadoBolsin nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);
         bolsin.setEstado(proximoEstado);
         bolsin.agregarCambioEstado(nuevo);
+
+        actualizarEstadoRemito(bolsin, fechaHora, responsable, opcion, documentacionIndicada);
     }
 
-    private Estado crearEstado() {
+    /** El estado Enviado coordina la recepción de los remitos del bolsín. */
+    private void actualizarEstadoRemito(Bolsin bolsin, LocalDateTime fechaHora, Empleado responsable,
+                                        OpcionRecepcion opcion, List<Integer> documentacionIndicada) {
+        for (Remito remito : bolsin.getRemitos()) {
+            remito.recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada);
+        }
+    }
+
+    private EstadoBolsin crearEstado() {
         return new RecibidoEnCMDestino();
-    }
-
-    private CambioEstadoBolsin crearCambioEstado(Estado estado, LocalDateTime fechaHora, Empleado responsable) {
-        return new CambioEstadoBolsin(fechaHora, estado, responsable);
     }
 }

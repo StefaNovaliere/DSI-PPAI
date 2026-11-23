@@ -33,8 +33,6 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
     private final String contrasenia;
     private final String remitente;
     private final String redirigirA;
-    /** Si está activa, se muestra en la consola la conversación con el servidor y el error completo. */
-    private boolean depurar;
 
     /**
      * @param usuario    usuario SMTP; vacío o null si el servidor no pide autenticación
@@ -51,11 +49,6 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
         this.contrasenia = contrasenia;
         this.remitente = remitente;
         this.redirigirA = redirigirA;
-    }
-
-    /** Activa la depuración del envío (correo.depurar=true en correo.properties). */
-    public void activarDepuracion() {
-        this.depurar = true;
     }
 
     @Override
@@ -80,10 +73,6 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
             Transport.send(mensaje);
             return "se envió a " + aEnviar.destinatario() + " (servidor " + host + ")";
         } catch (MessagingException | UnsupportedEncodingException e) {
-            if (depurar) {
-                System.out.println("=== Error al enviar el correo (depuración) ===");
-                e.printStackTrace(System.out);
-            }
             throw new ErrorEnvioCorreo(explicar(e), e);
         }
     }
@@ -104,25 +93,17 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
         propiedades.put("mail.smtp.connectiontimeout", TIEMPO_ESPERA_MS);
         propiedades.put("mail.smtp.timeout", TIEMPO_ESPERA_MS);
         propiedades.put("mail.smtp.writetimeout", TIEMPO_ESPERA_MS);
-        // Nombre con el que nos presentamos al servidor (EHLO). Por defecto Jakarta Mail usa el nombre del
-        // equipo, y en algunas redes sale mal formado y el servidor corta la conexión sin responder ([EOF]).
-        propiedades.put("mail.smtp.localhost", "localhost");
         boolean conAutenticacion = usuario != null && !usuario.isBlank();
         propiedades.put("mail.smtp.auth", String.valueOf(conAutenticacion));
-        Session sesion;
         if (!conAutenticacion) {
-            sesion = Session.getInstance(propiedades);
-        } else {
-            sesion = Session.getInstance(propiedades, new Authenticator() {
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(usuario, contrasenia);
-                }
-            });
+            return Session.getInstance(propiedades);
         }
-        // Muestra la conversación con el servidor; Jakarta Mail no muestra la autenticación
-        sesion.setDebug(depurar);
-        return sesion;
+        return Session.getInstance(propiedades, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(usuario, contrasenia);
+            }
+        });
     }
 
     /** En modo demo, envía todo a una sola dirección y aclara a quién iba dirigido. */
@@ -151,11 +132,6 @@ public class ServicioCorreoSmtp implements ServicioCorreo {
         }
         if (tipo.contains("ConnectException") || tipo.contains("SocketTimeout")) {
             return "no se pudo conectar con " + host + ":" + puerto + " (¿la red bloquea el puerto?)";
-        }
-        if (detalle.contains("[EOF]") || tipo.contains("EOFException")) {
-            return "el servidor " + host + ":" + puerto + " cortó la conexión sin responder. Revise en "
-                    + "correo.properties que el puerto coincida con el cifrado (587 con starttls=true y ssl=false, "
-                    + "o 465 con ssl=true y starttls=false); si coinciden, la red o el antivirus bloquean el envío";
         }
         return detalle;
     }

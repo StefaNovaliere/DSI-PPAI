@@ -10,14 +10,13 @@ Objetos**.
 > La guía incluye un guion para probar el flujo principal y los alternativos, y una tabla de
 > problemas frecuentes.
 
-**Diseño (Entrega 2):** [`docs/PPAI2026_3K2_G10_E2_Diseño.pdf`](docs/PPAI2026_3K2_G10_E2_Dise%C3%B1o.pdf) tiene la carátula,
-la identificación del patrón, los detalles de implementación, el diagrama de clases (el
-rediseño del grupo) y el diagrama de secuencia. Los dos diagramas están en
-[`docs/CU28_diagramas.drawio`](docs/CU28_diagramas.drawio), para verlos y editarlos en
-diagrams.net (draw.io). El diagrama de clases también está como imagen en
-[`diagrama-clases/rediseno_grupo_con_metodos.png`](docs/diagrama-clases/rediseno_grupo_con_metodos.png),
-y el de secuencia tiene su fuente PlantUML en
-[`diagrama-secuencia/cu28_state_corregido.puml`](docs/diagrama-secuencia/cu28_state_corregido.puml).
+**Diseño (Entrega 2):** [`docs/Entrega2_Diseno_CU28.pdf`](docs/Entrega2_Diseno_CU28.pdf) tiene
+la identificación del patrón, el diagrama de clases y el diagrama de secuencia. Los diagramas
+se editan en sus fuentes PlantUML:
+[`diagrama-clases/cu28_clases_state.puml`](docs/diagrama-clases/cu28_clases_state.puml) y
+[`diagrama-secuencia/cu28_state_corregido.puml`](docs/diagrama-secuencia/cu28_state_corregido.puml). Para verlos y
+editarlos en diagrams.net (draw.io), con formas UML editables, está
+[`docs/CU28_diagramas.drawio`](docs/CU28_diagramas.drawio).
 
 ## 1. Detalles de implementación
 
@@ -118,11 +117,10 @@ sistema:
 |------|---------|--------|
 | Interfaz (boundary) | `ppai.boundary` | `PantallaRecepcionBolsin` (interfaz), `PantallaGraficaRecepcionBolsin` (Swing), `PantallaConsolaRecepcionBolsin`, `PantallaPrincipal` (menú) |
 | Control | `ppai.control` | `GestorRecepcionBolsin`, `GestorNotificacionCU29` (CU incluido: arma y envía el correo) |
-| Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Empleado`, `Usuario`, `Sesion`, `ComisionMedica`, `TipoDocumento`, `OpcionRecepcion` (las 4 opciones del paso 7), `SituacionDocumentacion` (guarda de `recibir()`), `Estado` (clase abstracta general de los estados: nombre y descripción) |
-| Patrón State | `ppai.entidades` | `Estado`: la clase abstracta de todos los estados (con ámbito) |
-| Patrón State | `ppai.entidades.estadodocumentacion` | Los 9 estados concretos de Documentación |
-| Patrón State | `ppai.entidades.estadobolsin` | Los 5 estados concretos de Bolsín |
-| Patrón State | `ppai.entidades.estadoremito` | Los 6 estados concretos de Remito |
+| Dominio (entity) | `ppai.entidades` | `Bolsin`, `Remito`, `DetalleRemito`, `Documentacion`, `CambioEstadoBolsin`, `CambioEstadoDocumentacion`, `Empleado`, `Usuario`, `Sesion`, `ComisionMedica`, `TipoDocumento`, `OpcionRecepcion` (las 4 opciones del paso 7), `SituacionDocumentacion` (guarda de `recibir()`) |
+| Patrón State | `ppai.entidades.estadodocumentacion` | `EstadoDocumentacion` + 9 estados concretos |
+| Patrón State | `ppai.entidades.estadobolsin` | `EstadoBolsin` + 5 estados concretos |
+| Patrón State | `ppai.entidades.estadoremito` | `EstadoRemito` + 6 estados concretos |
 | Persistencia | `ppai.persistencia` | `Repositorio` (esquema de persistencia), `RepositorioJPA` (SQLite + Hibernate), `ConversorEstadoDocumentacion`, `ConversorEstadoBolsin`, `ConversorEstadoRemito`, `DatosDePrueba`, `RepositorioEnMemoria` (sólo pruebas) |
 | Configuración JPA | `src/main/resources/META-INF` | `persistence.xml` |
 | Servicio externo de correo | `ppai.correo` | `ServicioCorreo` (interfaz), `ServicioCorreoSmtp` (Jakarta Mail), `ServicioCorreoSimulado` (sin servidor configurado), `ConfiguracionCorreo` (lee `correo.properties`), `Correo` |
@@ -132,7 +130,7 @@ análisis (`opcRegistrarRecBolsin`, `registrarNuevoRecBolsin`, `buscarCMUsuarioL
 `buscarBolsinesEnviadosCM`, `buscarCMOrigenBolsines`, `solicitarSelBolsin`,
 `tomarSeleccionBolsin`, `buscarInformacionRemito`, `solicitarSelOpcionesRecBolsin`,
 `tomarSeleccionPrimeraOpcion`, `solicitarConfirmacion`, `tomarConfirmacion`,
-`getFechaYHoraActual`, `recibirYAceptarRemito`, `recibirYAceptar`, `recibir`,
+`getFechaYHoraActual`, `actualizarEstadoRemito`, `recibirYAceptar`, `recibir`,
 `buscarInformacionDocumentacion`, `buscarCorreoCM`,
 `llamarCU29`, `finCU`). Para los flujos alternativos se agregaron `tomarFiltroBolsines`,
 `tomarSeleccionSegundaOpcion`, `tomarSeleccionTerceraOpcion`, `tomarSeleccionCuartaOpcion`,
@@ -187,14 +185,14 @@ la cátedra):
 | Rol | Documentación | Bolsín | Remito |
 |---|---|---|---|
 | **Contexto** (conoce su estado actual y le delega el evento) | `Documentacion` | `Bolsin` | `Remito` |
-| **Estado abstracto** (una sola clase con ámbito; declara los eventos y por defecto los rechaza) | `Estado` | `Estado` | `Estado` |
+| **Estado abstracto** (declara el evento; por defecto lo rechaza) | `EstadoDocumentacion` | `EstadoBolsin` | `EstadoRemito` |
 | **Evento del CU 28** | `recibir()` (la guarda es la situación de la documentación) | `recibir()` | `recibirYAceptar()` (la guarda decide si queda parcial) |
 | **Estados concretos que lo redefinen** | `EnBolsinEnviado`, `ParaRedirigir` | `Enviado` | `EnBolsinEnviado` |
-| **Resto de los estados** (heredan el rechazo) | `Registrada`, `EnRemito`, `EnBolsinSaliente`, `NoRecibida`, `RecibidaYAceptada`, `RecibidaYRechazada`, `DeBaja` | `Creado`, `Cerrado`, `RecibidoEnCMDestino`, `DeBaja` | `CreadoRemito`, `Cancelado`, `EnBolsinSaliente`, `RemitoRecibidoYAceptado`, `RecibidoYAceptadoParcial` |
+| **Resto de los estados** (heredan el rechazo) | `Registrada`, `EnRemito`, `EnBolsinSaliente`, `NoRecibida`, `RecibidaYAceptada`, `RecibidaYRechazada`, `DeBaja` | `Creado`, `Cerrado`, `RecibidoEnCMDestino`, `DeBaja` | `Creado`, `Cancelado`, `EnBolsinSaliente`, `RecibidoYAceptado`, `RecibidoYAceptadoParcial` |
 
 El código sigue el **rediseño del diagrama de secuencia** que hizo el grupo: en cada
 transición, el estado concreto le pone `setFechaHoraFin()` al cambio de estado actual, crea el
-próximo estado con `crearEstado()`, crea el nuevo cambio de estado con `crearCambioEstado()` (los dos son métodos privados del estado concreto)
+próximo estado con `crearEstado()`, crea el nuevo cambio de estado con `crearCambioEstado()`
 y le hace `setEstado()` y `agregarCambioEstado()` a la clase. El estado del **Remito**, además,
 actualiza la documentación de sus detalles (`actualizarEstadoDocumentacion()` →
 `DetalleRemito.recibirYAceptarDoc()` → `Documentacion.recibir()`). La correspondencia mensaje
@@ -223,63 +221,65 @@ de la documentación (`SituacionDocumentacion`), que sale de la opción que elig
 
 ```mermaid
 classDiagram
-    class Estado {
-        <<abstract>>
-        -ambito
-        -nombre
-        -descripcion
-        +esAmbitoBolsin()
-        +esAmbitoRemito()
-        +esAmbitoDocumentacion()
-        +recibir(bolsin, fechaHora, responsable)
-        +recibir(documentacion, fechaHora, responsable, situacion)
-        +recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)
-    }
     class Documentacion {
-        -estadoActual: Estado
+        -estadoActual: EstadoDocumentacion
         +recibir(fechaHora, responsable, situacion)
         +setEstado(estado)
         +agregarCambioEstado(cambioEstado)
     }
+    class EstadoDocumentacion {
+        <<abstract>>
+        +recibir(documentacion, fechaHora, responsable, situacion)
+        #buscarCambioEstadoActual(documentacion)
+        #crearCambioEstado(estado, fechaHora, responsable)
+    }
     class EnBolsinEnviado {
         +recibir(documentacion, fechaHora, responsable, situacion)
         -crearEstado(situacion)
-        -crearCambioEstado(estado, fechaHora, responsable)
     }
     class ParaRedirigir {
         +recibir(documentacion, fechaHora, responsable, situacion)
         -crearEstado(situacion)
-        -crearCambioEstado(estado, fechaHora, responsable)
     }
     class Bolsin {
-        -estadoActual: Estado
+        -estadoActual: EstadoBolsin
         +recibir(fechaHora, responsable)
         +setEstado(estado)
         +agregarCambioEstado(cambioEstado)
+    }
+    class EstadoBolsin {
+        <<abstract>>
+        +recibir(bolsin, fechaHora, responsable)
+        +esEnviado()
+        #buscarCambioEstadoActual(bolsin)
+        #crearCambioEstado(estado, fechaHora, responsable)
     }
     class Enviado {
         +recibir(bolsin, fechaHora, responsable)
         +esEnviado()
         -crearEstado()
-        -crearCambioEstado(estado, fechaHora, responsable)
     }
     class Remito {
-        -estado: Estado
+        -estado: EstadoRemito
         +recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada)
         +setEstado(estado)
+    }
+    class EstadoRemito {
+        <<abstract>>
+        +recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)
     }
     class EnBolsinEnviadoRemito["estadoremito.EnBolsinEnviado"] {
         +recibirYAceptar(remito, fechaHora, responsable, opcion, documentacionIndicada)
         -crearEstado(remito, opcion, documentacionIndicada)
         -actualizarEstadoDocumentacion(detallesRemito, ...)
     }
-    Documentacion --> Estado : estadoActual
-    Bolsin --> Estado : estadoActual
-    Remito --> Estado : estado
-    Estado <|-- EnBolsinEnviado
-    Estado <|-- ParaRedirigir
-    Estado <|-- Enviado
-    Estado <|-- EnBolsinEnviadoRemito
+    Documentacion --> EstadoDocumentacion : estadoActual
+    EstadoDocumentacion <|-- EnBolsinEnviado
+    EstadoDocumentacion <|-- ParaRedirigir
+    Bolsin --> EstadoBolsin : estadoActual
+    EstadoBolsin <|-- Enviado
+    Remito --> EstadoRemito : estado
+    EstadoRemito <|-- EnBolsinEnviadoRemito
 ```
 
 (En el diagrama sólo figuran los estados concretos que redefinen el evento del CU 28.)
@@ -289,21 +289,21 @@ classDiagram
 ```
 GestorRecepcionBolsin.tomarConfirmacion()
  ├─ getFechaYHoraActual()
- ├─ Bolsin.recibir(fechaHora, responsable)
- │   └─ Enviado.recibir(bolsin, ...)                  ← el estado actual del bolsín
- │       *sosActual() sobre los cambios de estado · setFechaHoraFin() · crearEstado(): new RecibidoEnCMDestino
- │       crearCambioEstado(): new CambioEstadoBolsin · bolsin.setEstado() · bolsin.agregarCambioEstado()
- └─ Bolsin.recibirYAceptarRemito(fechaHora, responsable, opción, documentación indicada)
-     └─ Remito.recibirYAceptar(...)                    (loop remitos)
-         └─ EnBolsinEnviado.recibirYAceptar(remito, ...) ← el estado del remito
-             crearEstado(): new RemitoRecibidoYAceptado (o RecibidoYAceptadoParcial si con
+ └─ Bolsin.recibir(fechaHora, responsable, opción, documentación indicada)
+     └─ Enviado.recibir(bolsin, ...)                   ← el estado actual del bolsín
+         buscarCambioEstadoActual() (*sosActual()) · setFechaHoraFin() · crearEstado(): new RecibidoEnCMDestino
+         crearCambioEstado(): new CambioEstadoBolsin · bolsin.setEstado() · bolsin.agregarCambioEstado()
+         actualizarEstadoRemito(...)                    (loop remitos)
+           └─ Remito.recibirYAceptar(...)
+               └─ EnBolsinEnviado.recibirYAceptar(remito, ...) ← el estado del remito
+             crearEstado(): new RemitoRecibidoYAceptado (o RemitoRecibidoYAceptadoParcial si con
                             la opción 2 o 3 se marcó documentación de este remito)
              remito.setEstado()
              actualizarEstadoDocumentacion(detalles)
               └─ DetalleRemito.recibirYAceptarDoc(...)    (loop detalles)
                   └─ Documentacion.recibir(fechaHora, responsable, situación)
                       └─ EnBolsinEnviado.recibir(documentacion, ...)  ← o ParaRedirigir
-                          *sosActual() sobre los cambios de estado · setFechaHoraFin()
+                          buscarCambioEstadoActual() (*sosActual()) · setFechaHoraFin()
                           crearEstado(situación): según la guarda, RecibidaYAceptada, NoRecibida,
                                                   RecibidaYRechazada o ParaRedirigir
                           crearCambioEstado() · documentacion.setEstado() · agregarCambioEstado()

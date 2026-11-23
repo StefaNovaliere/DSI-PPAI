@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ppai.dto.DatosRemito;
+import ppai.entidades.estadobolsin.EstadoBolsin;
 
 /**
  * Bolsín: envío físico precintado de remitos entre Comisiones Médicas.
@@ -56,7 +57,7 @@ public class Bolsin {
     private List<CambioEstadoBolsin> cambiosEstado = new ArrayList<>();
     /** No se guarda como columna: se obtiene del cambio de estado actual (ver restaurarEstadoActual). */
     @Transient
-    private Estado estadoActual;
+    private EstadoBolsin estadoActual;
 
     protected Bolsin() {
         // Requerido por JPA
@@ -92,10 +93,7 @@ public class Bolsin {
     }
 
     /** Lo usa el estado concreto al hacer la transición. */
-    public void setEstado(Estado estado) {
-        if (!estado.esAmbitoBolsin()) {
-            throw new IllegalArgumentException("El estado «" + estado + "» no es un estado de bolsín");
-        }
+    public void setEstado(EstadoBolsin estado) {
         this.estadoActual = estado;
     }
 
@@ -159,19 +157,9 @@ public class Bolsin {
     }
 
     /** CU 28, paso 11: delega en el estado actual, que lo pasa a Recibido en CM destino. */
-    public void recibir(LocalDateTime fechaHora, Empleado responsable) {
-        estadoActual.recibir(this, fechaHora, responsable);
-    }
-
-    /**
-     * CU 28, paso 11 y flujos A3 a A5: recibe cada remito del bolsín según la
-     * opción elegida y la documentación que indicó el usuario.
-     */
-    public void recibirYAceptarRemito(LocalDateTime fechaHora, Empleado responsable, OpcionRecepcion opcion,
-                                      List<Integer> documentacionIndicada) {
-        for (Remito remito : remitos) {
-            remito.recibirYAceptar(fechaHora, responsable, opcion, documentacionIndicada);
-        }
+    public void recibir(LocalDateTime fechaHora, Empleado responsable, OpcionRecepcion opcion,
+                        List<Integer> documentacionIndicada) {
+        estadoActual.recibir(this, fechaHora, responsable, opcion, documentacionIndicada);
     }
 
     /** CU 29: la notificación se envía a la CM origen del bolsín. */
@@ -179,7 +167,7 @@ public class Bolsin {
         return origen.getEmail();
     }
 
-    public Estado getEstadoActual() {
+    public EstadoBolsin getEstadoActual() {
         return estadoActual;
     }
 

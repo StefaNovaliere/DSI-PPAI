@@ -87,40 +87,41 @@ P -> G : tomarConfirmacion(confirma: boolean): void
 activate G
 G -> G : getFechaYHoraActual(): LocalDateTime
 
-G -> B : recibir(fechaHora: LocalDateTime,\nresponsable: Empleado): void
+G -> B : recibir(fechaHora: LocalDateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): void
 activate B
-B -> EN : recibir(bolsin: Bolsin, fechaHora: LocalDateTime,\nresponsable: Empleado): void
+B -> EN : recibir(bolsin: Bolsin, fechaHora: LocalDateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): void
 activate EN
-EN -> CEB : ~*sosActual(): boolean
+EN -> EN : buscarCambioEstadoActual(bolsin: Bolsin):\nCambioEstadoBolsin
+activate EN
+loop mientras haya cambios de estado
+  EN -> CEB : ~*sosActual(): boolean
+end
+deactivate EN
 EN -> ACEB : setFechaHoraFin(fechaHora: LocalDateTime): void
-EN -> EN : crearEstado(): Estado
+EN -> EN : crearEstado(): EstadoBolsin
 activate EN
 create REC
 EN -->> REC : new()
 deactivate EN
-EN -> EN : crearCambioEstado(estado: Estado,\nfechaHora: LocalDateTime, responsable: Empleado):\nCambioEstadoBolsin
+EN -> EN : crearCambioEstado(estado: EstadoBolsin,\nfechaHora: LocalDateTime, responsable: Empleado):\nCambioEstadoBolsin
 activate EN
 create NCEB
-EN -->> NCEB : new(fechaHoraInicio: LocalDateTime,\nestado: Estado, responsable: Empleado)
+EN -->> NCEB : new(fechaHoraInicio: LocalDateTime,\nestado: EstadoBolsin, responsable: Empleado)
 deactivate EN
-EN -> B : setEstado(estado: Estado): void
+EN -> B : setEstado(estado: EstadoBolsin): void
 EN -> B : agregarCambioEstado(cambioEstado:\nCambioEstadoBolsin): void
-deactivate EN
-deactivate B
-
-G -> B : recibirYAceptarRemito(fechaHora: LocalDateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): void
-activate B
+EN -> EN : actualizarEstadoRemito(bolsin, fechaHora,\nresponsable, opcion, documentacionIndicada): void
 loop mientras haya remitos
-  B -> R : recibirYAceptar(fechaHora: LocalDateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): void
+  EN -> R : recibirYAceptar(fechaHora: LocalDateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): void
   activate R
   R -> ER : recibirYAceptar(remito: Remito, fechaHora: LocalDateTime,\nresponsable: Empleado, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): void
   activate ER
-  ER -> ER : crearEstado(remito: Remito, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): Estado
+  ER -> ER : crearEstado(remito: Remito, opcion: OpcionRecepcion,\ndocumentacionIndicada: List<Integer>): EstadoRemito
   activate ER
   create RRA
   ER -->> RRA : new()
   deactivate ER
-  ER -> R : setEstado(estado: Estado): void
+  ER -> R : setEstado(estado: EstadoRemito): void
   ER -> R : getDetallesRemito(): List<DetalleRemito>
   ER -> ER : actualizarEstadoDocumentacion(detallesRemito: List<DetalleRemito>,\nfechaHora: LocalDateTime, responsable: Empleado,\nopcion: OpcionRecepcion, documentacionIndicada: List<Integer>): void
   activate ER
@@ -132,19 +133,24 @@ loop mientras haya remitos
     activate D
     D -> ED : recibir(documentacion: Documentacion,\nfechaHora: LocalDateTime, responsable: Empleado,\nsituacion: SituacionDocumentacion): void
     activate ED
-    ED -> CED : ~*sosActual(): boolean
+    ED -> ED : buscarCambioEstadoActual(documentacion:\nDocumentacion): CambioEstadoDocumentacion
+    activate ED
+    loop mientras haya cambios de estado
+      ED -> CED : ~*sosActual(): boolean
+    end
+    deactivate ED
     ED -> ACED : setFechaHoraFin(fechaHora: LocalDateTime): void
-    ED -> ED : crearEstado(situacion: SituacionDocumentacion):\nEstado
+    ED -> ED : crearEstado(situacion: SituacionDocumentacion):\nEstadoDocumentacion
     activate ED
     create RYA
     ED -->> RYA : new()
     deactivate ED
-    ED -> ED : crearCambioEstado(estado: Estado,\nfechaHora: LocalDateTime, responsable: Empleado):\nCambioEstadoDocumentacion
+    ED -> ED : crearCambioEstado(estado: EstadoDocumentacion,\nfechaHora: LocalDateTime, responsable: Empleado):\nCambioEstadoDocumentacion
     activate ED
     create NCED
-    ED -->> NCED : new(fechaHoraInicio: LocalDateTime,\nestado: Estado,\nresponsableCE: Empleado)
+    ED -->> NCED : new(fechaHoraInicio: LocalDateTime,\nestado: EstadoDocumentacion,\nresponsableCE: Empleado)
     deactivate ED
-    ED -> D : setEstado(estado: Estado): void
+    ED -> D : setEstado(estado: EstadoDocumentacion): void
     ED -> D : agregarCambioEstado(cambioEstado:\nCambioEstadoDocumentacion): void
     deactivate ED
     deactivate D
@@ -154,6 +160,7 @@ loop mientras haya remitos
   deactivate ER
   deactivate R
 end
+deactivate EN
 deactivate B
 
 note over G, R
