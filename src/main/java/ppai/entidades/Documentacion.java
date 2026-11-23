@@ -1,6 +1,7 @@
 package ppai.entidades;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +13,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import ppai.persistencia.ConversorEstadoDocumentacion;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import ppai.dto.DatosDocumentacion;
-import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 
 /**
  * Patrón State - rol CONTEXTO.
@@ -45,7 +46,7 @@ public class Documentacion {
     private TipoDocumento tipoDocumento;
     /** No se guarda como columna: se obtiene del cambio de estado actual (ver restaurarEstadoActual). */
     @Transient
-    private EstadoDocumentacion estadoActual;
+    private Estado estadoActual;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "documentacion_id")
     @OrderBy("id")
@@ -98,7 +99,8 @@ public class Documentacion {
 
     // Métodos que usa el estado concreto para hacer la transición
 
-    public void setEstado(EstadoDocumentacion estado) {
+    public void setEstado(Estado estado) {
+        if (estado != null && !estado.esAmbitoDocumentacion()) throw new IllegalArgumentException("El estado debe pertenecer al ámbito Documentacion");
         this.estadoActual = estado;
     }
 
@@ -128,7 +130,7 @@ public class Documentacion {
         return tipoDocumento.getNombre();
     }
 
-    public EstadoDocumentacion getEstadoActual() {
+    public Estado getEstadoActual() {
         return estadoActual;
     }
 

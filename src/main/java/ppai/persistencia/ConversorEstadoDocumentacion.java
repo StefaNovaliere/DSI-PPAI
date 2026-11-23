@@ -7,7 +7,7 @@ import ppai.entidades.estadodocumentacion.DeBaja;
 import ppai.entidades.estadodocumentacion.EnBolsinEnviado;
 import ppai.entidades.estadodocumentacion.EnBolsinSaliente;
 import ppai.entidades.estadodocumentacion.EnRemito;
-import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
+import ppai.entidades.Estado;
 import ppai.entidades.estadodocumentacion.NoRecibida;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
@@ -24,19 +24,20 @@ import ppai.entidades.estadodocumentacion.Registrada;
  * tener sentencias CASE sobre el estado.
  */
 @Converter(autoApply = true)
-public class ConversorEstadoDocumentacion implements AttributeConverter<EstadoDocumentacion, String> {
+public class ConversorEstadoDocumentacion implements AttributeConverter<Estado, String> {
 
     @Override
-    public String convertToDatabaseColumn(EstadoDocumentacion estado) {
+    public String convertToDatabaseColumn(Estado estado) {
+        validarAmbito(estado);
         return estado == null ? null : estado.getNombre();
     }
 
     @Override
-    public EstadoDocumentacion convertToEntityAttribute(String nombre) {
+    public Estado convertToEntityAttribute(String nombre) {
         if (nombre == null) {
             return null;
         }
-        return switch (nombre) {
+        Estado estado = switch (nombre) {
             case "Registrada" -> new Registrada();
             case "EnRemito" -> new EnRemito();
             case "EnBolsinSaliente" -> new EnBolsinSaliente();
@@ -48,5 +49,12 @@ public class ConversorEstadoDocumentacion implements AttributeConverter<EstadoDo
             case "DeBaja" -> new DeBaja();
             default -> throw new IllegalArgumentException("Estado de documentación desconocido: " + nombre);
         };
+        validarAmbito(estado);
+        return estado;
+    }
+
+    private void validarAmbito(Estado estado) {
+        if (estado != null && !estado.esAmbitoDocumentacion()) throw new IllegalArgumentException("El estado no pertenece al ámbito Documentacion");
     }
 }
+

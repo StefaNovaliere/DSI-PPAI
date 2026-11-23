@@ -5,9 +5,9 @@ package ppai.entidades.estadobolsin;
  *
  * <p>No redefine recibir(): el bolsín cerrado todavía no fue retirado por el correo.
  */
-public class Cerrado extends EstadoBolsin {
+public class Cerrado extends ppai.entidades.Estado {
 
     public Cerrado() {
-        super("Cerrado", "Cerrado");
+        super(AMBITO_BOLSIN, "Cerrado", "Cerrado");
     }
 }

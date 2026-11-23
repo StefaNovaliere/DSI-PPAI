@@ -5,9 +5,9 @@ package ppai.entidades.estadobolsin;
  *
  * <p>No redefine recibir(): un bolsín no se puede recibir dos veces.
  */
-public class RecibidoEnCMDestino extends EstadoBolsin {
+public class RecibidoEnCMDestino extends ppai.entidades.Estado {
 
     public RecibidoEnCMDestino() {
-        super("RecibidoEnCMDestino", "Recibido en CM destino");
+        super(AMBITO_BOLSIN, "RecibidoEnCMDestino", "Recibido en CM destino");
     }
 }

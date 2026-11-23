@@ -7,9 +7,9 @@ import ppai.entidades.estadoremito.Cancelado;
 import ppai.entidades.estadoremito.Creado;
 import ppai.entidades.estadoremito.EnBolsinEnviado;
 import ppai.entidades.estadoremito.EnBolsinSaliente;
-import ppai.entidades.estadoremito.EstadoRemito;
 import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
 import ppai.entidades.estadoremito.RemitoRecibidoYAceptadoParcial;
+import ppai.entidades.Estado;
 
 /**
  * Conversor de base de datos para los estados de Remito (patrón State). Igual
@@ -17,19 +17,20 @@ import ppai.entidades.estadoremito.RemitoRecibidoYAceptadoParcial;
  * materializar, crea el objeto del estado concreto.
  */
 @Converter(autoApply = true)
-public class ConversorEstadoRemito implements AttributeConverter<EstadoRemito, String> {
+public class ConversorEstadoRemito implements AttributeConverter<Estado, String> {
 
     @Override
-    public String convertToDatabaseColumn(EstadoRemito estado) {
+    public String convertToDatabaseColumn(Estado estado) {
+        validarAmbito(estado);
         return estado == null ? null : estado.getNombre();
     }
 
     @Override
-    public EstadoRemito convertToEntityAttribute(String nombre) {
+    public Estado convertToEntityAttribute(String nombre) {
         if (nombre == null) {
             return null;
         }
-        return switch (nombre) {
+        Estado estado = switch (nombre) {
             case "Creado" -> new Creado();
             case "Cancelado" -> new Cancelado();
             case "EnBolsinSaliente" -> new EnBolsinSaliente();
@@ -38,5 +39,12 @@ public class ConversorEstadoRemito implements AttributeConverter<EstadoRemito, S
             case "RecibidoYAceptadoParcial" -> new RemitoRecibidoYAceptadoParcial();
             default -> throw new IllegalArgumentException("Estado de remito desconocido: " + nombre);
         };
+        validarAmbito(estado);
+        return estado;
+    }
+
+    private void validarAmbito(Estado estado) {
+        if (estado != null && !estado.esAmbitoRemito()) throw new IllegalArgumentException("El estado no pertenece al ámbito Remito");
     }
 }
+

@@ -1,6 +1,7 @@
 package ppai.entidades;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,8 +11,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.time.LocalDateTime;
+import ppai.persistencia.ConversorEstadoDocumentacion;
 
-import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 
 /**
  * Historial de estados de la Documentación. Referencia al estado concreto
@@ -29,7 +30,8 @@ public class CambioEstadoDocumentacion {
     private LocalDateTime fechaHoraFin;
     /** Se guarda el nombre del estado; lo convierte ConversorEstadoDocumentacion. */
     @Column(name = "estado", nullable = false)
-    private EstadoDocumentacion estado;
+    @Convert(converter = ConversorEstadoDocumentacion.class)
+    private Estado estado;
     @ManyToOne
     @JoinColumn(name = "responsable_id")
     private Empleado responsableCE;
@@ -38,7 +40,7 @@ public class CambioEstadoDocumentacion {
         // Requerido por JPA
     }
 
-    public CambioEstadoDocumentacion(LocalDateTime fechaHoraInicio, EstadoDocumentacion estado,
+    public CambioEstadoDocumentacion(LocalDateTime fechaHoraInicio, Estado estado,
                                      Empleado responsableCE) {
         this.fechaHoraInicio = fechaHoraInicio;
         this.estado = estado;
@@ -62,7 +64,7 @@ public class CambioEstadoDocumentacion {
         return fechaHoraFin;
     }
 
-    public EstadoDocumentacion getEstado() {
+    public Estado getEstado() {
         return estado;
     }
 

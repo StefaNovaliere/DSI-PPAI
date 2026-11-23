@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.Documentacion;
+import ppai.entidades.Estado;
 import ppai.entidades.Empleado;
 import ppai.entidades.SituacionDocumentacion;
 
@@ -14,10 +15,10 @@ import ppai.entidades.SituacionDocumentacion;
  * estados salen de él cuatro transiciones con el evento recibir(); la guarda
  * (la situación de la documentación) decide cuál se toma.
  */
-public class EnBolsinEnviado extends EstadoDocumentacion {
+public class EnBolsinEnviado extends ppai.entidades.Estado {
 
     public EnBolsinEnviado() {
-        super("EnBolsinEnviado", "En bolsín enviado");
+        super(AMBITO_DOCUMENTACION, "EnBolsinEnviado", "En bolsín enviado");
     }
 
     @Override
@@ -25,14 +26,14 @@ public class EnBolsinEnviado extends EstadoDocumentacion {
                         SituacionDocumentacion situacion) {
         CambioEstadoDocumentacion actual = buscarCambioEstadoActual(documentacion);
         actual.setFechaHoraFin(fechaHora);
-        EstadoDocumentacion proximoEstado = crearEstado(situacion);
-        CambioEstadoDocumentacion nuevo = crearCambioEstado(proximoEstado, fechaHora, responsable);
+        Estado proximoEstado = crearEstado(situacion);
+        CambioEstadoDocumentacion nuevo = crearCambioEstadoDocumentacion(proximoEstado, fechaHora, responsable);
         documentacion.setEstado(proximoEstado);
         documentacion.agregarCambioEstado(nuevo);
     }
 
     /** Las guardas de las transiciones recibir() que salen de EnBolsinEnviado. */
-    private EstadoDocumentacion crearEstado(SituacionDocumentacion situacion) {
+    private Estado crearEstado(SituacionDocumentacion situacion) {
         return switch (situacion) {
             // [todo remito y documentación igual a la registrada = True]
             case IGUAL_A_LA_REGISTRADA -> new RecibidaYAceptada();
@@ -45,3 +46,4 @@ public class EnBolsinEnviado extends EstadoDocumentacion {
         };
     }
 }
+

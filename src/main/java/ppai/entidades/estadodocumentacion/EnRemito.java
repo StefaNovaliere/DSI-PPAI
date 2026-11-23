@@ -6,9 +6,9 @@ package ppai.entidades.estadodocumentacion;
  * <p>No redefine recibir(): desde este estado la documentación no puede
  * recibirse (la máquina de estados no tiene esa transición).
  */
-public class EnRemito extends EstadoDocumentacion {
+public class EnRemito extends ppai.entidades.Estado {
 
     public EnRemito() {
-        super("EnRemito", "En remito");
+        super(AMBITO_DOCUMENTACION, "EnRemito", "En remito");
     }
 }

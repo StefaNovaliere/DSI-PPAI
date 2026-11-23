@@ -6,9 +6,9 @@ package ppai.entidades.estadodocumentacion;
  * <p>No redefine recibir(): desde este estado la documentación no puede
  * recibirse (la máquina de estados no tiene esa transición).
  */
-public class DeBaja extends EstadoDocumentacion {
+public class DeBaja extends ppai.entidades.Estado {
 
     public DeBaja() {
-        super("DeBaja", "De baja");
+        super(AMBITO_DOCUMENTACION, "DeBaja", "De baja");
     }
 }

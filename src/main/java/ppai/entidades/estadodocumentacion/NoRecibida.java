@@ -6,9 +6,9 @@ package ppai.entidades.estadodocumentacion;
  * <p>No redefine recibir(): en la máquina de estados las transiciones que
  * salen de este estado son de otros casos de uso (registrar() y darDeBaja()).
  */
-public class NoRecibida extends EstadoDocumentacion {
+public class NoRecibida extends ppai.entidades.Estado {
 
     public NoRecibida() {
-        super("NoRecibida", "No recibida");
+        super(AMBITO_DOCUMENTACION, "NoRecibida", "No recibida");
     }
 }

@@ -6,9 +6,9 @@ package ppai.entidades.estadodocumentacion;
  * <p>No redefine recibir(): desde este estado la documentación no puede
  * recibirse (la máquina de estados no tiene esa transición).
  */
-public class EnBolsinSaliente extends EstadoDocumentacion {
+public class EnBolsinSaliente extends ppai.entidades.Estado {
 
     public EnBolsinSaliente() {
-        super("EnBolsinSaliente", "En bolsín saliente");
+        super(AMBITO_DOCUMENTACION, "EnBolsinSaliente", "En bolsín saliente");
     }
 }

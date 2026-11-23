@@ -6,9 +6,9 @@ package ppai.entidades.estadodocumentacion;
  * <p>No redefine recibir(): en la máquina de estados las transiciones que
  * salen de este estado son de otros casos de uso (registrar() y darDeBaja()).
  */
-public class RecibidaYRechazada extends EstadoDocumentacion {
+public class RecibidaYRechazada extends ppai.entidades.Estado {
 
     public RecibidaYRechazada() {
-        super("Recibida&Rechazada", "Recibida y rechazada");
+        super(AMBITO_DOCUMENTACION, "Recibida&Rechazada", "Recibida y rechazada");
     }
 }

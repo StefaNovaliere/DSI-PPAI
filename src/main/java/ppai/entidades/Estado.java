@@ -2,6 +2,8 @@ package ppai.entidades;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import ppai.entidades.CambioEstadoBolsin;
+import ppai.entidades.CambioEstadoDocumentacion;
 
 /**
  * Patrón State - rol ESTADO ABSTRACTO.
@@ -41,6 +43,8 @@ public abstract class Estado {
         return nombre;
     }
 
+    public String getAmbito() { return ambito; }
+
     public String getDescripcion() {
         return descripcion;
     }
@@ -62,12 +66,41 @@ public abstract class Estado {
         return false;
     }
 
+    protected CambioEstadoBolsin buscarCambioEstadoActual(Bolsin bolsin) {
+        for (CambioEstadoBolsin cambio : bolsin.getCambiosEstado()) if (cambio.sosActual()) return cambio;
+        return null;
+    }
+
+    protected CambioEstadoDocumentacion buscarCambioEstadoActual(Documentacion documentacion) {
+        for (CambioEstadoDocumentacion cambio : documentacion.getCambiosEstado()) if (cambio.sosActual()) return cambio;
+        return null;
+    }
+
+    protected CambioEstadoBolsin crearCambioEstadoBolsin(Estado estado, LocalDateTime fechaHora, Empleado responsable) {
+        return new CambioEstadoBolsin(fechaHora, estado, responsable);
+    }
+
+    protected CambioEstadoDocumentacion crearCambioEstadoDocumentacion(Estado estado, LocalDateTime fechaHora, Empleado responsable) {
+        return new CambioEstadoDocumentacion(fechaHora, estado, responsable);
+    }
+
     // Eventos del CU 28
 
     /** Bolsín: Enviado -&gt; Recibido en CM destino. */
     public void recibir(Bolsin bolsin, LocalDateTime fechaHora, Empleado responsable) {
         throw new IllegalStateException("No se puede recibir el bolsín N° " + bolsin.getNumeroBolsin()
                 + " porque está en estado «" + descripcion + "»");
+    }
+
+    public void recibir(Bolsin bolsin, LocalDateTime fechaHora, Empleado responsable, OpcionRecepcion opcion,
+                        List<Integer> documentacionIndicada) {
+        throw new IllegalStateException("No se puede recibir el bolsín N° " + bolsin.getNumeroBolsin()
+                + " porque está en estado «" + descripcion + "»");
+    }
+
+    protected IllegalStateException recepcionInvalida(Documentacion documentacion, SituacionDocumentacion situacion) {
+        return new IllegalStateException("No se puede recibir la documentación N° " + documentacion.getNumero()
+                + " como «" + situacion.getDescripcion() + "» porque está en estado «" + descripcion + "»");
     }
 
     /** Documentación: la situación de la documentación es la guarda de la transición. */

@@ -22,6 +22,7 @@ import ppai.entidades.Bolsin;
 import ppai.entidades.CambioEstadoBolsin;
 import ppai.entidades.ComisionMedica;
 import ppai.entidades.Empleado;
+import ppai.entidades.Estado;
 import ppai.entidades.CambioEstadoDocumentacion;
 import ppai.entidades.DetalleRemito;
 import ppai.entidades.Documentacion;
@@ -33,15 +34,12 @@ import ppai.entidades.estadobolsin.Cerrado;
 import ppai.entidades.estadobolsin.Creado;
 import ppai.entidades.estadobolsin.DeBaja;
 import ppai.entidades.estadobolsin.Enviado;
-import ppai.entidades.estadobolsin.EstadoBolsin;
 import ppai.entidades.estadobolsin.RecibidoEnCMDestino;
 import ppai.entidades.estadoremito.Cancelado;
 import ppai.entidades.estadoremito.EnBolsinEnviado;
 import ppai.entidades.estadoremito.EnBolsinSaliente;
-import ppai.entidades.estadoremito.EstadoRemito;
 import ppai.entidades.estadoremito.RemitoRecibidoYAceptado;
 import ppai.entidades.estadoremito.RemitoRecibidoYAceptadoParcial;
-import ppai.entidades.estadodocumentacion.EstadoDocumentacion;
 import ppai.entidades.estadodocumentacion.NoRecibida;
 import ppai.entidades.estadodocumentacion.ParaRedirigir;
 import ppai.entidades.estadodocumentacion.RecibidaYAceptada;
@@ -60,7 +58,7 @@ class EstadoBolsinYRemitoTest {
     private final Empleado responsable = new Empleado("Pérez", "Ana", "ana@cmc.example", new Usuario("aperez"), cmc);
 
     /** Bolsín cuyo historial termina en el estado indicado (el actual). */
-    private Bolsin bolsinEn(EstadoBolsin estadoActual) {
+    private Bolsin bolsinEn(Estado estadoActual) {
         Bolsin bolsin = new Bolsin(LocalDate.of(2026, 9, 1), 101, "PR-0101", 1.0, rosario, cmc);
         CambioEstadoBolsin creado = new CambioEstadoBolsin(T0, new Creado(), responsable);
         creado.setFechaHoraFin(T0.plusDays(1));
@@ -71,7 +69,7 @@ class EstadoBolsinYRemitoTest {
     }
 
     /** Remito con dos documentos (1 y 2) en estado EnBolsinEnviado. */
-    private Remito remitoEn(EstadoRemito estado) {
+    private Remito remitoEn(Estado estado) {
         Remito remito = new Remito(LocalDate.of(2026, 9, 1), 5001, rosario, cmc, estado);
         remito.agregarDetalle(new DetalleRemito("Área Jurídica", documentacionEnviada(1)));
         remito.agregarDetalle(new DetalleRemito("Área de Dictámenes", documentacionEnviada(2)));
@@ -87,7 +85,7 @@ class EstadoBolsinYRemitoTest {
                 new TipoDocumento("Expediente", ""), List.of(registrada, enviada));
     }
 
-    private static EstadoDocumentacion estadoDoc(Remito remito, int indice) {
+    private static Estado estadoDoc(Remito remito, int indice) {
         return remito.getDetallesRemito().get(indice).getDocumentacion().getEstadoActual();
     }
 
@@ -110,13 +108,13 @@ class EstadoBolsinYRemitoTest {
     }
 
     static Stream<Arguments> estadosDeBolsinQueNoPuedenRecibirse() {
-        return Stream.<Supplier<EstadoBolsin>>of(Creado::new, Cerrado::new, RecibidoEnCMDestino::new, DeBaja::new)
+        return Stream.<Supplier<Estado>>of(Creado::new, Cerrado::new, RecibidoEnCMDestino::new, DeBaja::new)
                 .map(estado -> Arguments.of(estado.get()));
     }
 
     @ParameterizedTest(name = "bolsín {0} no puede recibirse")
     @MethodSource("estadosDeBolsinQueNoPuedenRecibirse")
-    void losDemasEstadosDelBolsinRechazanLaRecepcion(EstadoBolsin estado) {
+    void losDemasEstadosDelBolsinRechazanLaRecepcion(Estado estado) {
         Bolsin bolsin = bolsinEn(estado);
         assertFalse(bolsin.sosEnviado());
         IllegalStateException error = assertThrows(IllegalStateException.class,
@@ -161,14 +159,14 @@ class EstadoBolsinYRemitoTest {
     }
 
     static Stream<Arguments> estadosDeRemitoQueNoPuedenRecibirse() {
-        return Stream.<Supplier<EstadoRemito>>of(ppai.entidades.estadoremito.Creado::new, Cancelado::new,
+        return Stream.<Supplier<Estado>>of(ppai.entidades.estadoremito.Creado::new, Cancelado::new,
                         EnBolsinSaliente::new, RemitoRecibidoYAceptado::new, RemitoRecibidoYAceptadoParcial::new)
                 .map(estado -> Arguments.of(estado.get()));
     }
 
     @ParameterizedTest(name = "remito {0} no puede recibirse")
     @MethodSource("estadosDeRemitoQueNoPuedenRecibirse")
-    void losDemasEstadosDelRemitoRechazanLaRecepcion(EstadoRemito estado) {
+    void losDemasEstadosDelRemitoRechazanLaRecepcion(Estado estado) {
         Remito remito = remitoEn(estado);
         assertThrows(IllegalStateException.class,
                 () -> remito.recibirYAceptar(RECEPCION, responsable, OpcionRecepcion.CONTENIDO_IGUAL, List.of()));

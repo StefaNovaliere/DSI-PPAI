@@ -6,9 +6,9 @@ package ppai.entidades.estadobolsin;
  * <p>No redefine recibir(): un bolsín que todavía no se cerró ni se envió no
  * puede recibirse.
  */
-public class Creado extends EstadoBolsin {
+public class Creado extends ppai.entidades.Estado {
 
     public Creado() {
-        super("Creado", "Creado");
+        super(AMBITO_BOLSIN, "Creado", "Creado");
     }
 }

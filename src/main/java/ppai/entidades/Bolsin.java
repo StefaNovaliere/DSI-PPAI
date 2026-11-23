@@ -1,6 +1,7 @@
 package ppai.entidades;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +13,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import ppai.persistencia.ConversorEstadoBolsin;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import ppai.dto.DatosRemito;
-import ppai.entidades.estadobolsin.EstadoBolsin;
 
 /**
  * Bolsín: envío físico precintado de remitos entre Comisiones Médicas.
@@ -57,7 +58,7 @@ public class Bolsin {
     private List<CambioEstadoBolsin> cambiosEstado = new ArrayList<>();
     /** No se guarda como columna: se obtiene del cambio de estado actual (ver restaurarEstadoActual). */
     @Transient
-    private EstadoBolsin estadoActual;
+    private Estado estadoActual;
 
     protected Bolsin() {
         // Requerido por JPA
@@ -93,7 +94,8 @@ public class Bolsin {
     }
 
     /** Lo usa el estado concreto al hacer la transición. */
-    public void setEstado(EstadoBolsin estado) {
+    public void setEstado(Estado estado) {
+        if (estado != null && !estado.esAmbitoBolsin()) throw new IllegalArgumentException("El estado debe pertenecer al ámbito Bolsin");
         this.estadoActual = estado;
     }
 
@@ -167,7 +169,7 @@ public class Bolsin {
         return origen.getEmail();
     }
 
-    public EstadoBolsin getEstadoActual() {
+    public Estado getEstadoActual() {
         return estadoActual;
     }
 
