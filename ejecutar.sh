@@ -10,7 +10,7 @@ if ! command -v java >/dev/null 2>&1; then
 fi
 
 echo "Compilando el proyecto. La primera vez descarga dependencias y puede tardar unos minutos..."
-sh ./mvnw -q package -DskipTests || { echo "[ERROR] Fallo la compilacion. Ver COMO_EJECUTAR.md - Problemas frecuentes."; exit 1; }
+sh ./mvnw -q clean package -DskipTests || { echo "[ERROR] Fallo la compilacion. Ver COMO_EJECUTAR.md - Problemas frecuentes."; exit 1; }
 
 echo "Abriendo la aplicacion..."
 exec java -jar target/ppai-bolsines-g10-1.0.0.jar "$@"

@@ -208,13 +208,15 @@ envían porque…", el motivo indica qué falta.
 ## Paso 4 — Probar el caso de uso (guion)
 
 Datos de prueba: el usuario logueado es **Ana Pérez (`aperez`), de la Comisión Médica
-Central (CMC)**. Hay tres bolsines enviados a la CMC pendientes de recepción:
+Central (CMC)**. Hay cinco bolsines enviados a la CMC pendientes de recepción:
 
 | Bolsín | Precinto | Desde | Contenido |
 |---|---|---|---|
 | **101** | PR-0101 | CM Rosario | Remito 5001 (docs 1001 y 1002) y remito 5002 (doc 1003, que está **Para redirigir**) |
 | **102** | PR-0102 | CM Mendoza | Remito 6001 (docs 1004 y 1005) |
 | **105** | PR-0105 | CM Córdoba | Remito 9001 (docs 1008 y 1009) y remito 9002 (doc 1010) |
+| **106** | PR-0106 | CM Mendoza | Remito 9101 (docs 1011 y 1012) y remito 9102 (doc 1013) |
+| **107** | PR-0107 | CM Córdoba | Remito 9201 (docs 1014 y 1015) y remito 9202 (docs 1016 y 1017) |
 
 Los bolsines 103 (va a CM Rosario) y 104 (ya recibido) no deben aparecer.
 
@@ -225,7 +227,7 @@ Los bolsines 103 (va a CM Rosario) y 104 (ya recibido) no deben aparecer.
 ### Flujo principal (opción 1)
 
 1. En el menú, elegí **Registrar recepción de bolsín**.
-   → A la izquierda aparecen los bolsines por recibir: **101**, **102** y **105**.
+   → A la izquierda aparecen los bolsines por recibir: **101**, **102**, **105**, **106** y **107**.
 2. Hacé clic en el **101**.
    → A la derecha aparece su contenido: 2 remitos con 3 documentos, dos **En bolsín
    enviado** (celeste) y uno **Para redirigir** (naranja). Abajo están las cuatro opciones
@@ -251,10 +253,12 @@ Los bolsines 103 (va a CM Rosario) y 104 (ya recibido) no deben aparecer.
 | **A3 – No llegó toda la documentación** | Clic en el **105** → opción **2** → tildá la **1009** en la columna *No llegó* → **Registrar recepción** → **Registrar recepción** | La 1009 queda **No recibida** (rojo), la 1008 y la 1010 **Recibida y aceptada**. El remito 9001 queda **Recibido y aceptado parcial** y el 9002, **Recibido y aceptado** |
 | **A4 – Documentación que no corresponde** | Clic en el **102** → opción **3** → tildá la **1005** → registrar | La 1005 queda **Recibida y rechazada** y el remito 6001, **Recibido y aceptado parcial** |
 | **A5 – Redirigir a otra área** | Clic en el **102** → opción **4** → tildá la **1004** → registrar | La 1004 queda **Para redirigir** y el remito 6001, **Recibido y aceptado** (la opción 4 sólo vale cuando la CM destino es la CMC) |
+| **A7 – Recepción parcial con dos remitos** | Clic en el **106** → opción **2** → tildá la **1012** → registrar | El remito 9101 queda **Recibido y aceptado parcial**; el 9102, **Recibido y aceptado** |
+| **A8 – Redirigir documentos en más de un remito** | Clic en el **107** → opción **4** → tildá la **1016** y la **1017** → registrar | Los documentos quedan **Para redirigir** y ambos remitos quedan **Recibidos y aceptados** |
 | **A6 – No confirmar** | Elegí una opción → **Registrar recepción** → **Volver** | Aviso: *"No se registró la recepción … porque no se confirmó"*. Vuelve a las opciones con lo que habías tildado; nada cambia |
 | Opción 2 a 4 sin tildar nada | Elegí la opción 2 y apretá **Registrar recepción** sin tildar | Aviso: *"No se indicó ninguna documentación…"* |
 | **Transición que no existe** | Clic en el **101** → opción **2** → tildá la **1003** (Para redirigir) → registrar | Aviso: *"No se puede recibir la documentación N° 1003 como «no recibida» porque está en estado «Para redirigir». No se guardó ningún cambio."* (en la máquina de estados no hay esa transición) |
-| No quedan bolsines | Recibí el 101, el 102 y el 105 | Aviso *"No hay bolsines enviados pendientes de recepción"* y la lista queda vacía |
+| No quedan bolsines | Recibí el 101, el 102, el 105, el 106 y el 107 | Aviso *"No hay bolsines enviados pendientes de recepción"* y la lista queda vacía |
 | Falla el correo | Poner una contraseña incorrecta en `correo.properties`, abrir el programa y recibir un bolsín | Aviso *"No se pudo enviar la notificación por correo… rechazó el usuario o la contraseña. La recepción quedó registrada igual."* |
 
 ![A3: remito recibido y aceptado parcial](docs/capturas/08_recepcion_parcial.png)
@@ -315,7 +319,7 @@ anterior, el programa la vuelve a crear solo y lo avisa en la ventana negra.)
 | La compilación falla con errores de descarga / `Could not resolve` | Sin Internet (la primera vez es necesaria) | Conectarse a Internet y volver a compilar |
 | Errores de compilación en archivos que no existen en GitHub (por ejemplo `DemostracionPatronState.java`) | Se descomprimió una versión nueva **encima** de la anterior: Windows no borra los archivos que se eliminaron | Borrar la carpeta del proyecto y extraer el ZIP nuevo en una carpeta limpia (ver "Actualizar a una versión nueva") |
 | `UnsupportedClassVersionError` | La versión de Java es menor a 17 | Instalar Java 21 (Paso 1) |
-| La lista de bolsines aparece vacía | Ya se recibieron el 101, el 102 y el 105 (los cambios quedan guardados) | Usar `ejecutar-desde-cero.bat` o `--reiniciar-datos` |
+| La lista de bolsines aparece vacía | Ya se recibieron el 101, el 102, el 105, el 106 y el 107 (los cambios quedan guardados) | Usar `ejecutar-desde-cero.bat` o `--reiniciar-datos` |
 | "Windows protegió su PC" al abrir el `.bat` | Protección de Windows para archivos descargados | **Más información → Ejecutar de todas formas** |
 | *"No se pudo enviar la notificación… rechazó el usuario o la contraseña"* | Gmail no acepta la contraseña normal | Usar una **contraseña de aplicación** (Paso 3b, Opción A) |
 | *"No se pudo enviar la notificación… no se pudo conectar con smtp.gmail.com:587"* | La red bloquea el puerto, o no hay Internet | Probar puerto 465 con `correo.smtp.ssl=true` y `correo.smtp.starttls=false`, o usar los datos del celular |

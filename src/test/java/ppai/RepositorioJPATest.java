@@ -67,7 +67,7 @@ class RepositorioJPATest {
     void laBaseSeCargaConLosDatosDePrueba() {
         String archivo = carpeta.resolve("prueba.db").toString();
         try (RepositorioJPA repositorio = new RepositorioJPA(archivo, true)) {
-            assertEquals(5, repositorio.getBolsines().size());
+            assertEquals(7, repositorio.getBolsines().size());
             assertEquals("aperez", repositorio.getSesionActual().getUsuario().getNombre());
             // Los conversores materializan el objeto del estado concreto de cada clase
             Bolsin bolsin101 = bolsin(repositorio, 101);
@@ -168,7 +168,7 @@ class RepositorioJPATest {
             sentencia.execute("create table estado (id integer primary key, ambito varchar, nombre varchar)");
         }
         try (RepositorioJPA repositorio = new RepositorioJPA(archivo, false)) {
-            assertEquals(5, repositorio.getBolsines().size());
+            assertEquals(7, repositorio.getBolsines().size());
         }
         // La segunda vez ya es de esta versión: no se vuelve a crear
         try (RepositorioJPA repositorio = new RepositorioJPA(archivo, false)) {

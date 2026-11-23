@@ -8,13 +8,14 @@ import java.util.Scanner;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import com.formdev.flatlaf.FlatLightLaf;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 import ppai.boundary.PantallaConsolaRecepcionBolsin;
 import ppai.boundary.PantallaGraficaRecepcionBolsin;
 import ppai.boundary.PantallaPrincipal;
+import ppai.boundary.TemaBolsines;
 import ppai.control.GestorNotificacionCU29;
 import ppai.control.GestorRecepcionBolsin;
 import ppai.correo.ConfiguracionCorreo;
@@ -45,11 +46,8 @@ public class App {
 
     /** Arma la ventana principal y la devuelve (también la usan las capturas de pantalla). */
     public static JFrame iniciarVentana(Repositorio repositorio, ServicioCorreo servicioCorreo) {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            // Si no se puede, queda el look and feel por defecto
-        }
+        FlatLightLaf.setup();
+        TemaBolsines.configurarUIManager();
         PantallaGraficaRecepcionBolsin pantalla = new PantallaGraficaRecepcionBolsin();
         // El correo se envía en segundo plano para que la ventana no se congele
         Executor enSegundoPlano = Executors.newSingleThreadExecutor(tarea -> {

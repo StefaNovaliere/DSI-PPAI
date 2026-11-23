@@ -134,6 +134,26 @@ public class DatosDePrueba {
                 detalle(AREA_JURIDICA, doc8), detalle(AREA_DICTAMENES, doc9));
         Remito r9002 = remito(9002, t0, cmCordoba, cmc, remitoEnviado(), detalle(AREA_AUDITORIA, doc10));
         bolsines.add(bolsinEnviado(105, "PR-0105", 1.5, cmCordoba, cmc, t0, empCordoba, r9001, r9002));
+
+        // Bolsín 106: CM Mendoza -> CMC, dos remitos y tres documentos para probar recepción parcial.
+        Documentacion doc11 = documentacionEnviada(1011, "Expediente de reevaluación laboral", expediente, t0, empMendoza);
+        Documentacion doc12 = documentacionEnviada(1012, "Dictamen de capacidad laboral", dictamen, t0, empMendoza);
+        Documentacion doc13 = documentacionEnviada(1013, "Estudio de laboratorio general", estudio, t0, empMendoza);
+        Remito r9101 = remito(9101, t0, cmMendoza, cmc, remitoEnviado(),
+                detalle(AREA_JURIDICA, doc11), detalle(AREA_DICTAMENES, doc12));
+        Remito r9102 = remito(9102, t0, cmMendoza, cmc, remitoEnviado(), detalle(AREA_AUDITORIA, doc13));
+        bolsines.add(bolsinEnviado(106, "PR-0106", 1.1, cmMendoza, cmc, t0, empMendoza, r9101, r9102));
+
+        // Bolsín 107: CM Córdoba -> CMC, cuatro documentos en dos remitos para probar el recorrido completo.
+        Documentacion doc14 = documentacionEnviada(1014, "Reclamo por incapacidad parcial", expediente, t0, empCordoba);
+        Documentacion doc15 = documentacionEnviada(1015, "Dictamen médico complementario", dictamen, t0, empCordoba);
+        Documentacion doc16 = documentacionEnviada(1016, "Informe de resonancia magnética", estudio, t0, empCordoba);
+        Documentacion doc17 = documentacionEnviada(1017, "Estudio de electromiografía", estudio, t0, empCordoba);
+        Remito r9201 = remito(9201, t0, cmCordoba, cmc, remitoEnviado(),
+                detalle(AREA_JURIDICA, doc14), detalle(AREA_DICTAMENES, doc15));
+        Remito r9202 = remito(9202, t0, cmCordoba, cmc, remitoEnviado(),
+                detalle(AREA_AUDITORIA, doc16), detalle(AREA_AUDITORIA, doc17));
+        bolsines.add(bolsinEnviado(107, "PR-0107", 1.8, cmCordoba, cmc, t0, empCordoba, r9201, r9202));
     }
 
     /** Documentación que viaja en un bolsín enviado: su estado actual es EnBolsinEnviado. */

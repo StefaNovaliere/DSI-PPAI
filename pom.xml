@@ -17,6 +17,12 @@
     </properties>
 
     <dependencies>
+        <!-- Apariencia moderna y consistente para las pantallas Swing -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.7.2</version>
+        </dependency>
         <!-- Framework de persistencia: JPA (Jakarta Persistence) implementado por Hibernate -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
@@ -92,6 +98,9 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>ppai.App</mainClass>
+                                    <manifestEntries>
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                             </transformers>

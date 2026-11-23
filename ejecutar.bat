@@ -8,7 +8,7 @@ if errorlevel 1 goto sinJava
 
 echo.
 echo Compilando el proyecto. La primera vez descarga dependencias y puede tardar unos minutos...
-call mvnw.cmd -q package -DskipTests
+call mvnw.cmd -q clean package -DskipTests
 if errorlevel 1 goto errorCompilacion
 
 echo Abriendo la aplicacion...
